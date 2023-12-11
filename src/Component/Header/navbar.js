@@ -1,13 +1,27 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
+import { auth } from "../../Config/firebaseConfig";
 
 export default function Navbar() {
+
+  const [user, setUser] = useState(null);
+  
+  const signInWithGoogle = useCallback(() => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log(result);
+        setUser(result.user); // อัปเดตสถานะของผู้ใช้
+      }).catch((error) => {
+        console.error(error);
+      });
+  }, [setUser]);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -20,15 +34,6 @@ export default function Navbar() {
         elevation={0}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ display: { xs: "none", md: "flex" } }}
-          >
-            <MenuIcon sx={{ color: "black" }} />
-          </IconButton>
           <Typography
             variant="h6"
             component="div"
@@ -40,7 +45,7 @@ export default function Navbar() {
               textAlign: "center",
             }}
           >
-            Name or Logo
+            Adshop
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 5 }}>
             <Button
@@ -63,7 +68,7 @@ export default function Navbar() {
             >
               Product
             </Button>
-            <Button
+            <Button onClick={signInWithGoogle}
               variant="h6"
               color="inherit"
               sx={{

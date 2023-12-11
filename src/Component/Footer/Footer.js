@@ -24,7 +24,7 @@ const Footer = () => {
             <Typography variant="body1">info@example.com</Typography>
           </Grid>
         </Grid>
-        <Typography variant="body2" sx={{ mt: 3 }}>© 2023 ชื่อบริษัท</Typography>
+        <Typography variant="body2" sx={{ mt: 3 }}>© 2023 Adshop</Typography>
       </Container>
     </Box>
   );
