@@ -5,7 +5,8 @@ import Navbar from './Component/Header/navbar';
 import Carousel from './Component/Body/Carousel';
 import Category from './Component/Body/Category';
 import Home from './Home';
-import ClothingCategoryPage from './Component/Pages/ClothingCategoryPage';
+import ClothingCategoryPage from './Pages/ClothingCategoryPage';
+import ConfirmationPage from './Pages/ConfirmationPage';
 
 const imageSlides = [
   "./Images/test1.jpeg",
@@ -19,8 +20,9 @@ const categories = [
 ];
 
 const products = [
-  { name: 'เสื้อผ้า 1', imageUrl: '/Images/shirt1.png', description: 'คำอธิบายสินค้า 1' },
-  { name: 'เสื้อผ้า 2', imageUrl: '/Images/short1.jpg', description: 'คำอธิบายสินค้า 2' },
+  { id: 1, name: 'เสื้อผ้า 1', imageUrl: '/Images/shirt1.png', description: 'คำอธิบายสินค้า 1' },
+  { id: 2, name: 'เสื้อผ้า 2', imageUrl: '/Images/short1.jpg', description: 'คำอธิบายสินค้า 2' },
+  { id: 3, name: 'เสื้อผ้า 3', imageUrl: '/Images/short1.jpg', description: 'คำอธิบายสินค้า 3' },
 ];
 
 function App() {
@@ -35,6 +37,7 @@ function App() {
           </Home>
         } />
         <Route path="/category/เสื้อผ้า" element={<ClothingCategoryPage products={products} />} />
+        <Route path='/confirmation' element={<ConfirmationPage />} />
       </Routes>
     </Router>
   );
