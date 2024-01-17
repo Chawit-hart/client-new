@@ -7,6 +7,9 @@ import Category from './Component/Body/Category';
 import Home from './Home';
 import ClothingCategoryPage from './Pages/ClothingCategoryPage';
 import ConfirmationPage from './Pages/ConfirmationPage';
+import AccPage from './Pages/AccPage'
+import Profile from './Pages/Profile';
+import Cart from './Pages/Cart';
 
 const imageSlides = [
   "./Images/test1.jpeg",
@@ -25,6 +28,12 @@ const products = [
   { id: 3, name: 'เสื้อผ้า 3', imageUrl: '/Images/short1.jpg', description: 'คำอธิบายสินค้า 3' },
 ];
 
+const Accproducts = [
+  { id: 1, name: 'เครื่องประดับ 1', imageUrl: '/Images/shirt1.png', description: 'คำอธิบายสินค้า 1' },
+  { id: 2, name: 'เครื่องประดับ 2', imageUrl: '/Images/short1.jpg', description: 'คำอธิบายสินค้า 2' },
+  { id: 3, name: 'เครื่องประดับ 3', imageUrl: '/Images/short1.jpg', description: 'คำอธิบายสินค้า 3' },
+];
+
 function App() {
   return (
     <Router>
@@ -36,7 +45,10 @@ function App() {
             <Category categories={categories} />
           </Home>
         } />
+        <Route path='/profile' element={<Profile />} />
+        <Route path='/cart' element={<Cart />} />
         <Route path="/category/เสื้อผ้า" element={<ClothingCategoryPage products={products} />} />
+        <Route path="/category/เครื่องประดับ" element={<AccPage products={Accproducts} />} />
         <Route path='/confirmation' element={<ConfirmationPage />} />
       </Routes>
     </Router>

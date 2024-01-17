@@ -1,8 +1,11 @@
-import React, { useState, useCallback } from "react";
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import React, { useState, useCallback, useEffect } from "react";
+import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { auth } from "../../Config/firebaseConfig";
@@ -13,8 +16,39 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
+    });
+  
+    // ยกเลิกการติดตามเมื่อ component ถูก unmount
+    return unsubscribe;
+  }, []);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   const goToHome = () => {
     navigate('/');
+  };
+
+  const goToProfile = () => {
+    navigate('/profile');
+  };
+
+  const goToCart = () => {
+    navigate('/cart');
   };
 
   const signInWithGoogle = useCallback(() => {
@@ -88,43 +122,52 @@ export default function Navbar() {
               Home
             </Button>
             {user ? (
-              <>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontFamily: "Kanit",
-                    color: "black",
-                    fontSize: "18px",
-                  }}
-                >
-                  {user.displayName || user.email}
-                </Typography>
-                <Button onClick={handleSignOut}
-                  variant="h6"
-                  color="inherit"
-                  sx={{
-                    fontFamily: "Kanit",
-                    color: "black",
-                    fontSize: "18px",
-                  }}
-                >
-                  
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <Button onClick={signInWithGoogle}
-                variant="h6"
-                color="inherit"
-                sx={{
-                  fontFamily: "Kanit",
-                  color: "black",
-                  fontSize: "18px",
-                }}
-              >
-                Sign In
-              </Button>
-            )}
+          <>
+            <Button
+              endIcon={<ExpandMoreIcon />}
+              variant="h6"
+              onClick={handleMenuOpen}
+              sx={{
+                fontFamily: "Kanit",
+                color: "black",
+                fontSize: "18px",
+              }}
+            >
+              {user.displayName || user.email}
+            </Button>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
+              <MenuItem onClick={goToProfile}>Profile</MenuItem>
+              <MenuItem onClick={goToCart}>Cart</MenuItem>
+              <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <Button onClick={signInWithGoogle}
+            variant="h6"
+            color="inherit"
+            sx={{
+              fontFamily: "Kanit",
+              color: "black",
+              fontSize: "18px",
+            }}
+          >
+            Sign In
+          </Button>
+        )}
           </Box>
         </Toolbar>
       </AppBar>
