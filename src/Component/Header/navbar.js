@@ -27,7 +27,6 @@ export default function Navbar() {
       }
     });
   
-    // ยกเลิกการติดตามเมื่อ component ถูก unmount
     return unsubscribe;
   }, []);
 
@@ -105,6 +104,7 @@ export default function Navbar() {
               fontWeight: "bold",
               color: "black",
               textAlign: "center",
+              marginLeft: "200px"
             }}
           >
             Adshop

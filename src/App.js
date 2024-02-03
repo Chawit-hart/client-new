@@ -15,6 +15,9 @@ import Profile from "./Pages/Profile";
 import Cart from "./Pages/Cart";
 import AdminLoginPage from "./Component/Admin/AdminLoginPage";
 import HomeForAdmin from "./Component/Admin/HomeForAdmin";
+import Customer from "./Component/Admin/Customer";
+import AdminLayout from "./AdminLayout";
+import Products from './Component/Admin/Products'
 
 const imageSlides = ["./Images/test1.jpeg", "./Images/test2.png"];
 
@@ -95,7 +98,9 @@ function App() {
         />
         <Route path="/confirmation" element={<Home><ConfirmationPage /></Home>} />
         <Route path="/admin-login" element={<AdminLoginPage />} />
-        <Route path="/Dashboard" element={<HomeForAdmin />} />
+        <Route path="/Dashboard" element={<AdminLayout><HomeForAdmin /></AdminLayout>} />
+        <Route path="/Customers" element={<AdminLayout><Customer /></AdminLayout>} />
+        <Route path="/Products" element={<AdminLayout><Products /></AdminLayout>} />
       </Routes>
     </Router>
   );
