@@ -1,15 +1,39 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Container, Form, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Swal from 'sweetalert2';
 
 
 const AdminLoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
   
     const handleSubmit = (event) => {
       event.preventDefault();
-      console.log('Username:', username, 'Password:', password);
+      if (username === 'root' && password === 'rootadmin') {
+        Swal.fire({
+          position: 'top-end',
+          icon: 'success',
+          title: 'Sign In success!',
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          toast: true,
+        })
+          navigate('/dashboard');
+      } else {
+        Swal.fire({
+          position: 'top-end',
+          icon: 'error',
+          title: 'Incorrect username or password!',
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          toast: true,
+        });
+      }
     };
 
     const kanitStyle = { fontFamily: 'Kanit, sans-serif' };

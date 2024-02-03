@@ -14,6 +14,7 @@ import AccPage from "./Pages/AccPage";
 import Profile from "./Pages/Profile";
 import Cart from "./Pages/Cart";
 import AdminLoginPage from "./Component/Admin/AdminLoginPage";
+import HomeForAdmin from "./Component/Admin/HomeForAdmin";
 
 const imageSlides = ["./Images/test1.jpeg", "./Images/test2.png"];
 
@@ -94,6 +95,7 @@ function App() {
         />
         <Route path="/confirmation" element={<Home><ConfirmationPage /></Home>} />
         <Route path="/admin-login" element={<AdminLoginPage />} />
+        <Route path="/Dashboard" element={<HomeForAdmin />} />
       </Routes>
     </Router>
   );
