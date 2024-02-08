@@ -2,7 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 const CustomerContainer = styled.div`
-    margin-left: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  width: 80%;
+  padding: 20px;
 `;
 
 

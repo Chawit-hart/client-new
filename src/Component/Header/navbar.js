@@ -1,16 +1,21 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { auth } from "../../Config/firebaseConfig";
-import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -26,7 +31,7 @@ export default function Navbar() {
         setUser(null);
       }
     });
-  
+
     return unsubscribe;
   }, []);
 
@@ -39,48 +44,51 @@ export default function Navbar() {
   };
 
   const goToHome = () => {
-    navigate('/');
+    navigate("/");
   };
 
   const goToProfile = () => {
-    navigate('/profile');
+    navigate("/profile");
   };
 
   const goToCart = () => {
-    navigate('/cart');
+    navigate("/cart");
   };
 
   const signInWithGoogle = useCallback(() => {
     const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
+    provider.setCustomParameters({ prompt: "select_account" });
     signInWithPopup(auth, provider)
       .then((result) => {
         console.log(result);
         setUser(result.user);
         Swal.fire({
-          position: 'top-end',
-          icon: 'success',
-          title: 'Sign In success!',
+          position: "top-end",
+          icon: "success",
+          title: "Sign In success!",
           showConfirmButton: false,
           timerProgressBar: true,
           timer: 1500,
           toast: true,
           didOpen: (toast) => {
-            toast.style.marginTop = '70px';
-          }
+            toast.style.marginTop = "70px";
+          },
         });
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.error(error);
       });
   }, []);
 
   const handleSignOut = () => {
-    signOut(auth).then(() => {
-      setUser(null);
-      navigate('/');
-    }).catch((error) => {
-      console.error(error);
-    });
+    signOut(auth)
+      .then(() => {
+        setUser(null);
+        navigate("/");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
@@ -104,7 +112,7 @@ export default function Navbar() {
               fontWeight: "bold",
               color: "black",
               textAlign: "center",
-              marginLeft: "200px"
+              marginLeft: "200px",
             }}
           >
             Adshop
@@ -122,52 +130,53 @@ export default function Navbar() {
               Home
             </Button>
             {user ? (
-          <>
-            <Button
-              endIcon={<ExpandMoreIcon />}
-              variant="h6"
-              onClick={handleMenuOpen}
-              sx={{
-                fontFamily: "Kanit",
-                color: "black",
-                fontSize: "18px",
-              }}
-            >
-              {user.displayName || user.email}
-            </Button>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-            >
-              <MenuItem onClick={goToProfile}>Profile</MenuItem>
-              <MenuItem onClick={goToCart}>Cart</MenuItem>
-              <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
-            </Menu>
-          </>
-        ) : (
-          <Button onClick={signInWithGoogle}
-            variant="h6"
-            color="inherit"
-            sx={{
-              fontFamily: "Kanit",
-              color: "black",
-              fontSize: "18px",
-            }}
-          >
-            Sign In
-          </Button>
-        )}
+              <>
+                <Button
+                  endIcon={<ExpandMoreIcon />}
+                  variant="h6"
+                  onClick={handleMenuOpen}
+                  sx={{
+                    fontFamily: "Kanit",
+                    color: "black",
+                    fontSize: "18px",
+                  }}
+                >
+                  {user.displayName || user.email}
+                </Button>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorEl}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem onClick={goToProfile}>Profile</MenuItem>
+                  <MenuItem onClick={goToCart}>Cart</MenuItem>
+                  <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Button
+                onClick={signInWithGoogle}
+                variant="h6"
+                color="inherit"
+                sx={{
+                  fontFamily: "Kanit",
+                  color: "black",
+                  fontSize: "18px",
+                }}
+              >
+                Sign In
+              </Button>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
