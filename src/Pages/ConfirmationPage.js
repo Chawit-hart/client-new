@@ -1,18 +1,11 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Grid, Typography, Paper, Button, Divider } from '@mui/material';
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Grid, Typography, Paper, Button, Divider } from "@mui/material";
+import axios from "axios";
 
 const ConfirmationPage = () => {
-  const location = useLocation();
-  const orderDetails = location.state || {};
-
-  const {
-    imageUrl,
-    productName,
-    price,
-    quantity,
-    paymentMethods = [],
-  } = orderDetails;
+  const { state } = useLocation();
+  const [product, setProduct] = useState(null);
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
@@ -20,39 +13,84 @@ const ConfirmationPage = () => {
   };
 
   const handleConfirmOrder = () => {
-    console.log('Order Confirmed');
+    console.log("Order Confirmed");
   };
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:3001/posts/${state.productId}`)
+      .then((response) => {
+        setProduct(response.data);
+      })
+      .catch((error) => console.error("Error:", error));
+  }, [state]);
 
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
-        <Typography variant="h4" align="center" gutterBottom>
+        <Typography
+          variant="h4"
+          align="center"
+          gutterBottom
+          sx={{
+            marginTop: "-150px",
+          }}
+        >
           ยืนยันคำสั่งซื้อ
         </Typography>
         <Divider />
       </Grid>
-      <Grid item xs={12}>
-        <Paper elevation={3}>
-          <Grid container spacing={2} justifyContent="center" alignItems="center" sx={{ padding: 3 }}>
+      <Grid
+        item
+        xs={12}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            borderRadius: "20px",
+          }}
+        >
+          <Grid
+            container
+            spacing={2}
+            justifyContent="center"
+            alignItems="center"
+            sx={{ padding: 3, height: 500, width: 1000 }}
+          >
             <Grid item xs={12} sm={4}>
-              <img src={imageUrl} alt={productName} style={{ maxWidth: '100%' }} />
+              <img
+                src={`http://localhost:3001/posts/images/${state.productId}`}
+                alt={state.productId}
+                style={{
+                  maxWidth: "100%",
+                  borderRadius: "20px",
+                  width: "auto",
+                  height: "250px",
+                }}
+              />
             </Grid>
             <Grid item xs={12} sm={8}>
-              <Typography variant="h6" gutterBottom>
-                {productName}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                ราคา: {price} บาท
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                จำนวน: {quantity}
-              </Typography>
-              <Typography variant="body1" gutterBottom>
-                วิธีการชำระเงิน:
-                {paymentMethods.map((method, index) => (
-                  <span key={index}>{`${method}${index !== paymentMethods.length - 1 ? ', ' : ''}`}</span>
-                ))}
-              </Typography>
+              {product && (
+                <>
+                  <Typography variant="h3" gutterBottom>
+                    {product.name}
+                  </Typography>
+                  <Typography variant="h6" gutterBottom>
+                    รายละเอียด: {product.detail}
+                  </Typography>
+                  <Typography variant="h6" gutterBottom>
+                    ราคา: {product.price} บาท
+                  </Typography>
+                  <Typography variant="h6" gutterBottom>
+                    จำนวนคงเหลือ: {product.amount} ตัว
+                  </Typography>
+                </>
+              )}
             </Grid>
           </Grid>
         </Paper>
@@ -62,7 +100,7 @@ const ConfirmationPage = () => {
           <input
             type="file"
             accept="image/jpeg, image/png, image/gif, image/jpg"
-            style={{ display: 'none' }}
+            style={{ display: "none" }}
             id="upload-receipt"
             onChange={handleFileSelect}
           />
@@ -75,7 +113,11 @@ const ConfirmationPage = () => {
       </Grid>
       <Grid item xs={12}>
         <Grid container justifyContent="center">
-          <Button variant="contained" color="primary" onClick={handleConfirmOrder}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConfirmOrder}
+          >
             ยืนยันคำสั่งซื้อ
           </Button>
         </Grid>

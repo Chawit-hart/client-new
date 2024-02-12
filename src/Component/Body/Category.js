@@ -1,17 +1,39 @@
-import React from 'react';
-import { Card, CardActionArea, CardContent, CardMedia, Typography } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React from "react";
+import {
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
+  Typography,
+  Grid
+} from "@mui/material";
+import { Link } from "react-router-dom";
 
 const Category = ({ categories }) => {
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '20px', marginTop: '20px', marginBottom: '20px' }}>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        flexWrap: "wrap",
+        gap: "70px",
+        marginTop: "100px",
+        marginBottom: "20px",
+        borderTop: "2px solid rgba(0, 0, 0, 0.1)",
+        paddingTop: "20px",
+      }}
+    >
       {categories.map((category, index) => (
-        <Link to={`/category/${category.name}`} key={index} style={{ textDecoration: 'none' }}>
-          <Card style={{ maxWidth: 345 }}>
+        <Link
+          to={`/category/${category.name}`}
+          key={index}
+          style={{ textDecoration: "none" }}
+        >
+          <Card style={{ width: 350, marginTop: '50px' }}>
             <CardActionArea>
               <CardMedia
+              sx={{ objectFit: "contain", width: '50%', display: 'block', marginLeft: 'auto', marginRight: 'auto', marginTop: '20px' }}
                 component="img"
-                height="140"
                 image={category.imageUrl}
                 alt={category.name}
               />
@@ -30,6 +52,5 @@ const Category = ({ categories }) => {
     </div>
   );
 };
-
 
 export default Category;

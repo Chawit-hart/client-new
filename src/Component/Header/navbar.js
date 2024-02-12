@@ -112,7 +112,7 @@ export default function Navbar() {
               fontWeight: "bold",
               color: "black",
               textAlign: "center",
-              marginLeft: "200px",
+              marginLeft: "250px",
               fontSize: "35px",
             }}
           >

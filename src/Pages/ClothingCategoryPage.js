@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import ClothingProduct from './ClothingProduct';
-import axios from 'axios'; 
+import axios from 'axios';
 
 const ClothingCategoryPage = () => {
   const [products, setProducts] = useState([]);
@@ -18,10 +18,10 @@ const ClothingCategoryPage = () => {
   }, []);
   
   return (
-    <div style={{ marginTop: '100px', marginLeft: '200px', marginBottom: '70px' }}>
-    <Grid container spacing={1}>
-      {products.map((product, index) => (
-        <Grid item xs={12} sm={6} md={4} key={index}>
+    <div style={{ marginTop: '100px', marginLeft: '200px', marginBottom: '70px', width: '80%', justifyContent: "center" }}>
+    <Grid container spacing={4}>
+      {products.map((product) => (
+        <Grid sx={{ display: 'flex', justifyContent: 'center' }} item xs={12} sm={6} md={4} lg={3} key={product._id}>
           <ClothingProduct product={product} />
         </Grid>
       ))}

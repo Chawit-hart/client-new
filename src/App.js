@@ -19,7 +19,7 @@ import Customer from "./Component/Admin/Customer";
 import AdminLayout from "./AdminLayout";
 import Products from './Component/Admin/Products'
 
-const imageSlides = ["./Images/test1.jpeg", "./Images/test2.png"];
+const imageSlides = ["./Images/shirt1.png", "./Images/applewatch.png"];
 
 const categories = [
   { name: "เสื้อผ้า", imageUrl: imageSlides[0], description: "คำอธิบาย 1" },
