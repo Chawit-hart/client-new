@@ -30,27 +30,6 @@ const categories = [
   },
 ];
 
-const products = [
-  {
-    id: 1,
-    name: "เสื้อผ้า 1",
-    imageUrl: "/Images/shirt1.png",
-    description: "คำอธิบายสินค้า 1",
-  },
-  {
-    id: 2,
-    name: "เสื้อผ้า 2",
-    imageUrl: "/Images/short1.jpg",
-    description: "คำอธิบายสินค้า 2",
-  },
-  {
-    id: 3,
-    name: "เสื้อผ้า 3",
-    imageUrl: "/Images/short1.jpg",
-    description: "คำอธิบายสินค้า 3",
-  },
-];
-
 const Accproducts = [
   {
     id: 1,
@@ -90,7 +69,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route
           path="/category/เสื้อผ้า"
-          element={<Home><ClothingCategoryPage products={products} /></Home>}
+          element={<Home><ClothingCategoryPage /></Home>}
         />
         <Route
           path="/category/เครื่องประดับ"

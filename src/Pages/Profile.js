@@ -61,7 +61,7 @@ export default function Profile() {
       }}
     >
       <Container>
-        <Paper elevation={3} sx={{ padding: 3, marginTop: 5 }}>
+        <Paper elevation={3} sx={{ padding: 3, marginTop: 5, borderRadius: "20px" }}>
           <Typography variant="h4" gutterBottom>
             หน้าโปรไฟล์
           </Typography>

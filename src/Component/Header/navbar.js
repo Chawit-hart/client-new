@@ -113,6 +113,7 @@ export default function Navbar() {
               color: "black",
               textAlign: "center",
               marginLeft: "200px",
+              fontSize: "35px",
             }}
           >
             Adshop
@@ -124,7 +125,7 @@ export default function Navbar() {
               sx={{
                 fontFamily: "Kanit",
                 color: "black",
-                fontSize: "18px",
+                fontSize: "20px",
               }}
             >
               Home
@@ -138,7 +139,7 @@ export default function Navbar() {
                   sx={{
                     fontFamily: "Kanit",
                     color: "black",
-                    fontSize: "18px",
+                    fontSize: "20px",
                   }}
                 >
                   {user.displayName || user.email}
@@ -158,9 +159,30 @@ export default function Navbar() {
                   open={Boolean(anchorEl)}
                   onClose={handleMenuClose}
                 >
-                  <MenuItem onClick={goToProfile}>Profile</MenuItem>
-                  <MenuItem onClick={goToCart}>Cart</MenuItem>
-                  <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                  <MenuItem
+                    sx={{
+                      fontSize: "18px",
+                    }}
+                    onClick={goToProfile}
+                  >
+                    Profile
+                  </MenuItem>
+                  <MenuItem
+                    sx={{
+                      fontSize: "18px",
+                    }}
+                    onClick={goToCart}
+                  >
+                    Cart
+                  </MenuItem>
+                  <MenuItem
+                    sx={{
+                      fontSize: "18px",
+                    }}
+                    onClick={handleSignOut}
+                  >
+                    Sign Out
+                  </MenuItem>
                 </Menu>
               </>
             ) : (
