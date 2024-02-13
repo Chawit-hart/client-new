@@ -1,29 +1,81 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Grid, Typography, Paper, Button, Divider } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Paper,
+  Button,
+  Divider,
+  TextField,
+} from "@mui/material";
 import axios from "axios";
+import { useAuth } from '../Component/service/AuthContext';
+
 
 const ConfirmationPage = () => {
   const { state } = useLocation();
   const [product, setProduct] = useState(null);
+  const [Amount, setAmount] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [file, setFile] = useState(null);
+
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    if (product) {
+      updateTotalPrice(product.price, Amount);
+    }
+  }, [product, Amount]);
 
   const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    console.log(file);
+    setFile(event.target.files[0]);
   };
 
-  const handleConfirmOrder = () => {
-    console.log("Order Confirmed");
+  const handleConfirmOrder = async () => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('productName', product.name);
+    formData.append('productPrice', product.price);
+    formData.append('amount', Amount);
+    formData.append('totalPrice', totalPrice);
+    formData.append('email', currentUser?.email);
+
+
+    try {
+      await axios.post('http://localhost:3001/order/upload-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data; boundary=<calculated when request is sent>',
+        },
+      });
+      console.log('Order has been confirmed and data sent to server.');
+    } catch (error) {
+      console.error('Error uploading order data:', error);
+    }
   };
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:3001/posts/${state.productId}`)
+    axios.get(`http://localhost:3001/posts/${state.productId}`)
       .then((response) => {
         setProduct(response.data);
+        // คำนวณราคารวมเริ่มต้น
+        updateTotalPrice(response.data.price, 1);
       })
       .catch((error) => console.error("Error:", error));
-  }, [state]);
+  }, [state.productId]);
+
+  const updateTotalPrice = (price, quantity) => {
+    const numericPrice = parseFloat(price.replace(/,/g, ''));
+    const newTotalPrice = numericPrice * Number(quantity);
+    setTotalPrice(newTotalPrice);
+  };
+
+  const handleAmountChange = (event) => {
+    const newAmount = parseInt(event.target.value, 10);
+    if (!isNaN(newAmount) && newAmount >= 1 && newAmount <= product.amount) {
+      setAmount(newAmount);
+      updateTotalPrice(product.price, newAmount);
+    }
+  };
 
   return (
     <Grid container spacing={3}>
@@ -88,6 +140,18 @@ const ConfirmationPage = () => {
                   </Typography>
                   <Typography variant="h6" gutterBottom>
                     จำนวนคงเหลือ: {product.amount} ตัว
+                  </Typography>
+                  <TextField
+                    label="จำนวน"
+                    type="number"
+                    InputProps={{ inputProps: { min: 1, max: product.amount } }}
+                    value={Amount}
+                    onChange={handleAmountChange}
+                    margin="normal"
+                    fullWidth
+                  />
+                  <Typography variant="h6" gutterBottom>
+                    ราคารวม: {totalPrice} บาท
                   </Typography>
                 </>
               )}

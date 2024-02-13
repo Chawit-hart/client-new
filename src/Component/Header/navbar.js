@@ -60,7 +60,7 @@ export default function Navbar() {
     provider.setCustomParameters({ prompt: "select_account" });
     signInWithPopup(auth, provider)
       .then((result) => {
-        console.log(result);
+        setAnchorEl(null);
         setUser(result.user);
         Swal.fire({
           position: "top-end",

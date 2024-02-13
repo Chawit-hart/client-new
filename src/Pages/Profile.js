@@ -12,24 +12,50 @@ import {
 } from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import axios from 'axios';
+
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [profileData, setProfileData] = useState({
-    fullName: "",
+    name: "",
     address: "",
-    phoneNumber: "",
+    tel: "",
+    email: ""
   });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
       if (currentUser) {
-        setUser(currentUser);
+        // Endpoint สำหรับดึงข้อมูลโปรไฟล์โดยใช้ email
+        const fetchProfileEndpoint = `http://localhost:3001/usersinfo/address?email=${currentUser.email}`;
+  
+        // เรียก API เพื่อดึงข้อมูลโปรไฟล์
+        axios.get(fetchProfileEndpoint)
+          .then(response => {
+            const profileInfo = response.data;
+            setProfileData({
+              name: profileInfo.name,
+              address: profileInfo.address,
+              tel: profileInfo.tel,
+              email: currentUser.email
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching profile data:', error);
+          });
       } else {
         setUser(null);
+        setProfileData({
+          name: "",
+          address: "",
+          tel: "",
+          email: ""
+        });
       }
     });
-
+  
     return unsubscribe;
   }, []);
 
@@ -43,8 +69,21 @@ export default function Profile() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(profileData);
-    setEditMode(false);
+    const AddProfileEndpoint = 'http://localhost:3001/usersinfo';
+  
+    axios.post(AddProfileEndpoint, {
+      email: user.email,
+      name: profileData.name,
+      address: profileData.address,
+      tel: profileData.tel,
+    })
+    .then(response => {
+      console.log('Profile updated successfully:', response.data);
+      setEditMode(false);
+    })
+    .catch(error => {
+      console.error('Error updating profile:', error);
+    });
   };
 
   if (!user) {
@@ -70,13 +109,13 @@ export default function Profile() {
               <Grid item xs={12} md={6}>
                 {/* แสดงข้อมูลโปรไฟล์ */}
                 <Typography variant="h6">
-                  ชื่อนามสกุล: {profileData.fullName}
+                  ชื่อนามสกุล: {profileData.name}
                 </Typography>
                 <Typography variant="h6">
                   ที่อยู่: {profileData.address}
                 </Typography>
                 <Typography variant="h6">
-                  เบอร์โทร: {profileData.phoneNumber}
+                  เบอร์โทร: {profileData.tel}
                 </Typography>
                 <Button
                   variant="contained"
@@ -96,8 +135,8 @@ export default function Profile() {
                   >
                     <TextField
                       label="ชื่อนามสกุล"
-                      name="fullName"
-                      value={profileData.fullName}
+                      name="name"
+                      value={profileData.name}
                       onChange={handleChange}
                       fullWidth
                       margin="normal"
@@ -112,8 +151,8 @@ export default function Profile() {
                     />
                     <TextField
                       label="เบอร์โทร"
-                      name="phoneNumber"
-                      value={profileData.phoneNumber}
+                      name="tel"
+                      value={profileData.tel}
                       onChange={handleChange}
                       fullWidth
                       margin="normal"
