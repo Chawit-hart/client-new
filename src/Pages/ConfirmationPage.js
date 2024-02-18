@@ -9,8 +9,21 @@ import {
   TextField,
 } from "@mui/material";
 import axios from "axios";
-import { useAuth } from '../Component/service/AuthContext';
-
+import { useAuth } from "../Component/service/AuthContext";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import {
+  Dialog,
+  DialogContent,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Box,
+} from "@mui/material";
+import { auth } from "../Config/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
 const ConfirmationPage = () => {
   const { state } = useLocation();
@@ -18,6 +31,18 @@ const ConfirmationPage = () => {
   const [Amount, setAmount] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   const [file, setFile] = useState(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("cashOnDelivery");
+  const [productImg, setProductImg] = useState(null);
+  const [profileData, setProfileData] = useState({
+    name: "",
+    address: "",
+    tel: "",
+    email: "",
+  });
+
+  const [user, setUser] = useState(null);
 
   const { currentUser } = useAuth();
 
@@ -27,44 +52,110 @@ const ConfirmationPage = () => {
     }
   }, [product, Amount]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // Endpoint สำหรับดึงข้อมูลโปรไฟล์โดยใช้ email
+        const fetchProfileEndpoint = `http://localhost:3001/usersinfo/address?email=${currentUser.email}`;
+
+        // เรียก API เพื่อดึงข้อมูลโปรไฟล์
+        axios
+          .get(fetchProfileEndpoint)
+          .then((response) => {
+            const profileInfo = response.data;
+            setProfileData({
+              name: profileInfo.name,
+              address: profileInfo.address,
+              tel: profileInfo.tel,
+              email: currentUser.email,
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching profile data:", error);
+          });
+      } else {
+        setUser(null);
+        setProfileData({
+          name: "",
+          address: "",
+          tel: "",
+          email: "",
+        });
+      }
+    });
+
+    return unsubscribe;
+  }, []); // กำหนดว่า useEffect ควรเรียกเมื่อ Component ถูก mount โดยใส่ dependencies เป็น array ว่าง
+
+  useEffect(() => {
+    const fetchImageAndSendToAPI = async () => {
+      try {
+        const imageUrl = `http://localhost:3001/posts/images/${state.productId}`;
+        const response = await axios.get(imageUrl, { responseType: "blob" });
+
+        setProductImg(response.data);
+
+        // ทำอะไรกับ response จาก API ต่อไปได้ตามต้องการ
+        // console.log("Response from API:", response.data);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    return fetchImageAndSendToAPI;
+  }, []);
+
   const handleFileSelect = (event) => {
-    setFile(event.target.files[0]);
+    const files = event.target.files;
+    if (files.length > 0) {
+      const uploadedFile = files[0];
+      setFile(uploadedFile);
+      const uploadedImageUrl = URL.createObjectURL(uploadedFile);
+      setUploadedImageUrl(uploadedImageUrl);
+    } else {
+    }
   };
 
   const handleConfirmOrder = async () => {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('productName', product.name);
-    formData.append('productPrice', product.price);
-    formData.append('amount', Amount);
-    formData.append('totalPrice', totalPrice);
-    formData.append('email', currentUser?.email);
-
+    formData.append("productname", product.name);
+    formData.append("category", product.category);
+    formData.append("detail", product.detail);
+    formData.append("price", product.price);
+    formData.append("amount", Amount);
+    formData.append("email", profileData.email);
+    formData.append("name", profileData.name);
+    formData.append("tel", profileData.tel);
+    formData.append("address", profileData.address);
+    formData.append("image", productImg);
+    formData.append("slip", file);
 
     try {
-      await axios.post('http://localhost:3001/order/upload-image', formData, {
+      await axios.post("http://localhost:3001/order/upload-image", formData, {
         headers: {
-          'Content-Type': 'multipart/form-data; boundary=<calculated when request is sent>',
+          "Content-Type": "multipart/form-data",
         },
       });
-      console.log('Order has been confirmed and data sent to server.');
+
+      console.log("Order has been confirmed and data sent to server.");
     } catch (error) {
-      console.error('Error uploading order data:', error);
+      console.error("Error uploading order data:", error);
     }
   };
 
   useEffect(() => {
-    axios.get(`http://localhost:3001/posts/${state.productId}`)
+    axios
+      .get(`http://localhost:3001/posts/${state.productId}`)
       .then((response) => {
         setProduct(response.data);
-        // คำนวณราคารวมเริ่มต้น
         updateTotalPrice(response.data.price, 1);
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
 
   const updateTotalPrice = (price, quantity) => {
-    const numericPrice = parseFloat(price.replace(/,/g, ''));
+    const numericPrice = parseFloat(price.replace(/,/g, ""));
     const newTotalPrice = numericPrice * Number(quantity);
     setTotalPrice(newTotalPrice);
   };
@@ -75,6 +166,18 @@ const ConfirmationPage = () => {
       setAmount(newAmount);
       updateTotalPrice(product.price, newAmount);
     }
+  };
+
+  const handleClickOpen = () => {
+    setOpenDialog(true);
+  };
+
+  const handleClose = () => {
+    setOpenDialog(false);
+  };
+
+  const handlePaymentMethodChange = (event) => {
+    setPaymentMethod(event.target.value);
   };
 
   return (
@@ -99,6 +202,7 @@ const ConfirmationPage = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          marginTop: "100px",
         }}
       >
         <Paper
@@ -112,7 +216,11 @@ const ConfirmationPage = () => {
             spacing={2}
             justifyContent="center"
             alignItems="center"
-            sx={{ padding: 3, height: 500, width: 1000 }}
+            sx={{
+              padding: 3,
+              height: uploadedImageUrl ? "900px" : "700px",
+              width: 1000,
+            }}
           >
             <Grid item xs={12} sm={4}>
               <img
@@ -153,34 +261,119 @@ const ConfirmationPage = () => {
                   <Typography variant="h6" gutterBottom>
                     ราคารวม: {totalPrice} บาท
                   </Typography>
+                  <Box>
+                    <Typography variant="body1" gutterBottom>
+                      ธนาคาร: กสิกรไทย
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      เลขที่บัญชี: 036-3764-835
+                    </Typography>
+                    <Typography variant="body1" gutterBottom>
+                      ชื่อ: นายชวิศ ธนชูเชาวน์
+                    </Typography>
+                  </Box>
+                </>
+              )}
+              <FormControl
+                component="fieldset"
+                sx={{ width: "100%", marginTop: "5px" }}
+              >
+                <FormLabel component="legend">วิธีการชำระเงิน</FormLabel>
+                <RadioGroup
+                  row
+                  aria-label="paymentMethod"
+                  name="paymentMethod"
+                  value={paymentMethod}
+                  onChange={handlePaymentMethodChange}
+                >
+                  <FormControlLabel
+                    value="cashOnDelivery"
+                    control={<Radio />}
+                    label="ชำระเงินปลายทาง"
+                  />
+                  <FormControlLabel
+                    value="bankTransfer"
+                    control={<Radio />}
+                    label="โอนเงิน"
+                  />
+                </RadioGroup>
+              </FormControl>
+              {paymentMethod === "bankTransfer" && (
+                <>
+                  <Grid item xs={12}>
+                    <label htmlFor="upload-receipt">
+                      <input
+                        type="file"
+                        accept="image/jpeg, image/png, image/gif, image/jpg"
+                        style={{ display: "none" }}
+                        id="upload-receipt"
+                        onChange={handleFileSelect}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        component="span"
+                        startIcon={<CloudUploadIcon />}
+                      >
+                        อัปโหลดสลิป
+                      </Button>
+                    </label>
+                  </Grid>
+                  {uploadedImageUrl && (
+                    <Grid
+                      item
+                      xs={12}
+                      sx={{ display: "flex", justifyContent: "center", mt: 2 }}
+                    >
+                      <Box
+                        sx={{
+                          maxWidth: 200,
+                          maxHeight: 300,
+                          overflow: "hidden",
+                          borderRadius: "10px",
+                          boxShadow: 3,
+                          cursor: "pointer",
+                          "&:hover": {
+                            boxShadow: 6,
+                          },
+                        }}
+                        onClick={handleClickOpen}
+                      >
+                        <img
+                          src={uploadedImageUrl}
+                          alt="Uploaded"
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                          }}
+                        />
+                      </Box>
+                    </Grid>
+                  )}
                 </>
               )}
             </Grid>
+
+            <Dialog open={openDialog} onClose={handleClose} maxWidth="md">
+              <DialogContent>
+                <img
+                  src={uploadedImageUrl}
+                  alt="Uploaded"
+                  style={{ width: "100%", height: "auto" }}
+                />
+              </DialogContent>
+            </Dialog>
           </Grid>
         </Paper>
       </Grid>
-      <Grid item xs={12}>
-        <Grid container justifyContent="center">
-          <input
-            type="file"
-            accept="image/jpeg, image/png, image/gif, image/jpg"
-            style={{ display: "none" }}
-            id="upload-receipt"
-            onChange={handleFileSelect}
-          />
-          <label htmlFor="upload-receipt">
-            <Button variant="contained" color="primary" component="span">
-              อัปโหลดสลิป
-            </Button>
-          </label>
-        </Grid>
-      </Grid>
+
       <Grid item xs={12}>
         <Grid container justifyContent="center">
           <Button
             variant="contained"
             color="primary"
             onClick={handleConfirmOrder}
+            startIcon={<CheckCircleIcon />}
           >
             ยืนยันคำสั่งซื้อ
           </Button>

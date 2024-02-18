@@ -113,7 +113,7 @@ export default function Navbar() {
               color: "black",
               textAlign: "center",
               marginLeft: "250px",
-              fontSize: "35px",
+              fontSize: "25px",
             }}
           >
             Adshop
@@ -139,7 +139,7 @@ export default function Navbar() {
                   sx={{
                     fontFamily: "Kanit",
                     color: "black",
-                    fontSize: "20px",
+                    fontSize: "18px",
                   }}
                 >
                   {user.displayName || user.email}
@@ -161,7 +161,7 @@ export default function Navbar() {
                 >
                   <MenuItem
                     sx={{
-                      fontSize: "18px",
+                      fontSize: "16px",
                     }}
                     onClick={goToProfile}
                   >
@@ -169,7 +169,7 @@ export default function Navbar() {
                   </MenuItem>
                   <MenuItem
                     sx={{
-                      fontSize: "18px",
+                      fontSize: "16px",
                     }}
                     onClick={goToCart}
                   >
@@ -177,7 +177,7 @@ export default function Navbar() {
                   </MenuItem>
                   <MenuItem
                     sx={{
-                      fontSize: "18px",
+                      fontSize: "16px",
                     }}
                     onClick={handleSignOut}
                   >
