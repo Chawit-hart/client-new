@@ -127,6 +127,14 @@ const ConfirmationPage = () => {
     formData.append("address", profileData.address);
     formData.append("image", productImg);
     formData.append("slip", file);
+    let paymentMode = paymentMethod;
+    if(paymentMode === "bankTransfer"){
+      paymentMode = "โอนเงิน"
+    }else if (paymentMode === "cashOnDelivery"){
+      paymentMode = "ชำระเงินปลายทาง"
+    }
+    formData.append("payment",paymentMode);
+    console.log("🚀 ~ handleConfirmOrder ~ paymentMethod:", paymentMode)
 
     try {
       await axios.post("http://localhost:3001/order/upload-image", formData, {
@@ -140,6 +148,7 @@ const ConfirmationPage = () => {
       console.error("Error uploading order data:", error);
     }
   };
+    
 
   useEffect(() => {
     axios
