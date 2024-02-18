@@ -128,13 +128,13 @@ const ConfirmationPage = () => {
     formData.append("image", productImg);
     formData.append("slip", file);
     let paymentMode = paymentMethod;
-    if(paymentMode === "bankTransfer"){
-      paymentMode = "โอนเงิน"
-    }else if (paymentMode === "cashOnDelivery"){
-      paymentMode = "ชำระเงินปลายทาง"
+    if (paymentMode === "bankTransfer") {
+      paymentMode = "โอนเงิน";
+    } else if (paymentMode === "cashOnDelivery") {
+      paymentMode = "ชำระเงินปลายทาง";
     }
-    formData.append("payment",paymentMode);
-    console.log("🚀 ~ handleConfirmOrder ~ paymentMethod:", paymentMode)
+    formData.append("payment", paymentMode);
+    console.log("🚀 ~ handleConfirmOrder ~ paymentMethod:", paymentMode);
 
     try {
       await axios.post("http://localhost:3001/order/upload-image", formData, {
@@ -148,7 +148,6 @@ const ConfirmationPage = () => {
       console.error("Error uploading order data:", error);
     }
   };
-    
 
   useEffect(() => {
     axios
@@ -167,10 +166,14 @@ const ConfirmationPage = () => {
   };
 
   const handleAmountChange = (event) => {
-    const newAmount = parseInt(event.target.value, 10);
-    if (!isNaN(newAmount) && newAmount >= 1 && newAmount <= product.amount) {
-      setAmount(newAmount);
-      updateTotalPrice(product.price, newAmount);
+    const value = event.target.value.replace(/,/g, ""); // ลบลูกน้ำออกจากค่าที่ป้อน
+    const number = parseInt(value, 10);
+  
+    if (!isNaN(number) && number >= 1) {
+      setAmount(number);
+      updateTotalPrice(product.price, number);
+    } else if (value === "") {
+      setAmount("");
     }
   };
 
