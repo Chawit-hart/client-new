@@ -9,7 +9,6 @@ import {
   TextField,
 } from "@mui/material";
 import axios from "axios";
-import { useAuth } from "../Component/service/AuthContext";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
@@ -43,8 +42,6 @@ const ConfirmationPage = () => {
   });
 
   const [user, setUser] = useState(null);
-
-  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (product) {
