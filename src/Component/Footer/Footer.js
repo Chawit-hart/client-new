@@ -11,45 +11,33 @@ import { Box, Container, Grid, Link, Typography } from "@mui/material";
 const Footer = () => {
   const navigate = useNavigate();
 
+  const handleNavigateToHome = () => {
+    navigate("/");
+  };
+
+  const handleNavigateToClothing = () => {
+    navigate("/category/เสื้อผ้า");
+  };
+
+  const handleNavigateToAcc = () => {
+    navigate("/category/เครื่องประดับ");
+  };
+
   useEffect(() => {
-    const handleNavigateToHome = () => {
-      navigate("/");
-    };
+    const homeLink = document.getElementById("home-link");
+    const clothingLink = document.getElementById("clothing-link");
+    const accLink = document.getElementById("acc-link");
 
-    const handleNavigateToClothing = () => {
-      navigate("/category/เสื้อผ้า");
-    };
-
-    const handleNavigateToAcc = () => {
-      navigate("/category/เครื่องประดับ");
-    };
-
-    document
-      .getElementById("home-link")
-      .addEventListener("click", handleNavigateToHome);
-
-    document
-      .getElementById("clothing-link")
-      .addEventListener("click", handleNavigateToClothing);
-
-    document
-      .getElementById("acc-link")
-      .addEventListener("click", handleNavigateToAcc);
+    if (homeLink) homeLink.addEventListener("click", handleNavigateToHome);
+    if (clothingLink) clothingLink.addEventListener("click", handleNavigateToClothing);
+    if (accLink) accLink.addEventListener("click", handleNavigateToAcc);
 
     return () => {
-      document
-        .getElementById("home-link")
-        .removeEventListener("click", handleNavigateToHome);
-
-      document
-        .getElementById("clothing-link")
-        .removeEventListener("click", handleNavigateToClothing);
-
-      document
-        .getElementById("acc-link")
-        .removeEventListener("click", handleNavigateToAcc);
+      if (homeLink) homeLink.removeEventListener("click", handleNavigateToHome);
+      if (clothingLink) clothingLink.removeEventListener("click", handleNavigateToClothing);
+      if (accLink) accLink.removeEventListener("click", handleNavigateToAcc);
     };
-  }, [navigate]);
+}, [navigate]);
 
   return (
     <Box

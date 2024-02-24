@@ -114,7 +114,9 @@ export default function Navbar() {
               textAlign: "center",
               marginLeft: "250px",
               fontSize: "25px",
+              cursor: "pointer"
             }}
+            onClick={goToHome}
           >
             Adshop
           </Typography>

@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import {
   Dialog,
   DialogContent,
@@ -208,17 +209,50 @@ const ConfirmationPage = () => {
     setTotalPrice(newTotalPrice);
   };
 
-  const handleAmountChange = (event) => {
-    const value = event.target.value.replace(/,/g, ""); // ลบลูกน้ำออกจากค่าที่ป้อน
-    const number = parseInt(value, 10);
-
-    if (!isNaN(number) && number >= 1) {
-      setAmount(number);
-      updateTotalPrice(product.price, number);
-    } else if (value === "") {
-      setAmount("");
+  const handleAddToCart = async () => {
+    if (!user) {
+      Swal.fire("กรุณาล็อกอินก่อนทำการเพิ่มสินค้าลงในตะกร้า");
+      return;
+    }
+  
+    try {
+      const cartItem = {
+        productid: product._id,
+        productname: product.name,
+        price: product.price,
+        amount: Amount,
+        category: product.category,
+        email: user.email,
+        detail: product.detail
+      };
+  
+      await axios.post("http://localhost:3001/cart/upload-image", cartItem);
+  
+      Swal.fire("เพิ่มสินค้าเข้าตะกร้าสำเร็จ!");
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาดในการเพิ่มสินค้าลงในตะกร้า:", error);
+      Swal.fire("เกิดข้อผิดพลาดในการเพิ่มสินค้าลงในตะกร้า");
     }
   };
+
+  const handleAmountChange = (event) => {
+    const value = event.target.value.replace(/[^0-9]/g, '');
+    let number = parseInt(value, 10);
+
+    if (!value) {
+        setAmount('');
+        return;
+    }
+
+    if (number > product.amount) {
+        number = product.amount;
+    } else if (number < 1) {
+        number = 1;
+    }
+
+    setAmount(number.toString());
+    updateTotalPrice(product.price, number);
+};
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -299,7 +333,7 @@ const ConfirmationPage = () => {
                     ราคา: {product.price} บาท
                   </Typography>
                   <Typography variant="h6" gutterBottom>
-                    จำนวนคงเหลือ: {product.amount} ตัว
+                    จำนวนคงเหลือ: {product.amount} ชิ้น
                   </Typography>
                   <TextField
                     label="จำนวน"
@@ -421,11 +455,20 @@ const ConfirmationPage = () => {
 
       <Grid item xs={12}>
         <Grid container justifyContent="center">
+        <Button
+            variant="contained"
+            color="secondary"
+            onClick={handleAddToCart}
+            startIcon={<AddShoppingCartIcon />}
+          >
+            เพิ่มลงตะกร้า
+          </Button>
           <Button
             variant="contained"
             color="primary"
             onClick={handleConfirmOrder}
             startIcon={<CheckCircleIcon />}
+            style={{ marginLeft: "10px"}}
           >
             ยืนยันคำสั่งซื้อ
           </Button>

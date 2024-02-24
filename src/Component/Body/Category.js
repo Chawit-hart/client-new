@@ -37,11 +37,8 @@ const Category = ({ categories }) => {
                 alt={category.name}
               />
               <CardContent>
-                <Typography gutterBottom variant="h5" component="div">
+                <Typography gutterBottom variant="h5" component="div" style={{ textAlign: 'center'}}>
                   {category.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {category.description}
                 </Typography>
               </CardContent>
             </CardActionArea>
