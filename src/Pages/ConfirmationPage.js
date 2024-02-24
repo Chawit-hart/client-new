@@ -23,6 +23,8 @@ import {
 } from "@mui/material";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const ConfirmationPage = () => {
   const { state } = useLocation();
@@ -42,6 +44,7 @@ const ConfirmationPage = () => {
   });
 
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (product) {
@@ -136,6 +139,22 @@ const ConfirmationPage = () => {
     formData.append("payment", paymentMode);
     console.log("🚀 ~ handleConfirmOrder ~ paymentMethod:", paymentMode);
 
+    if (paymentMethod === "bankTransfer" && !file) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please upload the payment slip",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+      return;
+    }
+
     try {
       await axios.post("http://localhost:3001/order/upload-image", formData, {
         headers: {
@@ -143,9 +162,33 @@ const ConfirmationPage = () => {
         },
       });
 
-      console.log("Order has been confirmed and data sent to server.");
+      Swal.fire({
+        icon: "success",
+        title: "Your order has been placed successfully!",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      })
+      navigate("/");
+
     } catch (error) {
-      console.error("Error uploading order data:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to place your order! Please try again later.",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
     }
   };
 
@@ -168,7 +211,7 @@ const ConfirmationPage = () => {
   const handleAmountChange = (event) => {
     const value = event.target.value.replace(/,/g, ""); // ลบลูกน้ำออกจากค่าที่ป้อน
     const number = parseInt(value, 10);
-  
+
     if (!isNaN(number) && number >= 1) {
       setAmount(number);
       updateTotalPrice(product.price, number);

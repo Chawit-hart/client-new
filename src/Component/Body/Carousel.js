@@ -13,6 +13,7 @@ const Carousel = ({ slides = [] }) => {
     return () => clearInterval(interval);
   }, [slides.length]);
 
+
   const buttonStyle = {
     position: 'absolute',
     top: '50%',
