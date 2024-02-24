@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
 import {
   Button,
   Box,
@@ -20,6 +20,10 @@ import {
 } from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 import CloseIcon from "@mui/icons-material/Close";
+import { auth } from "../Config/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Swal from "sweetalert2";
 
 const style = {
   position: "absolute",
@@ -34,23 +38,62 @@ const style = {
 };
 
 export default function Cart() {
+  const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (currentUser) => {
       try {
-        const response = await axios.get('http://localhost:3001/cart');
+        const response = await axios.get(
+          `http://localhost:3001/cart/?email=${currentUser.email}`
+        );
         setItems(response.data);
-        console.log("setitem" + response.data)
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchData();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      fetchData(currentUser);
+    });
+
+    return () => unsubscribe();
   }, []);
+
+  const handleRemoveItem = async (itemId) => {
+    try {
+      await axios.delete(`http://localhost:3001/cart/${itemId}`);
+      setItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
+      Swal.fire({
+        icon: "success",
+        title: "Product successfully removed from cart.",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Problem removing product from cart. Please try again.",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    }
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -71,7 +114,7 @@ export default function Cart() {
   const handleCheck = (id) => {
     setItems(
       items.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
+        item._id === id ? { ...item, checked: !item.checked } : item
       )
     );
   };
@@ -83,7 +126,12 @@ export default function Cart() {
   const getTotalPrice = () => {
     return items
       .filter((item) => item.checked)
-      .reduce((total, item) => total + item.price, 0);
+      .reduce(
+        (total, item) =>
+          parseInt(total) + parseInt(item.price.replace(/,/g, "")),
+        0
+      )
+      .toLocaleString();
   };
 
   const handleSlipUpload = (event) => {
@@ -117,7 +165,7 @@ export default function Cart() {
             <input
               type="checkbox"
               className="form-check-input"
-              checked={items.every((item) => item.checked)}
+              checked={items.length > 0 && items.every((item) => item.checked)}
               onChange={(e) => handleCheckAll(e.target.checked)}
             />
             <Typography variant="subtitle1" sx={{ ml: 1 }}>
@@ -127,11 +175,11 @@ export default function Cart() {
           <Divider />
           <List>
             {items.map((item) => (
-              <ListItem key={item.id} divider className="align-items-center">
+              <ListItem key={item._id} divider className="align-items-center">
                 <ListItemAvatar>
                   <Avatar
                     alt={item.name}
-                    src={item.image}
+                    src={`http://localhost:3001/posts/images/${item.productid}`}
                     sx={{ width: 56, height: 56, mr: 2 }}
                   />
                 </ListItemAvatar>
@@ -139,13 +187,34 @@ export default function Cart() {
                   type="checkbox"
                   className="form-check-input"
                   checked={item.checked}
-                  onChange={() => handleCheck(item.id)}
+                  onChange={() => handleCheck(item._id)}
                 />
                 <ListItemText
-                  primary={item.name}
-                  secondary={`ราคา: ${item.price} บาท`}
+                  primary={item.productname}
+                  secondary={
+                    <>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="textPrimary"
+                      >
+                        ราคา: {item.price} บาท
+                      </Typography>
+                      {/* สร้างบรรทัดใหม่ */}
+                      <Typography component="div" variant="body2">
+                        จำนวน: {item.amount}
+                      </Typography>
+                    </>
+                  }
                   sx={{ ml: 2 }}
                 />
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => handleRemoveItem(item._id)}
+                >
+                  <DeleteIcon />
+                </IconButton>
               </ListItem>
             ))}
           </List>

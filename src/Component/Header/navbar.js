@@ -16,6 +16,14 @@ import Button from "@mui/material/Button";
 import { auth } from "../../Config/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import styled from "styled-components";
+
+const ListItemIcon = styled.div`
+  margin-right: 10px;
+`;
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -114,7 +122,7 @@ export default function Navbar() {
               textAlign: "center",
               marginLeft: "250px",
               fontSize: "25px",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
             onClick={goToHome}
           >
@@ -167,6 +175,9 @@ export default function Navbar() {
                     }}
                     onClick={goToProfile}
                   >
+                    <ListItemIcon>
+                      <AccountCircleIcon />
+                    </ListItemIcon>
                     Profile
                   </MenuItem>
                   <MenuItem
@@ -175,6 +186,9 @@ export default function Navbar() {
                     }}
                     onClick={goToCart}
                   >
+                    <ListItemIcon>
+                      <ShoppingCartIcon />
+                    </ListItemIcon>
                     Cart
                   </MenuItem>
                   <MenuItem
@@ -183,6 +197,9 @@ export default function Navbar() {
                     }}
                     onClick={handleSignOut}
                   >
+                    <ListItemIcon>
+                      <ExitToAppIcon />
+                    </ListItemIcon>
                     Sign Out
                   </MenuItem>
                 </Menu>

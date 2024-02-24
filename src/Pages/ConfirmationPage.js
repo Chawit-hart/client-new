@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import {
   Dialog,
   DialogContent,
@@ -174,9 +174,8 @@ const ConfirmationPage = () => {
         didOpen: (toast) => {
           toast.style.marginTop = "70px";
         },
-      })
+      });
       navigate("/");
-
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -214,45 +213,68 @@ const ConfirmationPage = () => {
       Swal.fire("กรุณาล็อกอินก่อนทำการเพิ่มสินค้าลงในตะกร้า");
       return;
     }
-  
+
     try {
+      const productPrice = product.price.replace(/,/g, "");
+      // console.log("🚀 ~ handleAddToCart ~ productPrice:", productPrice)
       const cartItem = {
         productid: product._id,
         productname: product.name,
-        price: product.price,
+        price: totalPrice,
         amount: Amount,
         category: product.category,
         email: user.email,
-        detail: product.detail
+        detail: product.detail,
       };
-  
+
       await axios.post("http://localhost:3001/cart/upload-image", cartItem);
-  
-      Swal.fire("เพิ่มสินค้าเข้าตะกร้าสำเร็จ!");
+
+      Swal.fire({
+        icon: "success",
+        title: "Product added to cart successfully!",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
     } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการเพิ่มสินค้าลงในตะกร้า:", error);
-      Swal.fire("เกิดข้อผิดพลาดในการเพิ่มสินค้าลงในตะกร้า");
+      Swal.fire({
+        icon: "error",
+        title: "Unable to add product to cart. Please try again.",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
     }
   };
 
   const handleAmountChange = (event) => {
-    const value = event.target.value.replace(/[^0-9]/g, '');
+    const value = event.target.value.replace(/[^0-9]/g, "");
     let number = parseInt(value, 10);
 
     if (!value) {
-        setAmount('');
-        return;
+      setAmount("");
+      return;
     }
 
     if (number > product.amount) {
-        number = product.amount;
+      number = product.amount;
     } else if (number < 1) {
-        number = 1;
+      number = 1;
     }
 
     setAmount(number.toString());
     updateTotalPrice(product.price, number);
-};
+  };
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -455,7 +477,7 @@ const ConfirmationPage = () => {
 
       <Grid item xs={12}>
         <Grid container justifyContent="center">
-        <Button
+          <Button
             variant="contained"
             color="secondary"
             onClick={handleAddToCart}
@@ -468,7 +490,7 @@ const ConfirmationPage = () => {
             color="primary"
             onClick={handleConfirmOrder}
             startIcon={<CheckCircleIcon />}
-            style={{ marginLeft: "10px"}}
+            style={{ marginLeft: "10px" }}
           >
             ยืนยันคำสั่งซื้อ
           </Button>

@@ -66,7 +66,7 @@ function App() {
           }
         />
         <Route path="/profile" element={<Home><Profile /></Home>} />
-        <Route path="/cart" element={<Cart />} />
+        <Route path="/cart" element={<Home><Cart /></Home>} />
         <Route
           path="/category/เสื้อผ้า"
           element={<Home><ClothingCategoryPage /></Home>}
