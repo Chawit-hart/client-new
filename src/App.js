@@ -18,6 +18,7 @@ import HomeForAdmin from "./Component/Admin/HomeForAdmin";
 import Customer from "./Component/Admin/Customer";
 import AdminLayout from "./AdminLayout";
 import Products from './Component/Admin/Products'
+import OrderList from "./Component/Admin/OrderList";
 
 const imageSlides = ["./Images/shirt1.png", "./Images/applewatch.png"];
 
@@ -79,6 +80,7 @@ function App() {
         <Route path="/admin-login" element={<AdminLoginPage />} />
         <Route path="/Dashboard" element={<AdminLayout><HomeForAdmin /></AdminLayout>} />
         <Route path="/Customers" element={<AdminLayout><Customer /></AdminLayout>} />
+        <Route path="/OrderList" element={<AdminLayout><OrderList /></AdminLayout>} />
         <Route path="/Products" element={<AdminLayout><Products /></AdminLayout>} />
       </Routes>
     </Router>

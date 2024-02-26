@@ -1,41 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { BiPlusCircle } from "react-icons/bi";
+import { BiPlusCircle, BiTrash } from "react-icons/bi";
 import Swal from "sweetalert2";
-
-const ClothingData = [
-  {
-    id: 1,
-    name: "Product 1",
-    price: "100",
-    imageUrl: "./Images/shirt1.png",
-    quantity: 10,
-  },
-  {
-    id: 2,
-    name: "Product 2",
-    price: "200",
-    imageUrl: "./Images/short1.png",
-    quantity: 20,
-  },
-];
-
-const accessoryData = [
-  {
-    id: 1,
-    name: "Watch 1",
-    price: "200",
-    imageUrl: "./Images/applewatch.png",
-    quantity: 5,
-  },
-  {
-    id: 2,
-    name: "Sunglasses 1",
-    price: "80",
-    imageUrl: "./Images/applewatch.png",
-    quantity: 8,
-  },
-];
+import axios from "axios";
 
 const ProductsContainer = styled.div`
   display: flex;
@@ -159,6 +126,7 @@ const StyledLabel = styled.label`
 
 const SubmitButton = styled(Button)`
   background-color: #28a745;
+  margin-left: 10px;
   &:hover {
     background-color: darken(#28a745, 10%);
   }
@@ -237,11 +205,13 @@ const AccHeader = styled.div`
 const Products = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [productName, setProductName] = useState("");
+  const [productDetail, setProductDetail] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
-  const [color, setColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
+  const [products, setProducts] = useState([]);
 
   const [isFormValid, setIsFormValid] = useState(true); // ห้ามลบ isFormValid เพราะว่าถ้าลบ มันจะเข้าใจว่า ตัวนี้จะไม่ใช่ฟังก์ชัน
 
@@ -253,16 +223,24 @@ const Products = () => {
 
   const handleImageChange = (e) => setImageUpload(e.target.files[0]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
+    console.log('name :', productName);
+    console.log('quantity :', quantity);
+    console.log('price :', price);
+    console.log('productDetail :', productDetail);
+    console.log('selectedCategory :', selectedCategory);
+    console.log('selectedSize :', selectedSize);
+    console.log('imageUpload :', imageUpload);
+  
     // ตรวจสอบความครบถ้วนของข้อมูล
     if (
       !productName ||
       !quantity ||
       !price ||
-      !color ||
-      !selectedSize ||
+      !productDetail ||
+      !selectedCategory ||
       !imageUpload
     ) {
       Swal.fire({
@@ -270,29 +248,123 @@ const Products = () => {
         title: "กรุณากรอกข้อมูลให้ครบถ้วน",
         showConfirmButton: true,
       });
-      setIsFormValid(false); // ตั้งค่าสถานะเป็น false เพื่อแสดงข้อความแจ้งเตือน
       return;
     }
 
-    // ถ้าข้อมูลครบถ้วน
-    Swal.fire({
-      icon: "success",
-      title: "เพิ่มรายการสินค้าเรียบร้อย",
-      showConfirmButton: false,
-      timer: 1500,
-    });
-    closeModal();
-    resetForm();
+  
+    // สร้าง FormData และเพิ่มข้อมูลสินค้าและไฟล์รูปภาพ
+    const formData = new FormData();
+    formData.append("name", productName);
+    formData.append("category", selectedCategory);
+    formData.append("detail", productDetail);
+    formData.append("price", price);
+    formData.append("amount", quantity);
+    formData.append("image", imageUpload);
+    if (selectedSize) formData.append("size", selectedSize);
+  
+    try {
+      const response = await axios.post("http://localhost:3001/posts/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+  
+      Swal.fire({
+        icon: "success",
+        title: "Product added successfully",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+  
+      closeModal();
+      resetForm();
+      fetchProducts();
+    } catch (error) {
+      console.error("Error submitting the product:", error);
+      Swal.fire({
+        icon: "error",
+        title: "An error occurred while saving the product",
+        showConfirmButton: true,
+      });
+    }
   };
+  
 
   const resetForm = () => {
     setProductName("");
     setQuantity("");
     setPrice("");
-    setColor("");
+    setProductDetail("");
+    setSelectedCategory("");
     setSelectedSize("");
     setImageUpload(null);
   };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/posts");
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const deleteProduct = async (id, name) => {
+    Swal.fire({
+      title: `Do you want to delete the product '${name}'?`,
+      text: "You will not be able to recover this action!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`http://localhost:3001/posts/${id}`);
+          Swal.fire({
+            icon: "success",
+            title: "The product has been successfully deleted!",
+            position: "top-end",
+            toast: true,
+            showConfirmButton: false,
+            timerProgressBar: true,
+            timer: 1500,
+            didOpen: (toast) => {
+              toast.style.marginTop = "70px";
+            },
+          });
+          fetchProducts();
+        } catch (error) {
+          console.error("Error deleting product:", error);
+          Swal.fire({
+            icon: "error",
+            title: "An error occurred while deleting the product.",
+            position: "top-end",
+            toast: true,
+            showConfirmButton: false,
+            timerProgressBar: true,
+            timer: 1500,
+            didOpen: (toast) => {
+              toast.style.marginTop = "70px";
+            },
+          });
+        }
+      }
+    });
+  };
+
+  const clothingData = products.filter(
+    (product) => product.category === "Clothing"
+  );
+  const accessoryData = products.filter(
+    (product) => product.category === "Accessories"
+  );
 
   return (
     <>
@@ -303,23 +375,37 @@ const Products = () => {
             <StyledBiPlusCircle />
             Add Product
           </AddProductButton>
-          {ClothingData.map((product) => (
-            <ProductCard key={product.id}>
-              <ProductImage src={product.imageUrl} alt={product.name} />
+          {clothingData.map((product) => (
+            <ProductCard key={product._id}>
+              <ProductImage
+                src={`http://localhost:3001/posts/images/${product._id}`}
+                alt={product.name}
+              />
               <ProductName>{product.name}</ProductName>
-              <ProductPrice>${product.price}</ProductPrice>
-              <ProductQuantity>Quantity: {product.quantity}</ProductQuantity>
+              <ProductPrice>{product.price} บาท</ProductPrice>
+              <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
+              <BiTrash
+                style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
+                onClick={() => deleteProduct(product._id, product.name)}
+              />
             </ProductCard>
           ))}
         </ClothesContainer>
         <AccContainer>
           <AccHeader>Accessories</AccHeader>
           {accessoryData.map((product) => (
-            <ProductCard key={product.id}>
-              <ProductImage src={product.imageUrl} alt={product.name} />
+            <ProductCard key={product._id}>
+              <ProductImage
+                src={`http://localhost:3001/posts/images/${product._id}`}
+                alt={product.name}
+              />
               <ProductName>{product.name}</ProductName>
-              <ProductPrice>${product.price}</ProductPrice>
-              <ProductQuantity>Quantity: {product.quantity}</ProductQuantity>
+              <ProductPrice>{product.price} บาท</ProductPrice>
+              <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
+              <BiTrash
+                style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
+                onClick={() => deleteProduct(product._id, product.name)}
+              />
             </ProductCard>
           ))}
         </AccContainer>
@@ -337,12 +423,31 @@ const Products = () => {
             />
           </StyledLabel>
           <StyledLabel>
+            Detail: <span style={{ color: "red" }}>*</span>
+            <StyledInput
+              type="text"
+              value={productDetail}
+              onChange={(e) => setProductDetail(e.target.value)}
+            />
+          </StyledLabel>
+          <StyledLabel>
             Quantity: <span style={{ color: "red" }}>*</span>
             <StyledInput
               type="text"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
+          </StyledLabel>
+          <StyledLabel>
+            Category: <span style={{ color: "red" }}>*</span>
+            <StyledSelect
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">Select Category</option>
+              <option value="Clothing">Clothing</option>
+              <option value="Accessories">Accessories</option>
+            </StyledSelect>
           </StyledLabel>
           <StyledLabel>
             Price: <span style={{ color: "red" }}>*</span>
@@ -353,15 +458,7 @@ const Products = () => {
             />
           </StyledLabel>
           <StyledLabel>
-            Color: <span style={{ color: "red" }}>*</span>
-            <StyledInput
-              type="text"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
-          </StyledLabel>
-          <StyledLabel>
-            Size: <span style={{ color: "red" }}>*</span>
+            Size:
             <StyledSelect
               value={selectedSize}
               onChange={(e) => setSelectedSize(e.target.value)}
@@ -384,6 +481,7 @@ const Products = () => {
               <StyledInput
                 type="file"
                 id="product-image"
+                value={setImageUpload}
                 onChange={handleImageChange}
                 accept="image/jpeg, image/png"
               />
@@ -391,10 +489,10 @@ const Products = () => {
             </FileInputContainer>
           </StyledLabel>
           <ButtonsContainer>
-            <SubmitButton type="submit">Submit</SubmitButton>
             <CancelButton type="button" onClick={closeModal}>
               Cancel
             </CancelButton>
+            <SubmitButton type="submit">Submit</SubmitButton>
           </ButtonsContainer>
         </StyledForm>
       </Modal>

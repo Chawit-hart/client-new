@@ -19,6 +19,7 @@ import Swal from "sweetalert2";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import styled from "styled-components";
 
 const ListItemIcon = styled.div`
@@ -61,6 +62,10 @@ export default function Navbar() {
 
   const goToCart = () => {
     navigate("/cart");
+  };
+
+  const goToOrders = () => {
+    navigate("/Orders");
   };
 
   const signInWithGoogle = useCallback(() => {
@@ -179,6 +184,17 @@ export default function Navbar() {
                       <AccountCircleIcon />
                     </ListItemIcon>
                     Profile
+                  </MenuItem>
+                  <MenuItem
+                    sx={{
+                      fontSize: "16px",
+                    }}
+                    onClick={goToOrders}
+                  >
+                    <ListItemIcon>
+                      <ListAltIcon />
+                    </ListItemIcon>
+                    Orders
                   </MenuItem>
                   <MenuItem
                     sx={{

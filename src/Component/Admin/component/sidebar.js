@@ -21,6 +21,7 @@ const Title = styled.div`
 
 const ListGroup = styled.ul`
   margin-top: 10px;
+  padding-right: 20px;
 `;
 
 const ListItem = styled.li`
@@ -33,6 +34,7 @@ const ListItem = styled.li`
   
   &:hover {
     background-color: #f0f0f0;
+    border-radius: 10px;
   }
 `;
 
@@ -51,6 +53,10 @@ const Sidebar = () => {
     navigate('/Products')
   }
 
+  const handleToOrderList = () => {
+    navigate('/OrderList')
+  }
+
   return (
     <SidebarContainer>
       <Title>AdminPanel</Title>
@@ -60,6 +66,9 @@ const Sidebar = () => {
         </ListItem>
         <ListItem onClick={handleToCustomer}>
           <i className="bi bi-people me-2"></i>Customers
+        </ListItem>
+        <ListItem onClick={handleToOrderList}>
+        <i className="bi bi-clipboard me-2"></i>Order list
         </ListItem>
         <ListItem onClick={handleToProduct}>
           <i className="bi bi-bag me-2"></i>Products

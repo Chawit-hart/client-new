@@ -11,12 +11,12 @@ const AdminDashboard = () => {
   };
 
   const chartData = {
-    labels: ["Monthly Sales", "Total Products", "Total Revenue", "Total Profit"],
+    labels: ["Monthly Sales", "Total Products", "Total Revenue"],
     datasets: [{
       label: "Data",
-      data: [data.monthlySales, data.totalProducts, data.totalRevenue, data.totalProfit],
-      backgroundColor: ["#007bff", "#28a745", "#ffc107", "#dc3545"],
-      borderColor: ["#007bff", "#28a745", "#ffc107", "#dc3545"],
+      data: [data.monthlySales, data.totalProducts, data.totalRevenue],
+      backgroundColor: ["#007bff", "#28a745", "#ffc107"],
+      borderColor: ["#007bff", "#28a745", "#ffc107"],
       borderWidth: 1
     }]
   };
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
         <div>
         <h1 className="my-4 text-center">Welcome to Admin Dashboard</h1>
           </div>
-          <div className="row text-center">
+          <div className="row text-center justify-content-center">
             <div className="col-md-3 mb-4">
               <div className="card h-100" style={cardStyle('#007bff')}>
                 <div className="card-body">
@@ -79,14 +79,6 @@ const AdminDashboard = () => {
                 <div className="card-body">
                   <h5 className="card-title">Total Revenue</h5>
                   <p className="card-text">${data.totalRevenue}</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle('#dc3545')}>
-                <div className="card-body">
-                  <h5 className="card-title">Total Profit</h5>
-                  <p className="card-text">${data.totalProfit}</p>
                 </div>
               </div>
             </div>

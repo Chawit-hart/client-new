@@ -37,7 +37,7 @@ const Customer = () => {
       <table className="table table-striped mt-3">
         <thead>
           <tr>
-            <th scope="col">#</th>
+            <th scope="col">Uid</th>
             <th scope="col">Name</th>
             <th scope="col">Email</th>
             <th scope="col">Phone</th>
@@ -46,8 +46,8 @@ const Customer = () => {
         </thead>
         <tbody>
           {customers.map((customer) => (
-            <tr key={customer.id}>
-              <th scope="row">{customer.id}</th>
+            <tr key={customer._id}>
+              <td scope="row">{customer._id}</td>
               <td>{customer.name}</td>
               <td>{customer.email}</td>
               <td>{customer.tel}</td>

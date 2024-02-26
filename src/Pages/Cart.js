@@ -200,7 +200,6 @@ export default function Cart() {
                       >
                         ราคา: {item.price} บาท
                       </Typography>
-                      {/* สร้างบรรทัดใหม่ */}
                       <Typography component="div" variant="body2">
                         จำนวน: {item.amount}
                       </Typography>
