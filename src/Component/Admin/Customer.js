@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
 
 const CustomerContainer = styled.div`
   display: flex;
@@ -12,15 +13,27 @@ const CustomerContainer = styled.div`
 `;
 
 
-const customers = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', phone: '123-456-7890', address: '123 Main St, Anytown, AS 12345' },
-  { id: 2, name: 'Jane Doe', email: 'jane@example.com', phone: '098-765-4321', address: '456 Maple Ave, Othertown, AS 67890' },
-];
-
 const Customer = () => {
+
+  const [customers, setCustomers] = useState([]);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/Usersinfo');
+        setCustomers(response.data);
+      } catch (error) {
+        console.error('มีปัญหาในการดึงข้อมูล:', error);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+
   return (
     <CustomerContainer className="container mt-5">
-      <h2>Customer Management</h2>
+      <h2>Customer List</h2>
       <table className="table table-striped mt-3">
         <thead>
           <tr>
@@ -37,7 +50,7 @@ const Customer = () => {
               <th scope="row">{customer.id}</th>
               <td>{customer.name}</td>
               <td>{customer.email}</td>
-              <td>{customer.phone}</td>
+              <td>{customer.tel}</td>
               <td>{customer.address}</td>
             </tr>
           ))}

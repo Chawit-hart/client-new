@@ -87,7 +87,7 @@ const ConfirmationPage = () => {
     });
 
     return unsubscribe;
-  }, []); // กำหนดว่า useEffect ควรเรียกเมื่อ Component ถูก mount โดยใส่ dependencies เป็น array ว่าง
+  }, []);
 
   useEffect(() => {
     const fetchImageAndSendToAPI = async () => {
@@ -120,6 +120,7 @@ const ConfirmationPage = () => {
 
   const handleConfirmOrder = async () => {
     const formData = new FormData();
+    formData.append("productid", product._id);
     formData.append("productname", product.name);
     formData.append("category", product.category);
     formData.append("detail", product.detail);
@@ -201,6 +202,7 @@ const ConfirmationPage = () => {
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
+  
 
   const updateTotalPrice = (price, quantity) => {
     const numericPrice = parseFloat(price.replace(/,/g, ""));
@@ -215,8 +217,6 @@ const ConfirmationPage = () => {
     }
 
     try {
-      const productPrice = product.price.replace(/,/g, "");
-      // console.log("🚀 ~ handleAddToCart ~ productPrice:", productPrice)
       const cartItem = {
         productid: product._id,
         productname: product.name,
@@ -258,16 +258,23 @@ const ConfirmationPage = () => {
   };
 
   const handleAmountChange = (event) => {
-    const value = event.target.value.replace(/[^0-9]/g, "");
+    const value = event.target.value.replace(/,/g, "");
     let number = parseInt(value, 10);
+    const max = product.amount.replace(/,/g, "");
+    console.log("🚀 ~ handleAmountChange ~ max:", max);
 
     if (!value) {
       setAmount("");
       return;
     }
 
-    if (number > product.amount) {
-      number = product.amount;
+    if (max === "สินค้าหมด") {
+      number = 1;
+      setAmount(0);
+    }
+
+    if (number > max) {
+      number = max;
     } else if (number < 1) {
       number = 1;
     }
@@ -275,6 +282,7 @@ const ConfirmationPage = () => {
     setAmount(number.toString());
     updateTotalPrice(product.price, number);
   };
+
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -355,7 +363,10 @@ const ConfirmationPage = () => {
                     ราคา: {product.price} บาท
                   </Typography>
                   <Typography variant="h6" gutterBottom>
-                    จำนวนคงเหลือ: {product.amount} ชิ้น
+                  จำนวนคงเหลือ:{" "}
+                    {product.amount === "สินค้าหมด"
+                      ? product.amount
+                      : `${product.amount} ชิ้น`}
                   </Typography>
                   <TextField
                     label="จำนวน"
@@ -367,7 +378,7 @@ const ConfirmationPage = () => {
                     fullWidth
                   />
                   <Typography variant="h6" gutterBottom>
-                    ราคารวม: {totalPrice} บาท
+                  ราคารวม: {totalPrice.toLocaleString()} บาท
                   </Typography>
                   <Box>
                     <Typography variant="body1" gutterBottom>
@@ -482,6 +493,7 @@ const ConfirmationPage = () => {
             color="secondary"
             onClick={handleAddToCart}
             startIcon={<AddShoppingCartIcon />}
+            disabled={!product || product.amount === "สินค้าหมด"}
           >
             เพิ่มลงตะกร้า
           </Button>
@@ -491,6 +503,7 @@ const ConfirmationPage = () => {
             onClick={handleConfirmOrder}
             startIcon={<CheckCircleIcon />}
             style={{ marginLeft: "10px" }}
+            disabled={!product || product.amount === "สินค้าหมด"}
           >
             ยืนยันคำสั่งซื้อ
           </Button>

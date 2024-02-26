@@ -32,7 +32,7 @@ const ListItem = styled.li`
   cursor: pointer;
   
   &:hover {
-    background-color: #f0f0f0; // เพิ่มสีพื้นหลังเมื่อ hover ถ้าต้องการ
+    background-color: #f0f0f0;
   }
 `;
 
@@ -63,9 +63,6 @@ const Sidebar = () => {
         </ListItem>
         <ListItem onClick={handleToProduct}>
           <i className="bi bi-bag me-2"></i>Products
-        </ListItem>
-        <ListItem onClick={() => navigate('/Settings')}>
-          <i className="bi bi-gear me-2"></i>Settings
         </ListItem>
       </ListGroup>
     </SidebarContainer>
