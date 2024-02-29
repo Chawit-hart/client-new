@@ -14,18 +14,20 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Checkbox,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import axios from "axios";
 
 const OrderContainer = styled.div`
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 100%;
   padding: 20px;
   margin-left: 300px;
   margin-top: 50px;
   height: 100vh;
-  display: flex;
   text-align: center;
 `;
 
@@ -38,12 +40,14 @@ const OrderList = () => {
   const [open, setOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [slipUrl, setSlipUrl] = useState("");
+  const [selected, setSelected] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [currentOrder, setCurrentOrder] = useState(null);
 
   const fetchOrders = async () => {
     try {
       const response = await axios.get("http://localhost:3001/order");
       setOrders(response.data);
-      console.log(Orders);
     } catch (error) {
       console.error("There was an error fetching the order data:", error);
     }
@@ -55,9 +59,12 @@ const OrderList = () => {
 
   const fetchSlip = async (postId) => {
     try {
-      const response = await axios.get(`http://localhost:3001/order/slip/${postId}`, {
-        responseType: "blob",
-      });
+      const response = await axios.get(
+        `http://localhost:3001/order/slip/${postId}`,
+        {
+          responseType: "blob",
+        }
+      );
       const url = URL.createObjectURL(response.data);
       setSlipUrl(url);
     } catch (error) {
@@ -89,6 +96,51 @@ const OrderList = () => {
     setOpen(false);
   };
 
+  const handleSelectAllClick = (event) => {
+    if (event.target.checked) {
+      const newSelecteds = Orders.map((n) => n._id);
+      setSelected(newSelecteds);
+      return;
+    }
+    setSelected([]);
+  };
+
+  const handleClick = (event, id) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1)
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  const isSelected = (id) => selected.indexOf(id) !== -1;
+
+  const handleStatusClick = (event, order) => {
+    setAnchorEl(event.currentTarget);
+    setCurrentOrder(order);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const handleUpdateStatus = (status) => {
+    console.log(`Updating status for ${currentOrder._id} to ${status}`);
+    handleCloseMenu();
+  };
+
   return (
     <OrderContainer>
       <h2>Order Management</h2>
@@ -97,9 +149,23 @@ const OrderList = () => {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={
+                      selected.length > 0 && selected.length < Orders.length
+                    }
+                    checked={
+                      Orders.length > 0 && selected.length === Orders.length
+                    }
+                    onChange={handleSelectAllClick}
+                    inputProps={{
+                      "aria-label": "select all orders",
+                    }}
+                  />
+                </TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Prduct ID</TableCell>
+                <TableCell>Product ID</TableCell>
                 <TableCell>Product Name</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Quantity</TableCell>
@@ -109,38 +175,74 @@ const OrderList = () => {
                 <TableCell>Payment</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Time</TableCell>
+                <TableCell>Action</TableCell>{" "}
+                {/* Added Action column for the button */}
               </TableRow>
             </TableHead>
             <TableBody>
-              {Orders.map((order, index) => (
-                <TableRow
-                  key={index}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {order.email}
-                  </TableCell>
-                  <TableCell>{order.name}</TableCell>
-                  <TableCell>{order.productid}</TableCell>
-                  <TableCell>{order.productname}</TableCell>
-                  <TableCell>{order.category}</TableCell>
-                  <TableCell>{order.amount}</TableCell>
-                  <TableCell>{order.totalprice} บาท</TableCell>
-                  <TableCell>{order.address}</TableCell>
-                  <TableCell>{order.tel}</TableCell>
-                  <TableCell>{order.payment}</TableCell>
-                  <TableCell>{order.status}</TableCell>
-                  <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      onClick={() => handleClickOpen(order)}
-                    >
-                      ดูสลิป
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {Orders.map((order, index) => {
+                const isItemSelected = isSelected(order._id);
+                return (
+                  <TableRow
+                    key={index}
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    selected={isItemSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={isItemSelected}
+                        onChange={(event) => handleClick(event, order._id)}
+                        inputProps={{
+                          "aria-labelledby": `enhanced-table-checkbox-${index}`,
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell component="th" scope="row">
+                      {order.email}
+                    </TableCell>
+                    <TableCell>{order.name}</TableCell>
+                    <TableCell>{order.productid}</TableCell>
+                    <TableCell>{order.productname}</TableCell>
+                    <TableCell>{order.category}</TableCell>
+                    <TableCell>{order.amount}</TableCell>
+                    <TableCell>{order.totalprice} บาท</TableCell>
+                    <TableCell>{order.address}</TableCell>
+                    <TableCell>{order.tel}</TableCell>
+                    <TableCell>{order.payment}</TableCell>
+                    <TableCell>{order.status}</TableCell>
+                    <TableCell>
+                      {formatTimeToBangkok(order.ordertime)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        onClick={(event) => handleStatusClick(event, order)}
+                      >
+                        Manage
+                      </Button>
+                      <Menu
+                        id="status-menu"
+                        anchorEl={anchorEl}
+                        open={
+                          Boolean(anchorEl) &&
+                          currentOrder &&
+                          currentOrder._id === order._id
+                        }
+                        onClose={handleCloseMenu}
+                      >
+                        <MenuItem
+                          onClick={() => handleUpdateStatus("Processing")}
+                        >
+                          Update status
+                        </MenuItem>
+                        <MenuItem onClick={() => handleClickOpen(order)}>
+                          ดูสลิป
+                        </MenuItem>
+                      </Menu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
@@ -148,7 +250,9 @@ const OrderList = () => {
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Order Details</DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ marginBottom: "10px" }}>สลิปการสั่งซื้อ:</DialogContentText>
+          <DialogContentText sx={{ marginBottom: "10px" }}>
+            สลิปการสั่งซื้อ:
+          </DialogContentText>
           {slipUrl && (
             <img src={slipUrl} alt="Order Slip" style={{ width: "100%" }} />
           )}

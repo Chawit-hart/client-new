@@ -11,6 +11,8 @@ const SidebarContainer = styled.div`
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   font-family: 'Kanit', sans-serif;
+  background-color: white;
+  z-index: 100;
 `;
 
 const Title = styled.div`
