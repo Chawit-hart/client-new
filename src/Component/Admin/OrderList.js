@@ -20,8 +20,16 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  TextField,
 } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
+import UpdateIcon from "@mui/icons-material/Update";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Swal from "sweetalert2";
 import axios from "axios";
+import { InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 const OrderContainer = styled.div`
   display: flex;
@@ -38,6 +46,27 @@ const BodyWrapper = styled.div`
   margin-top: 30px;
 `;
 
+const StyledTextField = styled(TextField)`
+  width: 50%;
+  & .MuiOutlinedInput-root {
+    border-radius: 20px;
+    &:hover {
+      border: 0.5px solid #blue;
+    }
+    &.Mui-focused {
+      border: 0.5px solid #blue;
+      box-shadow: 0 0 0 1px rgba(0, 0, 255, 0.2);
+    }
+  }
+`;
+
+const SearchContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 20px;
+`;
+
 const OrderList = () => {
   const [Orders, setOrders] = useState([]);
   const [open, setOpen] = useState(false);
@@ -47,7 +76,8 @@ const OrderList = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
-  const [orderStatus, setOrderStatus] = useState('');
+  const [orderStatus, setOrderStatus] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchOrders = async () => {
     try {
@@ -92,6 +122,7 @@ const OrderList = () => {
   };
 
   const handleClickOpen = (order) => {
+    handleCloseMenu();
     setSelectedOrder(order);
     fetchSlip(order._id);
     setOpen(true);
@@ -141,12 +172,50 @@ const OrderList = () => {
     setAnchorEl(null);
   };
 
-  const handleUpdateStatus = (status) => {
-    console.log(`Updating status for ${currentOrder._id} to ${status}`);
-    setStatusDialogOpen(false);
+  const handleUpdateStatus = async (status) => {
+    if (currentOrder && currentOrder._id) {
+      try {
+        const response = await axios.put(
+          `http://localhost:3001/order/update/${currentOrder._id}`,
+          {
+            status: status,
+          }
+        );
+        console.log(response.data.message);
+        setStatusDialogOpen(false);
+        fetchOrders();
+        Swal.fire({
+          icon: "success",
+          title: "Order status updated successfully.",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
+      } catch (error) {
+        console.error("There was an error updating the order status:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to update order status.",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
+      }
+    }
   };
 
   const handleOpenStatusDialog = (order) => {
+    handleCloseMenu();
     setCurrentOrder(order);
     setStatusDialogOpen(true);
   };
@@ -159,9 +228,84 @@ const OrderList = () => {
     setOrderStatus(event.target.value);
   };
 
+  const handleDeleteOrder = async (order) => {
+    handleCloseMenu();
+    // แสดงข้อความยืนยันก่อนการลบ
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this order?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "No, cancel!",
+    });
+
+    if (result.isConfirmed) {
+      // ผู้ใช้คลิกที่ "Yes, delete it!"
+      try {
+        await axios.delete(`http://localhost:3001/order/${order._id}`);
+        Swal.fire({
+          icon: "success",
+          title: "Order deleted successfully",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
+        setOrders(Orders.filter((o) => o._id !== order._id));
+      } catch (error) {
+        console.error("Error deleting order:", error);
+      }
+      Swal.fire({
+        icon: "error",
+        title: "Failed to delete order",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    }
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredOrders = Orders.filter((order) => {
+    const searchFields = ["email", "productid", "productname", "name"];
+    return searchFields.some((field) =>
+      order[field].toString().toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
   return (
     <OrderContainer>
       <h2>Order Management</h2>
+      <SearchContainer>
+        <StyledTextField
+          label="Search Orders"
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </SearchContainer>
       <BodyWrapper>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -198,8 +342,9 @@ const OrderList = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {Orders.map((order, index) => {
+              {filteredOrders.map((order, index) => {
                 const isItemSelected = isSelected(order._id);
+                const isCOD = order.payment === "ชำระเงินปลายทาง";
                 return (
                   <TableRow
                     key={index}
@@ -235,6 +380,7 @@ const OrderList = () => {
                       <Button
                         variant="outlined"
                         onClick={(event) => handleStatusClick(event, order)}
+                        startIcon={<SettingsIcon />}
                       >
                         Manage
                       </Button>
@@ -248,13 +394,29 @@ const OrderList = () => {
                         }
                         onClose={handleCloseMenu}
                       >
-                        <MenuItem
-                          onClick={() => handleOpenStatusDialog(order)}
-                        >
+                        <MenuItem onClick={() => handleOpenStatusDialog(order)}>
+                          <UpdateIcon
+                            fontSize="small"
+                            style={{ marginRight: 8 }}
+                          />{" "}
                           Update status
                         </MenuItem>
-                        <MenuItem onClick={() => handleClickOpen(order)}>
-                          ดูสลิป
+                        <MenuItem
+                          onClick={() => handleClickOpen(order)}
+                          disabled={isCOD}
+                        >
+                          <VisibilityIcon
+                            fontSize="small"
+                            style={{ marginRight: 8 }}
+                          />{" "}
+                          Check slip
+                        </MenuItem>
+                        <MenuItem onClick={() => handleDeleteOrder(order)}>
+                          <DeleteIcon
+                            fontSize="small"
+                            style={{ marginRight: 8 }}
+                          />
+                          Delete
                         </MenuItem>
                       </Menu>
                     </TableCell>
@@ -283,16 +445,28 @@ const OrderList = () => {
         <DialogTitle>Update Order Status</DialogTitle>
         <DialogContent>
           <RadioGroup value={orderStatus} onChange={handleStatusChange}>
-            <FormControlLabel value="Processing" control={<Radio />} label="กำลังดำเนินการ" />
-            <FormControlLabel value="Rejected" control={<Radio />} label="ปฏิเสธ" />
-            <FormControlLabel value="Completed" control={<Radio />} label="สำเร็จ" />
+            <FormControlLabel
+              value="กำลังดำเนินการ"
+              control={<Radio />}
+              label="กำลังดำเนินการ"
+            />
+            <FormControlLabel
+              value="ปฏิเสธ"
+              control={<Radio />}
+              label="ปฏิเสธ"
+            />
+            <FormControlLabel
+              value="สำเร็จ"
+              control={<Radio />}
+              label="สำเร็จ"
+            />
           </RadioGroup>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseStatusDialog}>Cancel</Button>
-          <Button onClick={handleUpdateStatus}>Save</Button>
+          <Button onClick={() => handleUpdateStatus(orderStatus)}>Save</Button>
         </DialogActions>
-      </Dialog>;
+      </Dialog>
     </OrderContainer>
   );
 };

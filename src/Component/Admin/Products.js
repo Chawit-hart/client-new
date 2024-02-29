@@ -225,14 +225,6 @@ const Products = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    console.log('name :', productName);
-    console.log('quantity :', quantity);
-    console.log('price :', price);
-    console.log('productDetail :', productDetail);
-    console.log('selectedCategory :', selectedCategory);
-    console.log('selectedSize :', selectedSize);
-    console.log('imageUpload :', imageUpload);
   
     // ตรวจสอบความครบถ้วนของข้อมูล
     if (
