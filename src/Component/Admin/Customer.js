@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import axios from "axios";
+import { TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 const CustomerContainer = styled.div`
   display: flex;
@@ -12,28 +14,64 @@ const CustomerContainer = styled.div`
   padding: 20px;
 `;
 
+const SearchContainer = styled.div`
+  margin-bottom: 20px;
+  margin-top: 20px;
+  width: 50%;
+`;
+
+const StyledTextField = styled(TextField)`
+  & .MuiOutlinedInput-root {
+    border-radius: 20px;
+    &.Mui-focused {
+      border-color: #blue;
+    }
+  }
+`;
 
 const Customer = () => {
-
   const [customers, setCustomers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/Usersinfo');
+        const response = await axios.get("http://localhost:3001/Usersinfo");
         setCustomers(response.data);
       } catch (error) {
-        console.error('มีปัญหาในการดึงข้อมูล:', error);
+        console.error("มีปัญหาในการดึงข้อมูล:", error);
       }
     };
 
     fetchCustomers();
   }, []);
 
+  const filteredCustomers = customers.filter(
+    (customer) =>
+      customer._id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <CustomerContainer className="container mt-5">
       <h2>Customer List</h2>
+      <SearchContainer>
+        <StyledTextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </SearchContainer>
       <table className="table table-striped mt-3">
         <thead>
           <tr>
@@ -45,7 +83,7 @@ const Customer = () => {
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer) => (
+          {filteredCustomers.map((customer) => (
             <tr key={customer._id}>
               <td scope="row">{customer._id}</td>
               <td>{customer.name}</td>

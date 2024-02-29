@@ -67,6 +67,12 @@ const SearchContainer = styled.div`
   margin-top: 20px;
 `;
 
+const DeleteButtonContainer = styled.div`
+  position: fixed;
+  top: 20px;
+  right: 20px;
+`;
+
 const OrderList = () => {
   const [Orders, setOrders] = useState([]);
   const [open, setOpen] = useState(false);
@@ -288,6 +294,54 @@ const OrderList = () => {
     );
   });
 
+  const handleDeleteSelectedOrders = async () => {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        await Promise.all(selected.map(orderId => axios.delete(`http://localhost:3001/order/${orderId}`)));
+        
+        setOrders(Orders.filter(order => !selected.includes(order._id)));
+        setSelected([]);
+  
+        Swal.fire({
+          icon: "success",
+          title: "Your selected orders have been deleted.",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
+      } catch (error) {
+        console.error("Error deleting orders:", error);
+        Swal.fire({
+          icon: "error",
+          title: "There was a problem deleting your orders.",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
+      }
+    }
+  };
+
   return (
     <OrderContainer>
       <h2>Order Management</h2>
@@ -306,6 +360,16 @@ const OrderList = () => {
           }}
         />
       </SearchContainer>
+      <DeleteButtonContainer>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={handleDeleteSelectedOrders}
+        disabled={selected.length === 0}
+      >
+        Delete Selected
+      </Button>
+    </DeleteButtonContainer>
       <BodyWrapper>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
