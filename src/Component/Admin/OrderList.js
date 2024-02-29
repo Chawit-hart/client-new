@@ -17,6 +17,9 @@ import {
   Checkbox,
   Menu,
   MenuItem,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from "@mui/material";
 import axios from "axios";
 
@@ -43,6 +46,8 @@ const OrderList = () => {
   const [selected, setSelected] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentOrder, setCurrentOrder] = useState(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [orderStatus, setOrderStatus] = useState('');
 
   const fetchOrders = async () => {
     try {
@@ -138,7 +143,20 @@ const OrderList = () => {
 
   const handleUpdateStatus = (status) => {
     console.log(`Updating status for ${currentOrder._id} to ${status}`);
-    handleCloseMenu();
+    setStatusDialogOpen(false);
+  };
+
+  const handleOpenStatusDialog = (order) => {
+    setCurrentOrder(order);
+    setStatusDialogOpen(true);
+  };
+
+  const handleCloseStatusDialog = () => {
+    setStatusDialogOpen(false);
+  };
+
+  const handleStatusChange = (event) => {
+    setOrderStatus(event.target.value);
   };
 
   return (
@@ -231,7 +249,7 @@ const OrderList = () => {
                         onClose={handleCloseMenu}
                       >
                         <MenuItem
-                          onClick={() => handleUpdateStatus("Processing")}
+                          onClick={() => handleOpenStatusDialog(order)}
                         >
                           Update status
                         </MenuItem>
@@ -261,6 +279,20 @@ const OrderList = () => {
           <Button onClick={handleClose}>ปิด</Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={statusDialogOpen} onClose={handleCloseStatusDialog}>
+        <DialogTitle>Update Order Status</DialogTitle>
+        <DialogContent>
+          <RadioGroup value={orderStatus} onChange={handleStatusChange}>
+            <FormControlLabel value="Processing" control={<Radio />} label="กำลังดำเนินการ" />
+            <FormControlLabel value="Rejected" control={<Radio />} label="ปฏิเสธ" />
+            <FormControlLabel value="Completed" control={<Radio />} label="สำเร็จ" />
+          </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseStatusDialog}>Cancel</Button>
+          <Button onClick={handleUpdateStatus}>Save</Button>
+        </DialogActions>
+      </Dialog>;
     </OrderContainer>
   );
 };
