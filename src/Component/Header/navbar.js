@@ -22,6 +22,7 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import styled from "styled-components";
 
+
 const ListItemIcon = styled.div`
   margin-right: 10px;
 `;
@@ -53,18 +54,22 @@ export default function Navbar() {
   };
 
   const goToHome = () => {
+    handleMenuClose();
     navigate("/");
   };
 
   const goToProfile = () => {
+    handleMenuClose();
     navigate("/profile");
   };
 
   const goToCart = () => {
+    handleMenuClose();
     navigate("/cart");
   };
 
   const goToOrders = () => {
+    handleMenuClose();
     navigate("/Orders");
   };
 

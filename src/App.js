@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Carousel from "./Component/Body/Carousel";
 import Category from "./Component/Body/Category";
@@ -17,43 +13,21 @@ import AdminLoginPage from "./Component/Admin/AdminLoginPage";
 import HomeForAdmin from "./Component/Admin/HomeForAdmin";
 import Customer from "./Component/Admin/Customer";
 import AdminLayout from "./AdminLayout";
-import Products from './Component/Admin/Products'
+import Products from "./Component/Admin/Products";
 import OrderList from "./Component/Admin/OrderList";
+import Order from "./Pages/Orders";
 
 const imageSlides = ["./Images/shirt1.png", "./Images/applewatch.png"];
 
 const categories = [
-  { name: "เสื้อผ้า", imageUrl: imageSlides[0], description: "คำอธิบาย 1" },
+  { name: "เสื้อผ้า", imageUrl: imageSlides[0] },
   {
     name: "เครื่องประดับ",
-    imageUrl: imageSlides[1],
-    description: "คำอธิบาย 2",
-  },
-];
-
-const Accproducts = [
-  {
-    id: 1,
-    name: "เครื่องประดับ 1",
-    imageUrl: "/Images/shirt1.png",
-    description: "คำอธิบายสินค้า 1",
-  },
-  {
-    id: 2,
-    name: "เครื่องประดับ 2",
-    imageUrl: "/Images/short1.jpg",
-    description: "คำอธิบายสินค้า 2",
-  },
-  {
-    id: 3,
-    name: "เครื่องประดับ 3",
-    imageUrl: "/Images/short1.jpg",
-    description: "คำอธิบายสินค้า 3",
+    imageUrl: imageSlides[1]
   },
 ];
 
 function App() {
-
   return (
     <Router>
       <Routes>
@@ -66,22 +40,87 @@ function App() {
             </Home>
           }
         />
-        <Route path="/profile" element={<Home><Profile /></Home>} />
-        <Route path="/cart" element={<Home><Cart /></Home>} />
+        <Route
+          path="/profile"
+          element={
+            <Home>
+              <Profile />
+            </Home>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <Home>
+              <Cart />
+            </Home>
+          }
+        />
         <Route
           path="/category/เสื้อผ้า"
-          element={<Home><ClothingCategoryPage /></Home>}
+          element={
+            <Home>
+              <ClothingCategoryPage />
+            </Home>
+          }
         />
         <Route
           path="/category/เครื่องประดับ"
-          element={<Home><AccPage products={Accproducts} /></Home>}
+          element={
+            <Home>
+              <AccPage />
+            </Home>
+          }
         />
-        <Route path="/confirmation" element={<Home><ConfirmationPage /></Home>} />
+        <Route
+          path="/confirmation"
+          element={
+            <Home>
+              <ConfirmationPage />
+            </Home>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <Home>
+              <Order />
+            </Home>
+          }
+        />
         <Route path="/admin-login" element={<AdminLoginPage />} />
-        <Route path="/Dashboard" element={<AdminLayout><HomeForAdmin /></AdminLayout>} />
-        <Route path="/Customers" element={<AdminLayout><Customer /></AdminLayout>} />
-        <Route path="/OrderList" element={<AdminLayout><OrderList /></AdminLayout>} />
-        <Route path="/Products" element={<AdminLayout><Products /></AdminLayout>} />
+        <Route
+          path="/Dashboard"
+          element={
+            <AdminLayout>
+              <HomeForAdmin />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/Customers"
+          element={
+            <AdminLayout>
+              <Customer />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/OrderList"
+          element={
+            <AdminLayout>
+              <OrderList />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/Products"
+          element={
+            <AdminLayout>
+              <Products />
+            </AdminLayout>
+          }
+        />
       </Routes>
     </Router>
   );

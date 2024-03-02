@@ -74,7 +74,7 @@ const DeleteButtonContainer = styled.div`
 `;
 
 const OrderList = () => {
-  const [Orders, setOrders] = useState([]);
+  const [localOrders, setLocalOrders] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [slipUrl, setSlipUrl] = useState("");
@@ -88,7 +88,7 @@ const OrderList = () => {
   const fetchOrders = async () => {
     try {
       const response = await axios.get("http://localhost:3001/order");
-      setOrders(response.data);
+      setLocalOrders(response.data);
     } catch (error) {
       console.error("There was an error fetching the order data:", error);
     }
@@ -140,7 +140,7 @@ const OrderList = () => {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = Orders.map((n) => n._id);
+      const newSelecteds = localOrders.map((n) => n._id);
       setSelected(newSelecteds);
       return;
     }
@@ -264,7 +264,7 @@ const OrderList = () => {
             toast.style.marginTop = "70px";
           },
         });
-        setOrders(Orders.filter((o) => o._id !== order._id));
+        setLocalOrders(localOrders.filter((o) => o._id !== order._id));
       } catch (error) {
         console.error("Error deleting order:", error);
       }
@@ -287,7 +287,7 @@ const OrderList = () => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredOrders = Orders.filter((order) => {
+  const filteredOrders = localOrders.filter((order) => {
     const searchFields = ["email", "productid", "productname", "name"];
     return searchFields.some((field) =>
       order[field].toString().toLowerCase().includes(searchTerm.toLowerCase())
@@ -309,7 +309,7 @@ const OrderList = () => {
       try {
         await Promise.all(selected.map(orderId => axios.delete(`http://localhost:3001/order/${orderId}`)));
         
-        setOrders(Orders.filter(order => !selected.includes(order._id)));
+        setLocalOrders(localOrders.filter(order => !selected.includes(order._id)));
         setSelected([]);
   
         Swal.fire({
@@ -378,10 +378,10 @@ const OrderList = () => {
                 <TableCell padding="checkbox">
                   <Checkbox
                     indeterminate={
-                      selected.length > 0 && selected.length < Orders.length
+                      selected.length > 0 && selected.length < localOrders.length
                     }
                     checked={
-                      Orders.length > 0 && selected.length === Orders.length
+                      localOrders.length > 0 && selected.length === localOrders.length
                     }
                     onChange={handleSelectAllClick}
                     inputProps={{

@@ -1,50 +1,76 @@
-import React from 'react';
-import Sidebar from './component/sidebar';
-import MyChart from './component/Chart';
+import React, { useState, useEffect } from "react";
+import Sidebar from "./component/sidebar";
+import MyChart from "./component/Chart";
+import axios from "axios";
 
 const AdminDashboard = () => {
-  const data = {
-    monthlySales: 150,
-    totalProducts: 1200,
-    totalRevenue: 50000,
-    totalProfit: 20000
-  };
+  const [data, setData] = useState({
+    ProductCountSuccess: 0,
+    ProductCount: 0,
+    totalpriceSuccess: 0,
+  });
+
+  useEffect(() => {
+    const Data = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/order/dashboard"
+        );
+        setData(response.data);
+      } catch (error) {
+        console.error("There was an error fetching the dashboard:", error);
+      }
+    };
+    Data();
+  }, []);
+
+  console.log("data", data);
 
   const chartData = {
-    labels: ["Monthly Sales", "Total Products", "Total Revenue"],
-    datasets: [{
-      label: "Data",
-      data: [data.monthlySales, data.totalProducts, data.totalRevenue],
-      backgroundColor: ["#007bff", "#28a745", "#ffc107"],
-      borderColor: ["#007bff", "#28a745", "#ffc107"],
-      borderWidth: 1
-    }]
+    labels: ["Monthly Sales", "Total Products", "Total"],
+    datasets: [
+      {
+        data: [
+          data.ProductCountSuccess,
+          data.ProductCount,
+          data.totalpriceSuccess,
+        ],
+        backgroundColor: ["#007bff", "#28a745", "#ffc107"],
+        borderColor: ["#007bff", "#28a745", "#ffc107"],
+        borderWidth: 1,
+      },
+    ],
   };
 
   const chartOptions = {
     scales: {
-      y: [{
+      y: {
         ticks: {
-          beginAtZero: true
-        }
-      }]
+          type: 'logarithmic',
+          callback: function (value, index, values) {
+            return Number(value.toString());
+          },
+        },
+      },
     },
-    legend: {
-      display: true,
-      position: 'top'
+    plugins: {
+      legend: {
+        display: false,
+        position: "top",
+      },
     },
     responsive: true,
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
   };
 
   const cardStyle = (backgroundColor) => ({
     backgroundColor: backgroundColor,
-    color: '#fff',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+    color: "#fff",
+    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   });
 
   const pageStyle = {
-    fontFamily: 'Kanit, sans-serif',
+    fontFamily: "Kanit, sans-serif",
   };
 
   return (
@@ -54,37 +80,41 @@ const AdminDashboard = () => {
           <Sidebar />
         </div>
         <div className="col-md-10">
-        <div>
-        <h1 className="my-4 text-center">Welcome to Admin Dashboard</h1>
+          <div>
+            <h1 className="my-4 text-center">Welcome to Admin Dashboard</h1>
           </div>
           <div className="row text-center justify-content-center">
             <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle('#007bff')}>
+              <div className="card h-100" style={cardStyle("#007bff")}>
                 <div className="card-body">
                   <h5 className="card-title">Monthly Sales</h5>
-                  <p className="card-text">{data.monthlySales} items</p>
+                  <p className="card-text">{data.ProductCountSuccess} items</p>
                 </div>
               </div>
             </div>
             <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle('#28a745')}>
+              <div className="card h-100" style={cardStyle("#28a745")}>
                 <div className="card-body">
                   <h5 className="card-title">Total Products</h5>
-                  <p className="card-text" >{data.totalProducts} items</p>
+                  <p className="card-text">{data.ProductCount} items</p>
                 </div>
               </div>
             </div>
             <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle('#ffc107')}>
+              <div className="card h-100" style={cardStyle("#ffc107")}>
                 <div className="card-body">
                   <h5 className="card-title">Total Revenue</h5>
-                  <p className="card-text">${data.totalRevenue}</p>
+                  <p className="card-text">{data.totalpriceSuccess} บาท</p>
                 </div>
               </div>
             </div>
           </div>
-          <div style={{ height: '400px', marginTop: '100px' }}>
-            <MyChart data={chartData} options={chartOptions} chartId="myChart" />
+          <div style={{ height: "400px", marginTop: "100px" }}>
+            <MyChart
+              data={chartData}
+              options={chartOptions}
+              chartId="myChart"
+            />
           </div>
         </div>
       </div>
