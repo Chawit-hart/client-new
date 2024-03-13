@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import axios from "axios";
 
 const SidebarContainer = styled.div`
   width: 250px;
@@ -40,7 +41,23 @@ const ListItem = styled.li`
   }
 `;
 
+const UsernameContainer = styled.div`
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+`;
+
+const LogoutIcon = styled.i`
+  cursor: pointer;
+`;
+
 const Sidebar = () => {
+  const [ username, setUsername ] = useState();
+
   const navigate = useNavigate();
 
   const handleToDashboard = () => {
@@ -59,6 +76,24 @@ const Sidebar = () => {
     navigate('/OrderList')
   }
 
+  const handleLogout = () => {
+    console.log('Logging out...');
+    navigate('/login');
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/email/check-user');
+        setUsername(response.data.username);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    fetchUserData();
+  }, []);
+
   return (
     <SidebarContainer>
       <Title>AdminPanel</Title>
@@ -76,6 +111,10 @@ const Sidebar = () => {
           <i className="bi bi-bag me-2"></i>Products
         </ListItem>
       </ListGroup>
+      <UsernameContainer>
+        <span>{username}</span>
+        <LogoutIcon className="bi bi-box-arrow-right" onClick={handleLogout}></LogoutIcon>
+      </UsernameContainer>
     </SidebarContainer>
   );
 };

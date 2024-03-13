@@ -1,30 +1,57 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
+import AddUserModal from "./AddUserModal";
+import { Button } from "react-bootstrap";
 import axios from "axios";
 
 const AdminDashboard = () => {
+  const [users, setUsers] = useState([]);
+  const [show, setShow] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
     totalpriceSuccess: 0,
   });
+  const [username, setUsername] = useState('');
+
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/order/dashboard");
+      setData(response.data);
+    } catch (error) {
+      console.error("There was an error fetching the dashboard:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:3001/email/check-user"
+      );
+      setUsers(response.data);
+    } catch (error) {
+      console.error("มีข้อผิดพลาดในการดึงข้อมูลผู้ใช้:", error);
+    }
+  };
+
+  const addUser = async (userData) => {
+    try {
+      await axios.post("http://localhost:3001/email/user", userData);
+      fetchUsers();
+    } catch (error) {
+      console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
+    }
+  };
 
   useEffect(() => {
-    const Data = async () => {
-      try {
-        const response = await axios.get(
-          "http://localhost:3001/order/dashboard"
-        );
-        setData(response.data);
-      } catch (error) {
-        console.error("There was an error fetching the dashboard:", error);
-      }
-    };
-    Data();
+    fetchDashboardData();
+    fetchUsers();
   }, []);
-
-  console.log("data", data);
 
   const chartData = {
     labels: ["Monthly Sales", "Total Products", "Total"],
@@ -46,7 +73,7 @@ const AdminDashboard = () => {
     scales: {
       y: {
         ticks: {
-          type: 'logarithmic',
+          type: "logarithmic",
           callback: function (value, index, values) {
             return Number(value.toString());
           },
@@ -81,7 +108,7 @@ const AdminDashboard = () => {
         </div>
         <div className="col-md-10">
           <div>
-            <h1 className="my-4 text-center">Welcome to Admin Dashboard</h1>
+            <h1 className="my-4 text-center">Welcome {username} to Admin Dashboard</h1>
           </div>
           <div className="row text-center justify-content-center">
             <div className="col-md-3 mb-4">
@@ -116,6 +143,43 @@ const AdminDashboard = () => {
               chartId="myChart"
             />
           </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+              marginTop: "20px"
+            }}
+          >
+            <h2>รายชื่อผู้ใช้</h2>
+            <Button variant="primary" onClick={handleShow}>
+              Add User
+            </Button>
+          </div>
+          <AddUserModal
+            show={show}
+            handleClose={handleClose}
+            addUser={addUser}
+          />
+          <table className="table table-hover">
+            <thead className="thead-dark">
+              <tr>
+                <th scope="col">UID</th>
+                <th scope="col">User</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user, index) => (
+                <tr key={index}>
+                  <td>{user._id}</td>
+                  <td>{user.user}</td>
+                  <td>{user.userstatus}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
