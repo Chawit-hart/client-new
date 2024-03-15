@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Form, Button } from "react-bootstrap";
+import { useAdminAuth } from "../service/AdminAuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -10,6 +11,7 @@ const AdminLoginPage = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const { login } = useAdminAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -24,6 +26,7 @@ const AdminLoginPage = () => {
       });
 
       if (response.data.isAdmin) {
+        await login(username, password);
         localStorage.setItem("username", username);
         Swal.fire({
           position: "top-end",

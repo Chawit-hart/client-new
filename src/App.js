@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AdminAuthProvider } from "./Component/service/AdminAuthContext";
 import "./App.css";
 import Carousel from "./Component/Body/Carousel";
 import Category from "./Component/Body/Category";
@@ -30,98 +31,23 @@ const categories = [
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home>
-              <Carousel slides={imageSlides} />
-              <Category categories={categories} />
-            </Home>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <Home>
-              <Profile />
-            </Home>
-          }
-        />
-        <Route
-          path="/cart"
-          element={
-            <Home>
-              <Cart />
-            </Home>
-          }
-        />
-        <Route
-          path="/category/เสื้อผ้า"
-          element={
-            <Home>
-              <ClothingCategoryPage />
-            </Home>
-          }
-        />
-        <Route
-          path="/category/เครื่องประดับ"
-          element={
-            <Home>
-              <AccPage />
-            </Home>
-          }
-        />
-        <Route
-          path="/confirmation"
-          element={
-            <Home>
-              <ConfirmationPage />
-            </Home>
-          }
-        />
-        <Route
-          path="/orders"
-          element={
-            <Home>
-              <Order />
-            </Home>
-          }
-        />
-        <Route path="/admin-login" element={<AdminLoginPage />} />
-        <Route
-          path="/Dashboard"
-          element={
-            <AdminSection>
-              <HomeForAdmin />
-            </AdminSection>
-          }
-        />
-        <Route
-          path="/Customers"
-          element={
-            <AdminSection>
-              <Customer />
-            </AdminSection>
-          }
-        />
-        <Route
-          path="/OrderList"
-          element={
-            <AdminSection>
-              <OrderList />
-            </AdminSection>
-          }
-        />
-        <Route
-          path="/Products"
-          element={
-            <AdminSection>
-              <Products />
-            </AdminSection>
-          }
-        />
-      </Routes>
+      <AdminAuthProvider> {/* ใช้งาน AdminAuthProvider ที่นี่ */}
+        <Routes>
+          <Route path="/" element={<Home><Carousel slides={imageSlides} /><Category categories={categories} /></Home>} />
+          <Route path="/profile" element={<Home><Profile /></Home>} />
+          <Route path="/cart" element={<Home><Cart /></Home>} />
+          <Route path="/category/เสื้อผ้า" element={<Home><ClothingCategoryPage /></Home>} />
+          <Route path="/category/เครื่องประดับ" element={<Home><AccPage /></Home>} />
+          <Route path="/confirmation" element={<Home><ConfirmationPage /></Home>} />
+          <Route path="/orders" element={<Home><Order /></Home>} />
+          <Route path="/admin-login" element={<AdminLoginPage />} />
+          {/* ต่อไปนี้คือ routes ที่ป้องกันด้วย AdminSection */}
+          <Route path="/Dashboard" element={<AdminSection><HomeForAdmin /></AdminSection>} />
+          <Route path="/Customers" element={<AdminSection><Customer /></AdminSection>} />
+          <Route path="/OrderList" element={<AdminSection><OrderList /></AdminSection>} />
+          <Route path="/Products" element={<AdminSection><Products /></AdminSection>} />
+        </Routes>
+      </AdminAuthProvider>
     </Router>
   );
 }
