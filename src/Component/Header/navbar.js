@@ -22,7 +22,6 @@ import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import styled from "styled-components";
 
-
 const ListItemIcon = styled.div`
   margin-right: 10px;
 `;
@@ -160,9 +159,26 @@ export default function Navbar() {
                     fontFamily: "Kanit",
                     color: "black",
                     fontSize: "18px",
+                    textTransform: "none",
+                    display: "flex",
+                    alignItems: "center",
                   }}
                 >
-                  {user.displayName || user.email}
+                  {user?.photoURL && (
+                    <Box
+                      component="img"
+                      src={user.photoURL}
+                      alt="Profile"
+                      referrerpolicy="no-referrer"
+                      sx={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: "50%",
+                        marginRight: 1,
+                      }}
+                    />
+                  )}
+                  {user.displayName || "Sign In"}
                 </Button>
                 <Menu
                   id="menu-appbar"
