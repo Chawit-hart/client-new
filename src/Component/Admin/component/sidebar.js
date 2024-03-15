@@ -56,7 +56,7 @@ const LogoutIcon = styled.i`
 `;
 
 const Sidebar = () => {
-  const [ username, setUsername ] = useState();
+  const [ username, setUsername ] = useState("");
 
   const navigate = useNavigate();
 
@@ -78,20 +78,30 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     console.log('Logging out...');
-    navigate('/login');
+    localStorage.removeItem("username");
+    navigate('/admin-login');
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/email/check-user');
-        setUsername(response.data.username);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
+    const savedUsername = localStorage.getItem("username");
   
-    fetchUserData();
+    if (savedUsername) {
+      setUsername(savedUsername);
+    } else {
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get('http://localhost:3001/email/check-user');
+          if (response.data && response.data.username) {
+            localStorage.setItem("username", response.data.username);
+            setUsername(response.data.username);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+  
+      fetchUserData();
+    }
   }, []);
 
   return (
