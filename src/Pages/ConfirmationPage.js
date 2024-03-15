@@ -94,11 +94,7 @@ const ConfirmationPage = () => {
       try {
         const imageUrl = `http://localhost:3001/posts/images/${state.productId}`;
         const response = await axios.get(imageUrl, { responseType: "blob" });
-
         setProductImg(response.data);
-
-        // ทำอะไรกับ response จาก API ต่อไปได้ตามต้องการ
-        // console.log("Response from API:", response.data);
       } catch (error) {
         console.error("Error:", error);
       }

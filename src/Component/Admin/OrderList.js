@@ -21,6 +21,9 @@ import {
   FormControlLabel,
   Radio,
   TextField,
+  Select,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import UpdateIcon from "@mui/icons-material/Update";
@@ -84,6 +87,8 @@ const OrderList = () => {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [shippingProvider, setShippingProvider] = useState("");
 
   const fetchOrders = async () => {
     try {
@@ -185,6 +190,8 @@ const OrderList = () => {
           `http://localhost:3001/order/update/${currentOrder._id}`,
           {
             status: status,
+            parcel: trackingNumber,
+            provider: shippingProvider,
           }
         );
         console.log(response.data.message);
@@ -224,6 +231,9 @@ const OrderList = () => {
     handleCloseMenu();
     setCurrentOrder(order);
     setStatusDialogOpen(true);
+    setOrderStatus("");
+    setTrackingNumber("");
+    setShippingProvider("");
   };
 
   const handleCloseStatusDialog = () => {
@@ -236,7 +246,6 @@ const OrderList = () => {
 
   const handleDeleteOrder = async (order) => {
     handleCloseMenu();
-    // แสดงข้อความยืนยันก่อนการลบ
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "Do you really want to delete this order?",
@@ -296,22 +305,28 @@ const OrderList = () => {
 
   const handleDeleteSelectedOrders = async () => {
     const result = await Swal.fire({
-      title: 'Are you sure?',
+      title: "Are you sure?",
       text: "You won't be able to revert this!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
     });
-  
+
     if (result.isConfirmed) {
       try {
-        await Promise.all(selected.map(orderId => axios.delete(`http://localhost:3001/order/${orderId}`)));
-        
-        setLocalOrders(localOrders.filter(order => !selected.includes(order._id)));
+        await Promise.all(
+          selected.map((orderId) =>
+            axios.delete(`http://localhost:3001/order/${orderId}`)
+          )
+        );
+
+        setLocalOrders(
+          localOrders.filter((order) => !selected.includes(order._id))
+        );
         setSelected([]);
-  
+
         Swal.fire({
           icon: "success",
           title: "Your selected orders have been deleted.",
@@ -361,15 +376,15 @@ const OrderList = () => {
         />
       </SearchContainer>
       <DeleteButtonContainer>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={handleDeleteSelectedOrders}
-        disabled={selected.length === 0}
-      >
-        Delete Selected
-      </Button>
-    </DeleteButtonContainer>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={handleDeleteSelectedOrders}
+          disabled={selected.length === 0}
+        >
+          Delete Selected
+        </Button>
+      </DeleteButtonContainer>
       <BodyWrapper>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -378,10 +393,12 @@ const OrderList = () => {
                 <TableCell padding="checkbox">
                   <Checkbox
                     indeterminate={
-                      selected.length > 0 && selected.length < localOrders.length
+                      selected.length > 0 &&
+                      selected.length < localOrders.length
                     }
                     checked={
-                      localOrders.length > 0 && selected.length === localOrders.length
+                      localOrders.length > 0 &&
+                      selected.length === localOrders.length
                     }
                     onChange={handleSelectAllClick}
                     inputProps={{
@@ -400,9 +417,10 @@ const OrderList = () => {
                 <TableCell>Phone</TableCell>
                 <TableCell>Payment</TableCell>
                 <TableCell>Status</TableCell>
+                <TableCell>shipping Provider</TableCell>
+                <TableCell>Tracking Number</TableCell>
                 <TableCell>Time</TableCell>
-                <TableCell>Action</TableCell>{" "}
-                {/* Added Action column for the button */}
+                <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -437,6 +455,8 @@ const OrderList = () => {
                     <TableCell>{order.tel}</TableCell>
                     <TableCell>{order.payment}</TableCell>
                     <TableCell>{order.status}</TableCell>
+                    <TableCell>{order.provider}</TableCell>
+                    <TableCell>{order.parcel}</TableCell>
                     <TableCell>
                       {formatTimeToBangkok(order.ordertime)}
                     </TableCell>
@@ -525,10 +545,78 @@ const OrderList = () => {
               label="สำเร็จ"
             />
           </RadioGroup>
+          {orderStatus === "สำเร็จ" && (
+            <>
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="shipping-provider-label">
+                  Shipping Provider
+                </InputLabel>
+                <Select
+                  labelId="shipping-provider-label"
+                  id="shipping-provider"
+                  value={shippingProvider}
+                  label="Shipping Provider"
+                  onChange={(e) => setShippingProvider(e.target.value)}
+                >
+                  <MenuItem value="Thai Post">
+                    <img
+                      src="/Images/thaipost.png"
+                      alt="Thai Post"
+                      style={{ marginRight: 8, height: "24px" }}
+                    />
+                    ไปรษณีย์ไทย
+                  </MenuItem>
+                  <MenuItem value="DHL">
+                    <img
+                      src="/Images/dhl.jpg"
+                      alt="DHL"
+                      style={{ marginRight: 8, height: "24px" }}
+                    />
+                    DHL
+                  </MenuItem>
+                  <MenuItem value="Kerry Express">
+                  <img
+                      src="/Images/kerry.png"
+                      alt="Kerry Express"
+                      style={{ marginRight: 8, height: "24px" }}
+                    />
+                    Kerry Express</MenuItem>
+                  <MenuItem value="Flash Express">
+                  <img
+                      src="/Images/flash.png"
+                      alt="Flash Express"
+                      style={{ marginRight: 8, height: "24px" }}
+                    />
+                    Flash Express</MenuItem>
+                  <MenuItem value="J&T Express">
+                  <img
+                      src="/Images/J&T.png"
+                      alt="J&T Express"
+                      style={{ marginRight: 8, height: "24px" }}
+                    />
+                    J&T Express</MenuItem>
+                </Select>
+              </FormControl>
+              <TextField
+                margin="dense"
+                id="trackingNumber"
+                label="Tracking Number"
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={trackingNumber}
+                onChange={(e) => setTrackingNumber(e.target.value)}
+              />
+            </>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseStatusDialog}>Cancel</Button>
-          <Button onClick={() => handleUpdateStatus(orderStatus)}>Save</Button>
+          <Button
+            onClick={() => handleUpdateStatus(orderStatus, trackingNumber)}
+          >
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </OrderContainer>

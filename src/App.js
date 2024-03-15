@@ -12,10 +12,10 @@ import Cart from "./Pages/Cart";
 import AdminLoginPage from "./Component/Admin/AdminLoginPage";
 import HomeForAdmin from "./Component/Admin/HomeForAdmin";
 import Customer from "./Component/Admin/Customer";
-import AdminLayout from "./AdminLayout";
 import Products from "./Component/Admin/Products";
 import OrderList from "./Component/Admin/OrderList";
 import Order from "./Pages/Orders";
+import AdminSection from "./Component/service/AdminSection";
 
 const imageSlides = ["./Images/shirt1.png", "./Images/applewatch.png"];
 
@@ -23,7 +23,7 @@ const categories = [
   { name: "เสื้อผ้า", imageUrl: imageSlides[0] },
   {
     name: "เครื่องประดับ",
-    imageUrl: imageSlides[1]
+    imageUrl: imageSlides[1],
   },
 ];
 
@@ -92,33 +92,33 @@ function App() {
         <Route
           path="/Dashboard"
           element={
-            <AdminLayout>
+            <AdminSection>
               <HomeForAdmin />
-            </AdminLayout>
+            </AdminSection>
           }
         />
         <Route
           path="/Customers"
           element={
-            <AdminLayout>
+            <AdminSection>
               <Customer />
-            </AdminLayout>
+            </AdminSection>
           }
         />
         <Route
           path="/OrderList"
           element={
-            <AdminLayout>
+            <AdminSection>
               <OrderList />
-            </AdminLayout>
+            </AdminSection>
           }
         />
         <Route
           path="/Products"
           element={
-            <AdminLayout>
+            <AdminSection>
               <Products />
-            </AdminLayout>
+            </AdminSection>
           }
         />
       </Routes>

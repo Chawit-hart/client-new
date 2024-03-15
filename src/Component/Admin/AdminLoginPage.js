@@ -4,14 +4,18 @@ import { Container, Form, Button } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useAdminAuth } from "../service/AdminAuthContext";
 
 const AdminLoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  const { login } = useAdminAuth();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    login(username, password);
 
     console.log("username--->", username);
     console.log("password---->", password);
