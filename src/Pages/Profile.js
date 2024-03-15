@@ -107,7 +107,9 @@ export default function Profile() {
           <Box sx={{ flexGrow: 1 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
-                {/* แสดงข้อมูลโปรไฟล์ */}
+              <Typography variant="h6">
+                  อีเมล์: {user?.email}
+                </Typography>
                 <Typography variant="h6">
                   ชื่อนามสกุล: {profileData.name}
                 </Typography>
