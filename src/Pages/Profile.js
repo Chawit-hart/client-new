@@ -16,6 +16,10 @@ import {
   TableRow,
   TextField,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -31,12 +35,19 @@ export default function Profile() {
   const [editingAddressId, setEditingAddressId] = useState(null);
   const [selectedAddressIdForManagement, setSelectedAddressIdForManagement] =
     useState(null);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [profileData, setProfileData] = useState({
+    name: "",
+    addresses: [],
+    tel: "",
+    email: "",
+    photoURL: "",
+  });
+  const [newAddress, setNewAddress] = useState({
     name: "",
     address: "",
     tel: "",
     email: "",
-    photoURL: "",
   });
 
   useEffect(() => {
@@ -49,15 +60,12 @@ export default function Profile() {
           .get(fetchProfileEndpoint)
           .then((response) => {
             const profileInfo = response.data;
-            setProfileData({
-              id: profileInfo._id,
-              name: profileInfo.name,
-              // สมมติว่าที่อยู่อยู่ใน profileInfo.addresses และเป็นอาร์เรย์ของที่อยู่
-              address: profileInfo.address, // ปรับใช้ข้อมูลให้เหมาะสม
-              tel: profileInfo.tel,
-              email: currentUser.email,
-              photoURL: currentUser.photoURL,
-            });
+            setProfileData((prevState) => ({
+              ...prevState,
+              addresses: Array.isArray(profileInfo.addresses)
+                ? profileInfo.addresses
+                : [],
+            }));
           })
           .catch((error) => {
             console.error("Error fetching profile data:", error);
@@ -86,9 +94,21 @@ export default function Profile() {
 
   const handleChange = (e) => {
     setProfileData({ ...profileData, [e.target.name]: e.target.value });
+    setNewAddress((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleInputChange = (event) => {
+    const { id, value } = event.target;
+    setNewAddress((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmitEdit = (e) => {
     e.preventDefault();
 
     const editProfileEndpoint = `http://localhost:3001/usersinfo/${profileData.id}`;
@@ -108,6 +128,42 @@ export default function Profile() {
         console.error("Error updating profile:", error);
       });
   };
+
+  const handleSaveAddress = async () => {
+    if (!user) {
+      console.error("No user logged in.");
+      return;
+    }
+
+    const addressData = {
+      ...newAddress,
+      email: user.email,
+    };
+
+    try {
+      await axios.post("http://localhost:3001/usersinfo/", addressData);
+      console.log("Address added successfully");
+
+      // รีเซ็ต newAddress เพื่อให้ฟอร์มว่าง
+      setNewAddress({ name: "", address: "", tel: "" });
+
+      // ดึงข้อมูลที่อยู่อัปเดต
+      fetchAddresses();
+
+      handleCloseAddressModal();
+    } catch (error) {
+      console.error("Error adding new address:", error);
+    }
+};
+
+const fetchAddresses = async () => {
+  const response = await axios.get(`http://localhost:3001/usersinfo/newaddress?email=${user.email}`);
+  setProfileData(prevState => ({
+    ...prevState,
+    addresses: response.data.addresses,
+  }));
+};
+
 
   const handleSelectForManagement = (id) => {
     setSelectedAddressIdForManagement(
@@ -131,9 +187,12 @@ export default function Profile() {
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
     if (confirmDelete) {
-      axios.delete(`http://localhost:3001/usersinfo/${id}`)
+      axios
+        .delete(`http://localhost:3001/usersinfo/${id}`)
         .then((response) => {
           console.log(response.data.message);
         })
@@ -141,6 +200,14 @@ export default function Profile() {
           console.error("Error deleting user:", error.response.data.error);
         });
     }
+  };
+
+  const handleOpenAddressModal = () => {
+    setIsAddressModalOpen(true);
+  };
+
+  const handleCloseAddressModal = () => {
+    setIsAddressModalOpen(false);
   };
 
   if (!user) {
@@ -180,42 +247,47 @@ export default function Profile() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow>
-                  <TableCell component="th" scope="row">
-                    {profileData.name}
-                  </TableCell>
-                  <TableCell align="right">{profileData.address}</TableCell>
-                  <TableCell align="right">{profileData.tel}</TableCell>
-                  <TableCell align="right">
-                    {selectedAddressIdForManagement === profileData.id ? (
-                      <>
+                {profileData.addresses.map((address, index) => (
+                  <TableRow key={index}>
+                    <TableCell component="th" scope="row">
+                      {address.name}
+                    </TableCell>
+                    <TableCell align="right">{address.address}</TableCell>
+                    <TableCell align="right">{address.tel}</TableCell>
+                    <TableCell align="right">
+                      {selectedAddressIdForManagement === profileData.id ? (
+                        <>
+                          <IconButton
+                            onClick={() => toggleEditAddress(profileData.id)}
+                            size="small"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDelete(profileData.id)}
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </>
+                      ) : (
                         <IconButton
-                          onClick={() => toggleEditAddress(profileData.id)}
+                          onClick={() =>
+                            handleSelectForManagement(profileData.id)
+                          }
                           size="small"
                         >
-                          <EditIcon />
+                          <SettingsIcon />
                         </IconButton>
-                        <IconButton onClick={() => handleDelete(profileData.id)} size="small">
-                          <DeleteIcon />
-                        </IconButton>
-                      </>
-                    ) : (
-                      <IconButton
-                        onClick={() =>
-                          handleSelectForManagement(profileData.id)
-                        }
-                        size="small"
-                      >
-                        <SettingsIcon />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                </TableRow>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
                 {editMode && editingAddressId === profileData.id && (
                   <TableRow>
                     <TableCell colSpan={4}>
                       <form
-                        onSubmit={handleSubmit}
+                        onSubmit={handleSubmitEdit}
                         className="bg-light p-3 border rounded"
                       >
                         <TextField
@@ -276,7 +348,11 @@ export default function Profile() {
             mt: 2,
           }}
         >
-          <IconButton color="primary" disableRipple>
+          <IconButton
+            color="primary"
+            onClick={handleOpenAddressModal}
+            disableRipple
+          >
             <AddIcon />
             <Typography
               variant="h6"
@@ -289,6 +365,45 @@ export default function Profile() {
           </IconButton>
         </Box>
       </Paper>
+      <Dialog open={isAddressModalOpen} onClose={handleCloseAddressModal}>
+        <DialogTitle>เพิ่มที่อยู่ใหม่</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="name"
+            label="ชื่อ-นามสกุล"
+            value={newAddress.name}
+            onChange={handleInputChange}
+            fullWidth
+            variant="standard"
+          />
+          <TextField
+            margin="dense"
+            id="address"
+            label="ที่อยู่"
+            type="text"
+            value={newAddress.address}
+            onChange={handleInputChange}
+            fullWidth
+            variant="standard"
+          />
+          <TextField
+            margin="dense"
+            id="tel"
+            label="เบอร์โทร"
+            type="tel"
+            value={newAddress.tel}
+            onChange={handleInputChange}
+            fullWidth
+            variant="standard"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAddressModal}>ยกเลิก</Button>
+          <Button onClick={handleSaveAddress}>บันทึก</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
