@@ -36,13 +36,7 @@ export default function Profile() {
   const [selectedAddressIdForManagement, setSelectedAddressIdForManagement] =
     useState(null);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: "",
-    addresses: [],
-    tel: "",
-    email: "",
-    photoURL: "",
-  });
+  const [profileData, setProfileData] = useState([]);
   const [newAddress, setNewAddress] = useState({
     name: "",
     address: "",
@@ -59,26 +53,16 @@ export default function Profile() {
         axios
           .get(fetchProfileEndpoint)
           .then((response) => {
-            const profileInfo = response.data;
-            setProfileData((prevState) => ({
-              ...prevState,
-              addresses: Array.isArray(profileInfo.addresses)
-                ? profileInfo.addresses
-                : [],
-            }));
+            const profileInfos = response.data; // รับข้อมูลทั้งหมดกลับมาในรูปแบบของอาร์เรย์ของอ็อบเจ็ค
+            setProfileData(profileInfos); // กำหนดข้อมูลโปรไฟล์โดยตรง
+            console.log("response.data---->", response.data);
           })
           .catch((error) => {
             console.error("Error fetching profile data:", error);
           });
       } else {
         setUser(null);
-        setProfileData({
-          name: "",
-          addresses: "",
-          tel: "",
-          email: "",
-          photoURL: "",
-        });
+        setProfileData([]);
       }
     });
 
@@ -93,10 +77,10 @@ export default function Profile() {
   };
 
   const handleChange = (e) => {
-    setProfileData({ ...profileData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
     setNewAddress((prevState) => ({
       ...prevState,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
@@ -111,18 +95,20 @@ export default function Profile() {
   const handleSubmitEdit = (e) => {
     e.preventDefault();
 
-    const editProfileEndpoint = `http://localhost:3001/usersinfo/${profileData.id}`;
+    const editProfileEndpoint = `http://localhost:3001/usersinfo/${editingAddressId}`;
 
     axios
       .put(editProfileEndpoint, {
-        name: profileData.name,
-        address: profileData.address,
-        tel: profileData.tel,
+        name: newAddress.name,
+        address: newAddress.address,
+        tel: newAddress.tel,
       })
       .then((response) => {
         console.log("Profile updated successfully:", response.data);
         setEditMode(false);
         setEditingAddressId(null);
+        // อัปเดตข้อมูลโปรไฟล์หลังจากที่แก้ไข
+        fetchAddresses();
       })
       .catch((error) => {
         console.error("Error updating profile:", error);
@@ -142,7 +128,6 @@ export default function Profile() {
 
     try {
       await axios.post("http://localhost:3001/usersinfo/", addressData);
-      console.log("Address added successfully");
 
       // รีเซ็ต newAddress เพื่อให้ฟอร์มว่าง
       setNewAddress({ name: "", address: "", tel: "" });
@@ -154,16 +139,14 @@ export default function Profile() {
     } catch (error) {
       console.error("Error adding new address:", error);
     }
-};
+  };
 
-const fetchAddresses = async () => {
-  const response = await axios.get(`http://localhost:3001/usersinfo/newaddress?email=${user.email}`);
-  setProfileData(prevState => ({
-    ...prevState,
-    addresses: response.data.addresses,
-  }));
-};
-
+  const fetchAddresses = async () => {
+    const response = await axios.get(
+      `http://localhost:3001/usersinfo/address?email=${user.email}`
+    );
+    setProfileData(response.data);
+  };
 
   const handleSelectForManagement = (id) => {
     setSelectedAddressIdForManagement(
@@ -175,7 +158,19 @@ const fetchAddresses = async () => {
     }
   };
 
+  const handleEditClick = (profile) => {
+    setNewAddress({
+      name: profile.name,
+      address: profile.address,
+      tel: profile.tel,
+    });
+    setEditMode(true);
+    setEditingAddressId(profile._id);
+  };
+
   const toggleEditAddress = (id) => {
+    console.log("🚀 ~ file: Profile.js:166 ~ toggleEditAddress ~ id:", id);
+    console.log("editAddressId---->", editingAddressId);
     if (editingAddressId === id) {
       setEditingAddressId(null);
       setEditMode(false);
@@ -183,6 +178,7 @@ const fetchAddresses = async () => {
     } else {
       setEditingAddressId(id);
       setEditMode(true);
+      handleEditClick(profileData.find((profile) => profile._id === id));
     }
   };
 
@@ -232,7 +228,7 @@ const fetchAddresses = async () => {
             alignItems: "center",
           }}
         >
-          <Avatar src={profileData.photoURL} sx={{ width: 80, height: 80 }} />
+          <Avatar src={user.photoURL} sx={{ width: 80, height: 80 }} />
           <Typography variant="h6" sx={{ marginBottom: 2, marginTop: 2 }}>
             {user?.email}
           </Typography>
@@ -247,24 +243,24 @@ const fetchAddresses = async () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {profileData.addresses.map((address, index) => (
-                  <TableRow key={index}>
+                {Object.values(profileData).map((profile) => (
+                  <TableRow key={profile._id}>
                     <TableCell component="th" scope="row">
-                      {address.name}
+                      {profile.name}
                     </TableCell>
-                    <TableCell align="right">{address.address}</TableCell>
-                    <TableCell align="right">{address.tel}</TableCell>
+                    <TableCell align="right">{profile.address}</TableCell>
+                    <TableCell align="right">{profile.tel}</TableCell>
                     <TableCell align="right">
-                      {selectedAddressIdForManagement === profileData.id ? (
+                      {selectedAddressIdForManagement === profile._id ? (
                         <>
                           <IconButton
-                            onClick={() => toggleEditAddress(profileData.id)}
+                            onClick={() => toggleEditAddress(profile._id)}
                             size="small"
                           >
                             <EditIcon />
                           </IconButton>
                           <IconButton
-                            onClick={() => handleDelete(profileData.id)}
+                            onClick={() => handleDelete(profile._id)}
                             size="small"
                           >
                             <DeleteIcon />
@@ -272,9 +268,7 @@ const fetchAddresses = async () => {
                         </>
                       ) : (
                         <IconButton
-                          onClick={() =>
-                            handleSelectForManagement(profileData.id)
-                          }
+                          onClick={() => handleSelectForManagement(profile._id)}
                           size="small"
                         >
                           <SettingsIcon />
@@ -283,59 +277,62 @@ const fetchAddresses = async () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {editMode && editingAddressId === profileData.id && (
-                  <TableRow>
-                    <TableCell colSpan={4}>
-                      <form
-                        onSubmit={handleSubmitEdit}
-                        className="bg-light p-3 border rounded"
-                      >
-                        <TextField
-                          label="ชื่อนามสกุล"
-                          name="name"
-                          value={profileData.name}
-                          onChange={handleChange}
-                          fullWidth
-                          margin="normal"
-                        />
-                        <TextField
-                          label="ที่อยู่"
-                          name="address"
-                          value={profileData.address}
-                          onChange={handleChange}
-                          fullWidth
-                          margin="normal"
-                        />
-                        <TextField
-                          label="เบอร์โทร"
-                          name="tel"
-                          value={profileData.tel}
-                          onChange={handleChange}
-                          fullWidth
-                          margin="normal"
-                        />
-                        <div className="text-center">
-                          <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            sx={{ marginTop: 2 }}
-                          >
-                            บันทึก
-                          </Button>
-                          <Button
-                            onClick={handleEditToggle}
-                            variant="contained"
-                            color="error"
-                            sx={{ marginTop: 2, marginLeft: 2 }}
-                          >
-                            ยกเลิก
-                          </Button>
-                        </div>
-                      </form>
-                    </TableCell>
-                  </TableRow>
-                )}
+                {editMode &&
+                  profileData.some(
+                    (profile) => profile._id === editingAddressId
+                  ) && (
+                    <TableRow>
+                      <TableCell colSpan={4}>
+                        <form
+                          onSubmit={handleSubmitEdit}
+                          className="bg-light p-3 border rounded"
+                        >
+                          <TextField
+                            label="ชื่อนามสกุล"
+                            name="name"
+                            value={newAddress.name}
+                            onChange={handleChange}
+                            fullWidth
+                            margin="normal"
+                          />
+                          <TextField
+                            label="ที่อยู่"
+                            name="address"
+                            value={newAddress.address}
+                            onChange={handleChange}
+                            fullWidth
+                            margin="normal"
+                          />
+                          <TextField
+                            label="เบอร์โทร"
+                            name="tel"
+                            value={newAddress.tel}
+                            onChange={handleChange}
+                            fullWidth
+                            margin="normal"
+                          />
+                          <div className="text-center">
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              sx={{ marginTop: 2 }}
+                            >
+                              บันทึก
+                            </Button>
+                            <Button
+                              onClick={handleEditToggle}
+                              variant="contained"
+                              color="error"
+                              sx={{ marginTop: 2, marginLeft: 2 }}
+                            >
+                              ยกเลิก
+                            </Button>
+                          </div>
+                        </form>
+                      </TableCell>
+                    </TableRow>
+                  )}
               </TableBody>
             </Table>
           </TableContainer>
