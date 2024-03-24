@@ -40,7 +40,7 @@ export const AdminAuthProvider = ({ children }) => {
         if (response.data && response.data.isAdmin) {
           const adminData = { username, ...response.data };
           const currentTime = new Date().getTime();
-          const sessionExpiration = currentTime + (10 * 60 * 1000);
+          const sessionExpiration = currentTime + (30 * 60 * 1000); //ตั้ง Session ไว้ที่ 30 นาที
           localStorage.setItem("currentAdmin", JSON.stringify(adminData));
           localStorage.setItem("sessionExpiration", sessionExpiration.toString());
           setCurrentAdmin(adminData);
