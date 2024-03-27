@@ -169,7 +169,7 @@ export default function Navbar() {
                       component="img"
                       src={user.photoURL}
                       alt="Profile"
-                      referrerpolicy="no-referrer"
+                      referrerPolicy="no-referrer"
                       sx={{
                         width: 30,
                         height: 30,
