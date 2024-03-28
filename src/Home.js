@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation } from "react-router-dom";
 import Footer from "./Component/Footer/Footer";
 import Navbar from "./Component/Header/navbar";
+import { CartProvider } from "./Component/service/CartContext";
 
 function Home({ children }) {
   const location = useLocation();
@@ -21,6 +22,7 @@ function Home({ children }) {
   };
 
   return (
+    <CartProvider>
     <div style={appContainerStyle}>
       {location.pathname !== "/admin-login" && <Navbar />}
       <div style={contentWrapStyle}>{children}</div>
@@ -28,6 +30,7 @@ function Home({ children }) {
         <Footer />
       </div>
     </div>
+    </CartProvider>
   );
 }
 

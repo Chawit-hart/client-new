@@ -31,7 +31,7 @@ const categories = [
 function App() {
   return (
     <Router>
-      <AdminAuthProvider> {/* ใช้งาน AdminAuthProvider ที่นี่ */}
+      <AdminAuthProvider>
         <Routes>
           <Route path="/" element={<Home><Carousel slides={imageSlides} /><Category categories={categories} /></Home>} />
           <Route path="/profile" element={<Home><Profile /></Home>} />

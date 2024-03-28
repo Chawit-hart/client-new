@@ -21,14 +21,36 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import styled from "styled-components";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import SearchIcon from "@mui/icons-material/Search";
+import IconButton from "@mui/material/IconButton";
+import Badge from "@mui/material/Badge";
+import { useCart } from "../service/CartContext";
 
 const ListItemIcon = styled.div`
   margin-right: 10px;
 `;
 
+const StyledTextField = styled(TextField)({
+  "& .MuiOutlinedInput-root": {
+    borderRadius: "20px",
+    "& fieldset": {
+      borderColor: "grey",
+    },
+    "&:hover fieldset": {
+      borderColor: "black",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "blue",
+    },
+  },
+});
+
 export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const { cartCount } = useCart();
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -120,6 +142,18 @@ export default function Navbar() {
         elevation={0}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
+          <StyledTextField
+            variant="outlined"
+            size="small"
+            placeholder="Search..."
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
           <Typography
             variant="h6"
             component="div"
@@ -137,7 +171,7 @@ export default function Navbar() {
           >
             Adshop
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 5 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Button
               variant="h6"
               onClick={goToHome}
@@ -149,6 +183,20 @@ export default function Navbar() {
             >
               Home
             </Button>
+            <IconButton
+              onClick={goToCart}
+              sx={{
+                color: "black",
+              }}
+            >
+              <Badge
+                badgeContent={cartCount}
+                color="error"
+                invisible={cartCount === 0}
+              >
+                <ShoppingCartIcon />
+              </Badge>
+            </IconButton>
             {user ? (
               <>
                 <Button
@@ -169,7 +217,7 @@ export default function Navbar() {
                       component="img"
                       src={user.photoURL}
                       alt="Profile"
-                      referrerpolicy="no-referrer"
+                      referrerPolicy="no-referrer"
                       sx={{
                         width: 30,
                         height: 30,
@@ -216,17 +264,6 @@ export default function Navbar() {
                       <ListAltIcon />
                     </ListItemIcon>
                     Orders
-                  </MenuItem>
-                  <MenuItem
-                    sx={{
-                      fontSize: "16px",
-                    }}
-                    onClick={goToCart}
-                  >
-                    <ListItemIcon>
-                      <ShoppingCartIcon />
-                    </ListItemIcon>
-                    Cart
                   </MenuItem>
                   <MenuItem
                     sx={{
