@@ -49,12 +49,11 @@ export default function Profile() {
       setUser(currentUser);
       if (currentUser) {
         const fetchProfileEndpoint = `http://localhost:3001/usersinfo/address?email=${currentUser.email}`;
-
         axios
           .get(fetchProfileEndpoint)
           .then((response) => {
-            const profileInfos = response.data; // รับข้อมูลทั้งหมดกลับมาในรูปแบบของอาร์เรย์ของอ็อบเจ็ค
-            setProfileData(profileInfos); // กำหนดข้อมูลโปรไฟล์โดยตรง
+            const profileInfos = response.data;
+            setProfileData(profileInfos);
             console.log("response.data---->", response.data);
           })
           .catch((error) => {
@@ -141,13 +140,6 @@ export default function Profile() {
     }
   };
 
-  const fetchAddresses = async () => {
-    const response = await axios.get(
-      `http://localhost:3001/usersinfo/address?email=${user.email}`
-    );
-    setProfileData(response.data);
-  };
-
   const handleSelectForManagement = (id) => {
     setSelectedAddressIdForManagement(
       selectedAddressIdForManagement === id ? null : id
@@ -168,6 +160,24 @@ export default function Profile() {
     setEditingAddressId(profile._id);
   };
 
+  const fetchAddresses = async () => {
+    if (user && user.email) {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/usersinfo/address?email=${user.email}`
+        );
+        setProfileData(response.data);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+        if (error.response && error.response.status === 404) {
+          setProfileData([]);
+        }
+      }
+    }
+  };
+
+
+
   const toggleEditAddress = (id) => {
     console.log("🚀 ~ file: Profile.js:166 ~ toggleEditAddress ~ id:", id);
     console.log("editAddressId---->", editingAddressId);
@@ -183,20 +193,19 @@ export default function Profile() {
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
+    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
     if (confirmDelete) {
-      axios
-        .delete(`http://localhost:3001/usersinfo/${id}`)
+      axios.delete(`http://localhost:3001/usersinfo/${id}`)
         .then((response) => {
           console.log(response.data.message);
+          setProfileData(currentData => currentData.filter(profile => profile._id !== id));
         })
         .catch((error) => {
           console.error("Error deleting user:", error.response.data.error);
         });
     }
   };
+
 
   const handleOpenAddressModal = () => {
     setIsAddressModalOpen(true);
@@ -205,6 +214,7 @@ export default function Profile() {
   const handleCloseAddressModal = () => {
     setIsAddressModalOpen(false);
   };
+
 
   if (!user) {
     return <Typography>กรุณาล็อกอินเพื่อเข้าถึงหน้าโปรไฟล์</Typography>;
