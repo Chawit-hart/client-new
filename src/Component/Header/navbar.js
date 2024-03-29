@@ -179,6 +179,7 @@ export default function Navbar() {
                 fontFamily: "Kanit",
                 color: "black",
                 fontSize: "20px",
+                marginLeft: "170px"
               }}
             >
               Home
