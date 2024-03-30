@@ -44,6 +44,7 @@ export default function Cart() {
   const { setCartCount } = useCart();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [items, setItems] = useState([]);
+  const [profile, setProfile] = useState();
 
   useEffect(() => {
     const fetchData = async (currentUser) => {
@@ -52,6 +53,12 @@ export default function Cart() {
           `http://localhost:3001/cart/?email=${currentUser.email}`
         );
         setItems(response.data);
+
+        const response1 = await axios.get(
+          `http://localhost:3001/usersinfo/address?email=${currentUser.email}`
+        );
+        // ยังใช้ไม่ได้เด้อ
+        setProfile(response1.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -114,6 +121,25 @@ export default function Cart() {
     handleOpen();
   };
 
+  const handleSubmit = async () => {
+    console.log("profile--->", profile);
+    // ยังใช้ไม่ได้เด้อ
+    const body = {
+      items: items,
+      email: user.email,
+      name: profile.name,
+      tel: profile.tel,
+      address: profile.adress,
+      payment: paymentMethod,
+    };
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/order/upload-image",
+        body
+      );
+    } catch {}
+  };
+
   const handlePaymentChange = (event) => {
     setPaymentMethod(event.target.value);
   };
@@ -133,11 +159,7 @@ export default function Cart() {
   const getTotalPrice = () => {
     return items
       .filter((item) => item.checked)
-      .reduce(
-        (total, item) =>
-          parseInt(total) + parseInt(item.price.replace(/,/g, "")),
-        0
-      )
+      .reduce((total, item) => parseInt(total) + item.price, 0)
       .toLocaleString();
   };
 
@@ -205,10 +227,10 @@ export default function Cart() {
                         variant="body2"
                         color="textPrimary"
                       >
-                        ราคา: {item.price} บาท
+                        ราคา: {item.price.toLocaleString()} บาท
                       </Typography>
                       <Typography component="div" variant="body2">
-                        จำนวน: {item.amount}
+                        จำนวน: {item.amount.toLocaleString()}
                       </Typography>
                     </>
                   }
@@ -267,17 +289,17 @@ export default function Cart() {
                 onChange={handlePaymentChange}
               >
                 <FormControlLabel
-                  value="delivery"
+                  value="ชำระเงินปลายทาง"
                   control={<Radio />}
                   label="ชำระเงินปลายทาง"
                 />
                 <FormControlLabel
-                  value="transfer"
+                  value="โอนเงิน"
                   control={<Radio />}
                   label="โอนเงิน"
                 />
               </RadioGroup>
-              {paymentMethod === "transfer" && (
+              {paymentMethod === "โอนเงิน" && (
                 <>
                   <Button variant="contained" component="label">
                     อัปโหลดสลิป
@@ -308,7 +330,7 @@ export default function Cart() {
                 variant="contained"
                 color="primary"
                 className="btn btn-primary"
-                onClick={goToConfirmation}
+                onClick={handleSubmit}
                 style={{ marginTop: "20px" }}
               >
                 ยืนยันคำสั่งซื้อ
