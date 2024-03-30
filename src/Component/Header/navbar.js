@@ -200,7 +200,7 @@ export default function Navbar() {
             placeholder="Search..."
             value={searchQuery}
             onChange={handleSearchChange}
-            sx={{ marginLeft: "30px" }}
+            sx={{ marginLeft: "30px", }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -223,8 +223,8 @@ export default function Navbar() {
                 maxWidth: "300px",
                 marginLeft: "50px",
                 width: "100%",
-                maxHeight: "200px", // กำหนดความสูงสูงสุดของผลลัพธ์เพื่อให้เกิดการเลื่อนเมื่อมีผลลัพธ์มาก
-                overflowY: "auto", // ให้มีการเลื่อนเมื่อมีผลลัพธ์มาก
+                maxHeight: "200px",
+                overflowY: "auto",
               }}
             >
               {searchResults.map((result) => (

@@ -7,12 +7,6 @@ import {
   Button,
   Divider,
   TextField,
-} from "@mui/material";
-import axios from "axios";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import {
   Dialog,
   DialogContent,
   Radio,
@@ -21,7 +15,12 @@ import {
   FormControl,
   FormLabel,
   Box,
+  ButtonGroup,
 } from "@mui/material";
+import axios from "axios";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +38,8 @@ const ConfirmationPage = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("cashOnDelivery");
   const [productImg, setProductImg] = useState(null);
+  const [sizes, setSizes] = useState([]);
+  const [selectedSize, setSelectedSize] = useState("");
   const [profileData, setProfileData] = useState({
     name: "",
     address: "",
@@ -116,6 +117,10 @@ const ConfirmationPage = () => {
       setUploadedImageUrl(uploadedImageUrl);
     } else {
     }
+  };
+
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size);
   };
 
   const handleConfirmOrder = async () => {
@@ -197,8 +202,14 @@ const ConfirmationPage = () => {
     axios
       .get(`http://localhost:3001/posts/${state.productId}`)
       .then((response) => {
+        const productData = response.data;
         setProduct(response.data);
         updateTotalPrice(response.data.price, 1);
+        const productSizes = Array.isArray(productData.size)
+          ? productData.size
+          : [];
+        setSizes(productSizes);
+        setSelectedSize(productSizes[0] || "");
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
@@ -365,6 +376,84 @@ const ConfirmationPage = () => {
                   <Typography variant="h6" gutterBottom>
                     ราคา: {product.price.toLocaleString()} บาท
                   </Typography>
+                  <FormLabel component="legend">Size</FormLabel>
+                  <ButtonGroup
+                    row
+                    name="size"
+                    value={selectedSize}
+                    onChange={(e) => setSelectedSize(e.target.value)}
+                    sx={{
+                      ".MuiButton-root": {
+                        border: "1px solid black",
+                        "&:hover": {
+                          backgroundColor: "black",
+                          borderColor: "dark",
+                          color: "white",
+                        },
+                      },
+                    }}
+                  >
+                    {sizes.map((size) => (
+                      <FormControlLabel
+                        value={size}
+                        control={<Radio />}
+                        label={size}
+                        key={size}
+                      />
+                    ))}
+                    {["XS", "S", "M", "L", "XL"].map((size, index, array) => (
+                      <Button
+                        key={size}
+                        variant={
+                          selectedSize === size ? "contained" : "outlined"
+                        }
+                        onClick={() => handleSizeSelect(size)}
+                        sx={{
+                          typography: "body1",
+                          width: 60,
+                          height: 40,
+                          "&:not(:first-of-type)": {
+                            ml: -1,
+                          },
+                          ...(index === 0 && {
+                            borderTopLeftRadius: 8,
+                            borderBottomLeftRadius: 8,
+                          }),
+                          ...(index === array.length - 1 && {
+                            borderTopRightRadius: 8,
+                            borderBottomRightRadius: 8,
+                          }),
+                          // เส้นขอบเป็นสีดำเมื่อไม่ได้เลือก
+                          border: "1px solid rgba(0, 0, 0, 0.23)",
+                          // สีของข้อความเป็นสีดำเมื่อไม่ได้เลือก
+                          color: "black",
+                          // พื้นหลังสีขาวเมื่อไม่ได้เลือก
+                          bgcolor: "white",
+                          // เมื่อเลือกหรือวางเมาส์เหนือ (hover) ของปุ่มที่เลือกแล้ว
+                          ...(selectedSize === size && {
+                            bgcolor: "black",
+                            color: "white",
+                            "&:hover": {
+                              bgcolor: "black",
+                              color: "white",
+                              // เส้นขอบเป็นสีดำเมื่อ hover
+                              border: "1px solid black",
+                            },
+                          }),
+                          // เมื่อวางเมาส์เหนือ (hover) และปุ่มไม่ได้ถูกเลือก
+                          "&:hover": {
+                            bgcolor: (theme) => theme.palette.action.hover,
+                            // สีของข้อความเป็นสีดำเมื่อ hover
+                            color: "black",
+                            // เส้นขอบเป็นสีดำเมื่อ hover
+                            border: "1px solid black",
+                          },
+                        }}
+                      >
+                        {size}
+                      </Button>
+                    ))}
+                  </ButtonGroup>
                   <Typography variant="h6" gutterBottom>
                     จำนวนคงเหลือ:{" "}
                     {product.amount === "สินค้าหมด"
