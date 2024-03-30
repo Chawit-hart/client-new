@@ -24,6 +24,7 @@ import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
+import { useCart } from "../Component/service/CartContext";
 
 const style = {
   position: "absolute",
@@ -40,6 +41,7 @@ const style = {
 export default function Cart() {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+  const { setCartCount } = useCart();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [items, setItems] = useState([]);
 
@@ -67,6 +69,11 @@ export default function Cart() {
     try {
       await axios.delete(`http://localhost:3001/cart/${itemId}`);
       setItems((prevItems) => prevItems.filter((item) => item._id !== itemId));
+      const response = await axios.get(
+        `http://localhost:3001/cart/?email=${user.email}`
+      );
+      const orderData = response.data;
+      setCartCount(orderData.length);
       Swal.fire({
         icon: "success",
         title: "Product successfully removed from cart.",
