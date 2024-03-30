@@ -43,7 +43,7 @@ const ClothingProduct = ({ product }) => {
             {product.name}
           </Typography>
           <Typography gutterBottom variant="h6" component="div" sx={{ mt: 1 }}>
-            {product.price} บาท
+            {product.price.toLocaleString()} บาท
           </Typography>
         </CardContent>
       </CardActionArea>

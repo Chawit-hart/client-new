@@ -229,7 +229,7 @@ const ConfirmationPage = () => {
       const cartItem = {
         productid: product._id,
         productname: product.name,
-        price: totalPrice,
+        price: product.price,
         amount: Amount,
         category: product.category,
         email: user.email,
@@ -294,7 +294,7 @@ const ConfirmationPage = () => {
       number = 1;
     }
 
-    setAmount(number.toString());
+    setAmount(number);
     updateTotalPrice(product.price, number);
   };
 
