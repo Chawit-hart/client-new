@@ -55,6 +55,7 @@ export default function Navbar() {
   const { cartCount } = useCart();
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedResult, setSelectedResult] = useState(null);
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -97,6 +98,16 @@ export default function Navbar() {
     } else {
       debouncedSearch(query);
     }
+  };
+
+  const handleResultClick = (result) => {
+    setSearchQuery(result.name);
+    setSelectedResult(result);
+    setSearchResults([]);
+    navigate("/confirmation", {
+      state: { productId: result._id },
+    });
+    handleMenuClose();
   };
 
   const handleTextFieldClick = () => {
@@ -244,13 +255,7 @@ export default function Navbar() {
               {searchResults.map((result) => (
                 <MenuItem
                   key={result._id}
-                  onClick={() => {
-                    navigate("/confirmation", {
-                      state: { productId: result._id },
-                    });
-                    handleMenuClose();
-                    setSearchResults([]);
-                  }}
+                  onClick={() => handleResultClick(result)}
                   sx={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
                   <img
