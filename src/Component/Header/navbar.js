@@ -27,6 +27,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import { useCart } from "../service/CartContext";
+import debounce from "lodash/debounce";
 
 const ListItemIcon = styled.div`
   margin-right: 10px;
@@ -51,6 +52,9 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const { cartCount } = useCart();
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -65,6 +69,38 @@ export default function Navbar() {
 
     return unsubscribe;
   }, []);
+
+  const debouncedSearch = useCallback(
+    debounce(async (query) => {
+      try {
+        setLoading(true);
+        const response = await fetch(
+          `http://localhost:3001/posts/?search=${query}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const data = await response.json();
+        setSearchResults(data || []);
+      } catch (error) {
+        console.error("Error searching:", error);
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    []
+  );
+
+  const handleSearchChange = (event) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    if (query.trim() === "") {
+      setSearchResults([]);
+    } else {
+      debouncedSearch(query);
+    }
+  };
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -146,6 +182,8 @@ export default function Navbar() {
             variant="outlined"
             size="small"
             placeholder="Search..."
+            value={searchQuery}
+            onChange={handleSearchChange}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -154,6 +192,45 @@ export default function Navbar() {
               ),
             }}
           />
+          {searchResults.length > 0 && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "calc(100% + 8px)", // ตั้งค่าตำแหน่งเพื่อแสดงผลลัพธ์ใต้ช่องค้นหา
+                left: 0,
+                right: 0,
+                backgroundColor: "white",
+                borderRadius: "8px",
+                boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.1)",
+                zIndex: 999,
+                maxHeight: "200px", // กำหนดความสูงสูงสุดของผลลัพธ์เพื่อให้เกิดการเลื่อนเมื่อมีผลลัพธ์มาก
+                overflowY: "auto", // ให้มีการเลื่อนเมื่อมีผลลัพธ์มาก
+              }}
+            >
+              {searchResults.map((result) => (
+                <MenuItem
+                  key={result._id}
+                  onClick={() => {
+                    navigate(`/product/${result._id}`);
+                    handleMenuClose();
+                  }}
+                  sx={{ display: "flex", alignItems: "center", gap: "8px" }} // เพิ่มระยะห่างระหว่างรูปภาพและข้อความ
+                >
+                  <img
+                    src={`http://localhost:3001/posts/images/${result._id}`} // แสดงรูปภาพสินค้า
+                    alt={result.name} // ใส่ alt สำหรับความสำคัญ
+                    style={{
+                      width: "50px",
+                      height: "50px",
+                      borderRadius: "8px",
+                    }} // ปรับขนาดและขอบของรูปภาพ
+                  />
+                  <Typography variant="body1">{result.name}</Typography>
+                </MenuItem>
+              ))}
+            </Box>
+          )}
+
           <Typography
             variant="h6"
             component="div"
@@ -179,7 +256,7 @@ export default function Navbar() {
                 fontFamily: "Kanit",
                 color: "black",
                 fontSize: "20px",
-                marginLeft: "170px"
+                marginLeft: "170px",
               }}
             >
               Home
