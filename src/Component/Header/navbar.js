@@ -166,6 +166,25 @@ export default function Navbar() {
       });
   };
 
+  const highlightSearchTerm = (text, searchTerm) => {
+    if (!searchTerm.trim()) {
+      return text;
+    }
+    const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
+    return parts.map((part, index) => part.toLowerCase() === searchTerm.toLowerCase()
+      ? <span key={index} style={{ 
+        backgroundColor: 'rgba(63,81,181,0.2)', // สีพื้นหลังโปร่งใส
+        borderRadius: '3px', // มุมโค้งน้อยลง
+        padding: '0px 2px', // ระยะห่างภายในเล็กลง
+        fontWeight: 'bold', // หนา
+        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // เงา
+        color: '#3f51b5', // สีตัวอักษร
+      }}>
+          {part}
+        </span>
+      : part);
+  };
+  
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -184,6 +203,7 @@ export default function Navbar() {
             placeholder="Search..."
             value={searchQuery}
             onChange={handleSearchChange}
+            sx={{ marginLeft: "30px" }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -196,13 +216,16 @@ export default function Navbar() {
             <Box
               sx={{
                 position: "absolute",
-                top: "calc(100% + 8px)", // ตั้งค่าตำแหน่งเพื่อแสดงผลลัพธ์ใต้ช่องค้นหา
+                top: "calc(100% + 8px)",
                 left: 0,
                 right: 0,
                 backgroundColor: "white",
                 borderRadius: "8px",
                 boxShadow: "0px 4px 16px rgba(0, 0, 0, 0.1)",
                 zIndex: 999,
+                maxWidth: "300px",
+                marginLeft: "50px",
+                width: "100%",
                 maxHeight: "200px", // กำหนดความสูงสูงสุดของผลลัพธ์เพื่อให้เกิดการเลื่อนเมื่อมีผลลัพธ์มาก
                 overflowY: "auto", // ให้มีการเลื่อนเมื่อมีผลลัพธ์มาก
               }}
@@ -214,10 +237,10 @@ export default function Navbar() {
                     navigate(`/product/${result._id}`);
                     handleMenuClose();
                   }}
-                  sx={{ display: "flex", alignItems: "center", gap: "8px" }} // เพิ่มระยะห่างระหว่างรูปภาพและข้อความ
+                  sx={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
                   <img
-                    src={`http://localhost:3001/posts/images/${result._id}`} // แสดงรูปภาพสินค้า
+                    src={`http://localhost:3001/posts/images/${result._id}`}
                     alt={result.name} // ใส่ alt สำหรับความสำคัญ
                     style={{
                       width: "50px",
@@ -225,7 +248,9 @@ export default function Navbar() {
                       borderRadius: "8px",
                     }} // ปรับขนาดและขอบของรูปภาพ
                   />
-                  <Typography variant="body1">{result.name}</Typography>
+                  <Typography variant="body1">
+                    {highlightSearchTerm(result.name, searchQuery)}
+                  </Typography>
                 </MenuItem>
               ))}
             </Box>
