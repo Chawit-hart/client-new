@@ -26,7 +26,7 @@ const ConfirmationPage = () => {
   const [Amount, setAmount] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   const [productImg, setProductImg] = useState(null);
-  const [sizes, setSizes] = useState([]);
+  // const [sizes, setSizes] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [profileData, setProfileData] = useState({
     name: "",
@@ -95,8 +95,12 @@ const ConfirmationPage = () => {
     return fetchImageAndSendToAPI;
   }, []);
 
-
   const handleSizeSelect = (size) => {
+    console.log("selectedSize--->", selectedSize);
+    console.log(
+      "🚀 ~ file: ConfirmationPage.js:100 ~ handleSizeSelect ~ size:",
+      size
+    );
     setSelectedSize(size);
   };
 
@@ -107,11 +111,11 @@ const ConfirmationPage = () => {
         const productData = response.data;
         setProduct(response.data);
         updateTotalPrice(response.data.price, 1);
-        const productSizes = Array.isArray(productData.size)
-          ? productData.size
-          : [];
-        setSizes(productSizes);
-        setSelectedSize(productSizes[0] || "");
+        // const productSizes = Array.isArray(productData.size)
+        //   ? productData.size
+        //   : [];
+        // setSizes(productSizes);
+        // setSelectedSize(productSizes[0] || "");
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
@@ -130,13 +134,18 @@ const ConfirmationPage = () => {
     try {
       const cartItem = {
         productid: product._id,
+        email: user.email,
         productname: product.name,
+        detail: product.detail,
+        size: selectedSize,
+        category: product.category,
         price: product.price,
         amount: Amount,
-        category: product.category,
-        email: user.email,
-        detail: product.detail,
       };
+      console.log(
+        "🚀 ~ file: ConfirmationPage.js:142 ~ handleAddToCart ~ cartItem:",
+        cartItem
+      );
 
       await axios.post("http://localhost:3001/cart/upload-image", cartItem);
 
@@ -216,8 +225,8 @@ const ConfirmationPage = () => {
           elevation={3}
           sx={{
             borderRadius: "20px",
-            maxWidth: '1400px',
-            width: '100%',
+            maxWidth: "1400px",
+            width: "100%",
           }}
         >
           <Grid
@@ -239,11 +248,11 @@ const ConfirmationPage = () => {
                   borderRadius: "20px",
                   width: "auto",
                   height: "250px",
-                  marginLeft: '30px',
+                  marginLeft: "30px",
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={8} >
+            <Grid item xs={12} sm={8}>
               {product && (
                 <>
                   <Typography variant="h3" gutterBottom>
@@ -272,14 +281,14 @@ const ConfirmationPage = () => {
                       },
                     }}
                   >
-                    {sizes.map((size) => (
+                    {/* {sizes.map((size) => (
                       <FormControlLabel
                         value={size}
                         control={<Radio />}
                         label={size}
                         key={size}
                       />
-                    ))}
+                    ))} */}
                     {["XS", "S", "M", "L", "XL"].map((size, index, array) => (
                       <Button
                         key={size}
@@ -339,8 +348,8 @@ const ConfirmationPage = () => {
                     sx={{
                       display: "block",
                       marginTop: "15px",
-                      color: theme => theme.palette.grey[600],
-                      fontSize: '0.95rem',
+                      color: (theme) => theme.palette.grey[600],
+                      fontSize: "0.95rem",
                     }}
                   >
                     จำนวนคงเหลือ:{" "}
@@ -356,7 +365,7 @@ const ConfirmationPage = () => {
                     onChange={handleAmountChange}
                     margin="normal"
                     sx={{
-                      width: '150px'
+                      width: "150px",
                     }}
                   />
                   <Typography variant="h6" gutterBottom>
