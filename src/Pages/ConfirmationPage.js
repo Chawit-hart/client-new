@@ -7,23 +7,15 @@ import {
   Button,
   Divider,
   TextField,
-  Dialog,
-  DialogContent,
   Radio,
-  RadioGroup,
   FormControlLabel,
-  FormControl,
   FormLabel,
-  Box,
   ButtonGroup,
 } from "@mui/material";
 import axios from "axios";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
 import { useCart } from "../Component/service/CartContext";
@@ -33,10 +25,6 @@ const ConfirmationPage = () => {
   const [product, setProduct] = useState(null);
   const [Amount, setAmount] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [file, setFile] = useState(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("cashOnDelivery");
   const [productImg, setProductImg] = useState(null);
   const [sizes, setSizes] = useState([]);
   const [selectedSize, setSelectedSize] = useState("");
@@ -50,7 +38,6 @@ const ConfirmationPage = () => {
   const { setCartCount } = useCart();
 
   const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (product) {
@@ -108,94 +95,9 @@ const ConfirmationPage = () => {
     return fetchImageAndSendToAPI;
   }, []);
 
-  const handleFileSelect = (event) => {
-    const files = event.target.files;
-    if (files.length > 0) {
-      const uploadedFile = files[0];
-      setFile(uploadedFile);
-      const uploadedImageUrl = URL.createObjectURL(uploadedFile);
-      setUploadedImageUrl(uploadedImageUrl);
-    } else {
-    }
-  };
 
   const handleSizeSelect = (size) => {
     setSelectedSize(size);
-  };
-
-  const handleConfirmOrder = async () => {
-    const formData = new FormData();
-    formData.append("productid", product._id);
-    formData.append("productname", product.name);
-    formData.append("category", product.category);
-    formData.append("detail", product.detail);
-    formData.append("price", product.price);
-    formData.append("amount", Amount);
-    formData.append("email", profileData.email);
-    formData.append("name", profileData.name);
-    formData.append("tel", profileData.tel);
-    formData.append("address", profileData.address);
-    formData.append("image", productImg);
-    formData.append("slip", file);
-    let paymentMode = paymentMethod;
-    if (paymentMode === "bankTransfer") {
-      paymentMode = "โอนเงิน";
-    } else if (paymentMode === "cashOnDelivery") {
-      paymentMode = "ชำระเงินปลายทาง";
-    }
-    formData.append("payment", paymentMode);
-    console.log("🚀 ~ handleConfirmOrder ~ paymentMethod:", paymentMode);
-
-    if (paymentMethod === "bankTransfer" && !file) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please upload the payment slip",
-        position: "top-end",
-        toast: true,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        timer: 1500,
-        didOpen: (toast) => {
-          toast.style.marginTop = "70px";
-        },
-      });
-      return;
-    }
-
-    try {
-      await axios.post("http://localhost:3001/order/upload-image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      Swal.fire({
-        icon: "success",
-        title: "Your order has been placed successfully!",
-        position: "top-end",
-        toast: true,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        timer: 1500,
-        didOpen: (toast) => {
-          toast.style.marginTop = "70px";
-        },
-      });
-      navigate("/");
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed to place your order! Please try again later.",
-        position: "top-end",
-        toast: true,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        timer: 1500,
-        didOpen: (toast) => {
-          toast.style.marginTop = "70px";
-        },
-      });
-    }
   };
 
   useEffect(() => {
@@ -298,33 +200,8 @@ const ConfirmationPage = () => {
     updateTotalPrice(product.price, number);
   };
 
-  const handleClickOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleClose = () => {
-    setOpenDialog(false);
-  };
-
-  const handlePaymentMethodChange = (event) => {
-    setPaymentMethod(event.target.value);
-  };
-
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Typography
-          variant="h4"
-          align="center"
-          gutterBottom
-          sx={{
-            marginTop: "-150px",
-          }}
-        >
-          ยืนยันคำสั่งซื้อ
-        </Typography>
-        <Divider />
-      </Grid>
       <Grid
         item
         xs={12}
@@ -339,6 +216,8 @@ const ConfirmationPage = () => {
           elevation={3}
           sx={{
             borderRadius: "20px",
+            maxWidth: '1400px',
+            width: '100%',
           }}
         >
           <Grid
@@ -348,8 +227,7 @@ const ConfirmationPage = () => {
             alignItems="center"
             sx={{
               padding: 3,
-              height: uploadedImageUrl ? "900px" : "700px",
-              width: 1000,
+              height: "700px",
             }}
           >
             <Grid item xs={12} sm={4}>
@@ -361,10 +239,11 @@ const ConfirmationPage = () => {
                   borderRadius: "20px",
                   width: "auto",
                   height: "250px",
+                  marginLeft: '30px',
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={8}>
+            <Grid item xs={12} sm={8} >
               {product && (
                 <>
                   <Typography variant="h3" gutterBottom>
@@ -454,7 +333,16 @@ const ConfirmationPage = () => {
                       </Button>
                     ))}
                   </ButtonGroup>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography
+                    color="textSecondary"
+                    gutterBottom
+                    sx={{
+                      display: "block",
+                      marginTop: "15px",
+                      color: theme => theme.palette.grey[600],
+                      fontSize: '0.95rem',
+                    }}
+                  >
                     จำนวนคงเหลือ:{" "}
                     {product.amount === "สินค้าหมด"
                       ? product.amount
@@ -467,113 +355,16 @@ const ConfirmationPage = () => {
                     value={Amount}
                     onChange={handleAmountChange}
                     margin="normal"
-                    fullWidth
+                    sx={{
+                      width: '150px'
+                    }}
                   />
                   <Typography variant="h6" gutterBottom>
                     ราคารวม: {totalPrice.toLocaleString()} บาท
                   </Typography>
-                  <Box>
-                    <Typography variant="body1" gutterBottom>
-                      ธนาคาร: กสิกรไทย
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      เลขที่บัญชี: 036-3764-835
-                    </Typography>
-                    <Typography variant="body1" gutterBottom>
-                      ชื่อ: นายชวิศ ธนชูเชาวน์
-                    </Typography>
-                  </Box>
-                </>
-              )}
-              <FormControl
-                component="fieldset"
-                sx={{ width: "100%", marginTop: "5px" }}
-              >
-                <FormLabel component="legend">วิธีการชำระเงิน</FormLabel>
-                <RadioGroup
-                  row
-                  aria-label="paymentMethod"
-                  name="paymentMethod"
-                  value={paymentMethod}
-                  onChange={handlePaymentMethodChange}
-                >
-                  <FormControlLabel
-                    value="cashOnDelivery"
-                    control={<Radio />}
-                    label="ชำระเงินปลายทาง"
-                  />
-                  <FormControlLabel
-                    value="bankTransfer"
-                    control={<Radio />}
-                    label="โอนเงิน"
-                  />
-                </RadioGroup>
-              </FormControl>
-              {paymentMethod === "bankTransfer" && (
-                <>
-                  <Grid item xs={12}>
-                    <label htmlFor="upload-receipt">
-                      <input
-                        type="file"
-                        accept="image/jpeg, image/png, image/gif, image/jpg"
-                        style={{ display: "none" }}
-                        id="upload-receipt"
-                        onChange={handleFileSelect}
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        component="span"
-                        startIcon={<CloudUploadIcon />}
-                      >
-                        อัปโหลดสลิป
-                      </Button>
-                    </label>
-                  </Grid>
-                  {uploadedImageUrl && (
-                    <Grid
-                      item
-                      xs={12}
-                      sx={{ display: "flex", justifyContent: "center", mt: 2 }}
-                    >
-                      <Box
-                        sx={{
-                          maxWidth: 200,
-                          maxHeight: 300,
-                          overflow: "hidden",
-                          borderRadius: "10px",
-                          boxShadow: 3,
-                          cursor: "pointer",
-                          "&:hover": {
-                            boxShadow: 6,
-                          },
-                        }}
-                        onClick={handleClickOpen}
-                      >
-                        <img
-                          src={uploadedImageUrl}
-                          alt="Uploaded"
-                          style={{
-                            width: "100%",
-                            height: "auto",
-                          }}
-                        />
-                      </Box>
-                    </Grid>
-                  )}
                 </>
               )}
             </Grid>
-
-            <Dialog open={openDialog} onClose={handleClose} maxWidth="md">
-              <DialogContent>
-                <img
-                  src={uploadedImageUrl}
-                  alt="Uploaded"
-                  style={{ width: "100%", height: "auto" }}
-                />
-              </DialogContent>
-            </Dialog>
           </Grid>
         </Paper>
       </Grid>
@@ -588,16 +379,6 @@ const ConfirmationPage = () => {
             disabled={!product || product.amount === "สินค้าหมด"}
           >
             เพิ่มลงตะกร้า
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleConfirmOrder}
-            startIcon={<CheckCircleIcon />}
-            style={{ marginLeft: "10px" }}
-            disabled={!product || product.amount === "สินค้าหมด"}
-          >
-            ยืนยันคำสั่งซื้อ
           </Button>
         </Grid>
       </Grid>
