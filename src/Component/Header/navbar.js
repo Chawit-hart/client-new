@@ -99,6 +99,12 @@ export default function Navbar() {
     }
   };
 
+  const handleTextFieldClick = () => {
+    if (searchQuery.trim() !== "") {
+      debouncedSearch(searchQuery);
+    }
+  };
+
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -167,21 +173,28 @@ export default function Navbar() {
     if (!searchTerm.trim()) {
       return text;
     }
-    const parts = text.split(new RegExp(`(${searchTerm})`, 'gi'));
-    return parts.map((part, index) => part.toLowerCase() === searchTerm.toLowerCase()
-      ? <span key={index} style={{ 
-        backgroundColor: 'rgba(63,81,181,0.2)', // สีพื้นหลังโปร่งใส
-        borderRadius: '3px', // มุมโค้งน้อยลง
-        padding: '0px 2px', // ระยะห่างภายในเล็กลง
-        fontWeight: 'bold', // หนา
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // เงา
-        color: '#3f51b5', // สีตัวอักษร
-      }}>
+    const parts = text.split(new RegExp(`(${searchTerm})`, "gi"));
+    return parts.map((part, index) =>
+      part.toLowerCase() === searchTerm.toLowerCase() ? (
+        <span
+          key={index}
+          style={{
+            backgroundColor: "rgba(63,81,181,0.2)", 
+            borderRadius: "3px",
+            padding: "0px 2px", 
+            fontWeight: "bold", 
+            boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+            color: "#3f51b5", 
+          }}
+        >
           {part}
         </span>
-      : part);
+      ) : (
+        part
+      )
+    );
   };
-  
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar
@@ -200,7 +213,8 @@ export default function Navbar() {
             placeholder="Search..."
             value={searchQuery}
             onChange={handleSearchChange}
-            sx={{ marginLeft: "30px", }}
+            onClick={handleTextFieldClick}
+            sx={{ marginLeft: "30px" }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -231,8 +245,11 @@ export default function Navbar() {
                 <MenuItem
                   key={result._id}
                   onClick={() => {
-                    navigate(`/product/${result._id}`);
+                    navigate("/confirmation", {
+                      state: { productId: result._id },
+                    });
                     handleMenuClose();
+                    setSearchResults([]);
                   }}
                   sx={{ display: "flex", alignItems: "center", gap: "8px" }}
                 >
