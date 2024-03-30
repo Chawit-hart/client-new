@@ -27,6 +27,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
+import { useCart } from "../Component/service/CartContext";
+
 const ConfirmationPage = () => {
   const { state } = useLocation();
   const [product, setProduct] = useState(null);
@@ -43,6 +45,8 @@ const ConfirmationPage = () => {
     tel: "",
     email: "",
   });
+
+  const { setCartCount } = useCart();
 
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
@@ -198,11 +202,9 @@ const ConfirmationPage = () => {
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
-  
 
   const updateTotalPrice = (price, quantity) => {
-    const numericPrice = parseFloat(price.replace(/,/g, ""));
-    const newTotalPrice = numericPrice * Number(quantity);
+    const newTotalPrice = price * quantity;
     setTotalPrice(newTotalPrice);
   };
 
@@ -224,6 +226,12 @@ const ConfirmationPage = () => {
       };
 
       await axios.post("http://localhost:3001/cart/upload-image", cartItem);
+
+      const response = await axios.get(
+        `http://localhost:3001/cart/?email=${user.email}`
+      );
+      const orderData = response.data;
+      setCartCount(orderData.length);
 
       Swal.fire({
         icon: "success",
@@ -254,9 +262,9 @@ const ConfirmationPage = () => {
   };
 
   const handleAmountChange = (event) => {
-    const value = event.target.value.replace(/,/g, "");
+    const value = event.target.value;
     let number = parseInt(value, 10);
-    const max = product.amount.replace(/,/g, "");
+    const max = product.amount;
     console.log("🚀 ~ handleAmountChange ~ max:", max);
 
     if (!value) {
@@ -278,7 +286,6 @@ const ConfirmationPage = () => {
     setAmount(number.toString());
     updateTotalPrice(product.price, number);
   };
-
 
   const handleClickOpen = () => {
     setOpenDialog(true);
@@ -356,10 +363,10 @@ const ConfirmationPage = () => {
                     รายละเอียด: {product.detail}
                   </Typography>
                   <Typography variant="h6" gutterBottom>
-                    ราคา: {product.price} บาท
+                    ราคา: {product.price.toLocaleString()} บาท
                   </Typography>
                   <Typography variant="h6" gutterBottom>
-                  จำนวนคงเหลือ:{" "}
+                    จำนวนคงเหลือ:{" "}
                     {product.amount === "สินค้าหมด"
                       ? product.amount
                       : `${product.amount} ชิ้น`}
@@ -374,7 +381,7 @@ const ConfirmationPage = () => {
                     fullWidth
                   />
                   <Typography variant="h6" gutterBottom>
-                  ราคารวม: {totalPrice.toLocaleString()} บาท
+                    ราคารวม: {totalPrice.toLocaleString()} บาท
                   </Typography>
                   <Box>
                     <Typography variant="body1" gutterBottom>
