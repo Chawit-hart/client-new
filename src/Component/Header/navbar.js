@@ -28,6 +28,7 @@ import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import { useCart } from "../service/CartContext";
 import debounce from "lodash/debounce";
+import axios from "axios";
 
 const ListItemIcon = styled.div`
   margin-right: 10px;
@@ -54,7 +55,6 @@ export default function Navbar() {
   const { cartCount } = useCart();
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -73,7 +73,6 @@ export default function Navbar() {
   const debouncedSearch = useCallback(
     debounce(async (query) => {
       try {
-        setLoading(true);
         const response = await fetch(
           `http://localhost:3001/posts/?search=${query}`
         );
@@ -85,8 +84,6 @@ export default function Navbar() {
       } catch (error) {
         console.error("Error searching:", error);
         setSearchResults([]);
-      } finally {
-        setLoading(false);
       }
     }, 500),
     []
