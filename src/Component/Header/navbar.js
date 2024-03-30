@@ -237,8 +237,8 @@ export default function Navbar() {
                 maxWidth: "300px",
                 marginLeft: "50px",
                 width: "100%",
-                maxHeight: "200px", 
-                overflowY: "auto", 
+                maxHeight: "200px",
+                overflowY: "auto",
               }}
             >
               {searchResults.map((result) => (
