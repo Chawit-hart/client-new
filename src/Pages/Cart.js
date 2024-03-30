@@ -256,7 +256,7 @@ export default function Cart() {
               className="btn btn-primary"
               onClick={goToConfirmation}
             >
-              ชำระเงิน
+              ยืนยันคำสั่งซื้อ
             </Button>
           </Box>
           <Modal
