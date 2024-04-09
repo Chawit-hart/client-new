@@ -25,6 +25,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
 import { useCart } from "../Component/service/CartContext";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const style = {
   position: "absolute",
@@ -44,7 +45,11 @@ export default function Cart() {
   const { setCartCount } = useCart();
   const [paymentMethod, setPaymentMethod] = useState("");
   const [items, setItems] = useState([]);
-  const [profile, setProfile] = useState();
+  const [addresses, setAddresses] = useState([]);
+  const [openAddress, setOpenAddress] = useState(false);
+  const [openPayment, setOpenPayment] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [slipImage, setSlipImage] = useState("");
 
   useEffect(() => {
     const fetchData = async (currentUser) => {
@@ -53,12 +58,6 @@ export default function Cart() {
           `http://localhost:3001/cart/?email=${currentUser.email}`
         );
         setItems(response.data);
-
-        const response1 = await axios.get(
-          `http://localhost:3001/usersinfo/address?email=${currentUser.email}`
-        );
-        // ยังใช้ไม่ได้เด้อ
-        setProfile(response1.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -71,6 +70,23 @@ export default function Cart() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/usersinfo/address?email=${user.email}`
+        );
+        setAddresses(response.data);
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      }
+    };
+
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user]);
 
   const handleRemoveItem = async (itemId) => {
     try {
@@ -109,27 +125,56 @@ export default function Cart() {
     }
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseAddress = () => {
+    setOpenAddress(false);
+  };
+
+  const handleClosePayment = () => {
+    setOpenPayment(false);
     setPaymentMethod("");
     setSlipImage("");
   };
-  const [slipImage, setSlipImage] = useState("");
 
-  const goToConfirmation = () => {
-    handleOpen();
+  const handleGobackToAddress = () => {
+    setOpenPayment(false);
+    setOpenAddress(true);
+  };
+
+  const handleSelectAddress = (selectedAddress) => {
+    goToPayment(selectedAddress);
+    console.log("select", selectedAddress);
+  };
+
+  const goToPayment = (selectedAddress) => {
+    if (selectedAddress) {
+      setOpenAddress(false);
+      setOpenPayment(true);
+      setPaymentMethod("");
+      setSelectedAddress(selectedAddress);
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Please select an address.",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 2000,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    }
   };
 
   const handleSubmit = async () => {
-    console.log("profile--->", profile);
-    // ยังใช้ไม่ได้เด้อ
+    console.log("profile--->", addresses);
     const body = {
-      items: items,
+      items: items.filter((item) => item.checked), // เลือกเฉพาะสินค้าที่ถูกเลือกเพื่อสั่งซื้อ
       email: user.email,
-      name: profile.name,
-      tel: profile.tel,
-      address: profile.adress,
+      name: selectedAddress.name,
+      tel: selectedAddress.tel,
+      address: selectedAddress.address,
       payment: paymentMethod,
     };
     try {
@@ -137,8 +182,43 @@ export default function Cart() {
         "http://localhost:3001/order/upload-image",
         body
       );
-    } catch {}
+      // หากสั่งซื้อสำเร็จ ก็ลบเฉพาะสินค้าที่สั่งซื้อออกจากตะกร้า
+      const filteredItems = items.filter((item) => !item.checked);
+      setItems(filteredItems);
+      setCartCount(filteredItems.length);
+      setOpenPayment(false);
+      Swal.fire({
+        icon: "success",
+        title: "การสั่งซื้อสำเร็จ",
+        text: "ขอบคุณที่ทำการสั่งซื้อสินค้า",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 3000,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    } catch {
+      // แสดงข้อความจาก Swal2 เมื่อเกิดข้อผิดพลาดในการ Submit
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "มีปัญหาในการสั่งซื้อสินค้า กรุณาลองใหม่ภายหลัง",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 3000,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+      console.log("🚀 ~ error");
+    }
   };
+  
 
   const handlePaymentChange = (event) => {
     setPaymentMethod(event.target.value);
@@ -161,6 +241,12 @@ export default function Cart() {
       .filter((item) => item.checked)
       .reduce((total, item) => parseInt(total) + item.price, 0)
       .toLocaleString();
+  };
+
+  const goToSelectAddress = () => {
+    setOpenAddress(true);
+    setOpenPayment(false);
+    setPaymentMethod("");
   };
 
   const handleSlipUpload = (event) => {
@@ -254,21 +340,26 @@ export default function Cart() {
               variant="contained"
               color="primary"
               className="btn btn-primary"
-              onClick={goToConfirmation}
+              onClick={goToSelectAddress}
+              disabled={items.filter((item) => item.checked).length === 0}
+              sx={{
+                opacity:
+                  items.filter((item) => item.checked).length === 0 ? 0.5 : 1,
+              }}
             >
-              ยืนยันคำสั่งซื้อ
+              ขั้นตอนต่อไป
             </Button>
           </Box>
           <Modal
-            open={open}
-            onClose={handleClose}
+            open={openAddress}
+            onClose={handleCloseAddress}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
             <Box sx={style}>
               <IconButton
                 aria-label="close"
-                onClick={handleClose}
+                onClick={handleCloseAddress}
                 sx={{
                   position: "absolute",
                   right: 8,
@@ -278,7 +369,85 @@ export default function Cart() {
               >
                 <CloseIcon />
               </IconButton>
-              <Typography id="modal-modal-title" variant="h6" component="h2">
+              <>
+                <Typography id="modal-modal-title" variant="h6" component="h2">
+                  เลือกที่อยู่
+                </Typography>
+                <List>
+                  {addresses.map((address) => (
+                    <ListItem
+                      key={address.id}
+                      button
+                      onClick={() => handleSelectAddress(address)}
+                      sx={{ flexDirection: "column", textAlign: "left" }}
+                    >
+                      <ListItemText
+                        primary={address.name}
+                        secondary={
+                          <>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="textPrimary"
+                              sx={{ display: "block" }}
+                            >
+                              {address.address}
+                            </Typography>
+                            <Typography
+                              component="span"
+                              variant="body2"
+                              color="textSecondary"
+                              sx={{ display: "block" }}
+                            >
+                              {address.tel}
+                            </Typography>
+                          </>
+                        }
+                        sx={{ whiteSpace: "normal", textAlign: "left" }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </>
+            </Box>
+          </Modal>
+          <Modal
+            open={openPayment && !openAddress}
+            onClose={handleClosePayment}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              <IconButton
+                aria-label="close"
+                onClick={handleGobackToAddress}
+                sx={{
+                  position: "absolute",
+                  left: 8,
+                  top: 8,
+                  color: (theme) => theme.palette.grey[500],
+                }}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+              <IconButton
+                aria-label="close"
+                onClick={handleClosePayment}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: (theme) => theme.palette.grey[500],
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography
+                id="modal-modal-title"
+                variant="h6"
+                component="h2"
+                sx={{ marginTop: "20px" }}
+              >
                 เลือกวิธีการชำระเงิน
               </Typography>
               <Typography>ราคารวมทั้งหมด : {totalPrice} บาท</Typography>
