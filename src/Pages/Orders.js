@@ -10,10 +10,13 @@ import {
   TableRow,
   Paper,
   Typography,
+  IconButton,
 } from "@mui/material";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 const Container = styled.div`
   margin: 20px;
@@ -27,6 +30,7 @@ const Image = styled.img`
 const Order = () => {
   const [orders, setOrders] = useState([]);
   const [user, setUser] = useState();
+  const [open, setOpen] = useState({});
 
   useEffect(() => {
     const fetchOrders = async (email) => {
@@ -52,6 +56,13 @@ const Order = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const handleToggle = (id) => {
+    setOpen((prevOpen) => ({
+      ...prevOpen,
+      [id]: !prevOpen[id],
+    }));
+  };
 
   const formatTimeToBangkok = (dateString) => {
     const date = new Date(dateString);
@@ -142,6 +153,15 @@ const Order = () => {
                   </a>
                 </TableCell>
                 <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                <TableCell>
+                    <IconButton
+                      aria-label="expand row"
+                      size="small"
+                      onClick={() => handleToggle(order._id)}
+                    >
+                      {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                  </TableCell>
               </TableRow>
             ))}
           </TableBody>
