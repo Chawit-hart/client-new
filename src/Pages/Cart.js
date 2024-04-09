@@ -218,7 +218,6 @@ export default function Cart() {
       console.log("🚀 ~ error");
     }
   };
-  
 
   const handlePaymentChange = (event) => {
     setPaymentMethod(event.target.value);
@@ -442,14 +441,23 @@ export default function Cart() {
               >
                 <CloseIcon />
               </IconButton>
-              <Typography
-                id="modal-modal-title"
-                variant="h6"
-                component="h2"
-                sx={{ marginTop: "20px" }}
-              >
-                เลือกวิธีการชำระเงิน
-              </Typography>
+              <Typography sx={{ marginTop: '20px'}}>เลือกวิธีการชำระเงิน</Typography>
+              <ListItemText
+                secondary={
+                  <>
+                    <Typography
+                      component="div"
+                      variant="body2"
+                      color="textPrimary"
+                    >
+                      <div>ชื่อ: {selectedAddress.name}</div>
+                      <div>ที่อยู่: {selectedAddress.address}</div>
+                      <div>เบอร์โทร: {selectedAddress.tel}</div>
+                    </Typography>
+                  </>
+                }
+                sx={{ ml: 2 }}
+              />
               <Typography>ราคารวมทั้งหมด : {totalPrice} บาท</Typography>
               <RadioGroup
                 aria-label="payment-method"
