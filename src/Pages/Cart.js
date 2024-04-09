@@ -168,9 +168,8 @@ export default function Cart() {
   };
 
   const handleSubmit = async () => {
-    console.log("profile--->", addresses);
     const body = {
-      items: items.filter((item) => item.checked), // เลือกเฉพาะสินค้าที่ถูกเลือกเพื่อสั่งซื้อ
+      items: items.filter((item) => item.checked),
       email: user.email,
       name: selectedAddress.name,
       tel: selectedAddress.tel,
@@ -182,6 +181,14 @@ export default function Cart() {
         "http://localhost:3001/order/upload-image",
         body
       );
+
+      if (response.status === 200) {
+        // วนลูปในรายการ items เพื่อส่ง items._id เป็นพารามิเตอร์ในการลบ
+        for (const item of body.items) {
+          await axios.delete(`http://localhost:3001/cart/${item._id}`);
+        }
+      }
+
       // หากสั่งซื้อสำเร็จ ก็ลบเฉพาะสินค้าที่สั่งซื้อออกจากตะกร้า
       const filteredItems = items.filter((item) => !item.checked);
       setItems(filteredItems);
@@ -218,7 +225,6 @@ export default function Cart() {
       console.log("🚀 ~ error");
     }
   };
-  
 
   const handlePaymentChange = (event) => {
     setPaymentMethod(event.target.value);
