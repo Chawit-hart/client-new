@@ -451,6 +451,7 @@ export default function Cart() {
               <Typography sx={{ marginTop: '20px'}}>เลือกวิธีการชำระเงิน</Typography>
               <ListItemText
                 secondary={
+                  selectedAddress && (
                   <>
                     <Typography
                       component="div"
@@ -462,6 +463,7 @@ export default function Cart() {
                       <div>เบอร์โทร: {selectedAddress.tel}</div>
                     </Typography>
                   </>
+                  )
                 }
                 sx={{ ml: 2 }}
               />
