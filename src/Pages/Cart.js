@@ -32,7 +32,7 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 600,
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
@@ -50,6 +50,9 @@ export default function Cart() {
   const [openPayment, setOpenPayment] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [slipImage, setSlipImage] = useState("");
+  const [slipFileName, setSlipFileName] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async (currentUser) => {
@@ -133,6 +136,8 @@ export default function Cart() {
     setOpenPayment(false);
     setPaymentMethod("");
     setSlipImage("");
+    setSlipFileName("");
+    setPreviewImage(null);
   };
 
   const handleGobackToAddress = () => {
@@ -222,7 +227,7 @@ export default function Cart() {
           toast.style.marginTop = "70px";
         },
       });
-      console.log("🚀 ~ error");
+      // // // console.log("🚀 ~ error");
     }
   };
 
@@ -260,13 +265,22 @@ export default function Cart() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSlipImage(reader.result);
+        setUploadedImage(reader.result);
+        setSlipFileName(file.name);
       };
       reader.readAsDataURL(file);
     }
   };
 
   const totalPrice = getTotalPrice();
+
+  useEffect(() => {
+    // ตรวจสอบว่า openPayment เปลี่ยนแล้วหรือไม่
+    if (!openPayment) {
+      // ลบชื่อไฟล์สลิปออก
+      setSlipFileName("");
+    }
+  }, [openPayment]);
 
   return (
     <Box
@@ -422,6 +436,7 @@ export default function Cart() {
             onClose={handleClosePayment}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
+            style={{ overflowY: slipImage ? "scroll" : "auto" }}
           >
             <Box sx={style}>
               <IconButton
@@ -448,21 +463,23 @@ export default function Cart() {
               >
                 <CloseIcon />
               </IconButton>
-              <Typography sx={{ marginTop: '20px'}}>เลือกวิธีการชำระเงิน</Typography>
+              <Typography sx={{ marginTop: "20px" }}>
+                เลือกวิธีการชำระเงิน
+              </Typography>
               <ListItemText
                 secondary={
                   selectedAddress && (
-                  <>
-                    <Typography
-                      component="div"
-                      variant="body2"
-                      color="textPrimary"
-                    >
-                      <div>ชื่อ: {selectedAddress.name}</div>
-                      <div>ที่อยู่: {selectedAddress.address}</div>
-                      <div>เบอร์โทร: {selectedAddress.tel}</div>
-                    </Typography>
-                  </>
+                    <>
+                      <Typography
+                        component="div"
+                        variant="body2"
+                        color="textPrimary"
+                      >
+                        <div>ชื่อ: {selectedAddress.name}</div>
+                        <div>ที่อยู่: {selectedAddress.address}</div>
+                        <div>เบอร์โทร: {selectedAddress.tel}</div>
+                      </Typography>
+                    </>
                   )
                 }
                 sx={{ ml: 2 }}
@@ -486,41 +503,73 @@ export default function Cart() {
                 />
               </RadioGroup>
               {paymentMethod === "โอนเงิน" && (
-                <>
-                  <Button variant="contained" component="label">
-                    อัปโหลดสลิป
-                    <input
-                      type="file"
-                      accept="image/jpeg, image/png"
-                      hidden
-                      onChange={handleSlipUpload}
-                    />
-                  </Button>
+                <Box>
                   <Typography style={{ marginTop: "15px" }}>
                     ชื่อบัญชี: ชวิศ ธนชูเชาวน์
                   </Typography>
                   <Typography>ธนาคาร: กสิกรไทย</Typography>
                   <Typography>เลขที่บัญชี: 036-376-4835</Typography>
-                  {slipImage && (
-                    <Box mt={2} sx={{ textAlign: "center" }}>
-                      <img
-                        src={slipImage}
-                        alt="Uploaded Slip"
-                        style={{ maxWidth: "100%", height: "auto" }}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Button variant="contained" component="label">
+                      อัปโหลดสลิป
+                      <input
+                        type="file"
+                        accept="image/jpeg, image/png"
+                        hidden
+                        onChange={handleSlipUpload}
                       />
-                    </Box>
+                    </Button>
+                    <Typography
+                      variant="body2"
+                      style={{ color: "red", marginRight: "25px" }}
+                    >
+                      **ถ้าต้องการเปลี่ยนภาพให้อัปโหลดภาพที่ต้องการเปลี่ยนทับได้เลยครับ
+                    </Typography>
+                  </div>
+                  {slipFileName && (
+                    <div style={{ marginTop: "15px" }}>
+                      <Button
+                        component="label"
+                        onClick={() => setPreviewImage(uploadedImage)}
+                      >
+                        <Typography>{slipFileName}</Typography>
+                      </Button>
+                    </div>
                   )}
-                </>
+                  {previewImage && (
+                    <div
+                      style={{ display: "flex", justifyContent: "flex-end" }}
+                    >
+                      <IconButton onClick={() => setPreviewImage(null)}>
+                        <CloseIcon />
+                      </IconButton>
+                    </div>
+                  )}
+                  {previewImage && (
+                    <img
+                      src={previewImage}
+                      alt="Uploaded Slip"
+                      style={{ maxWidth: "100%" }}
+                    />
+                  )}
+                </Box>
               )}
-              <Button
-                variant="contained"
-                color="primary"
-                className="btn btn-primary"
-                onClick={handleSubmit}
-                style={{ marginTop: "20px" }}
-              >
-                ยืนยันคำสั่งซื้อ
-              </Button>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  className="btn btn-primary"
+                  onClick={handleSubmit}
+                >
+                  ยืนยันคำสั่งซื้อ
+                </Button>
+              </Box>
             </Box>
           </Modal>
         </Paper>
