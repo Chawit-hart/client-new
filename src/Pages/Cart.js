@@ -514,6 +514,7 @@ export default function Cart() {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      marginTop: "10px",
                     }}
                   >
                     <Button variant="contained" component="label">
