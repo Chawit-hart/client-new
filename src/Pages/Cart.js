@@ -53,6 +53,7 @@ export default function Cart() {
   const [slipFileName, setSlipFileName] = useState("");
   const [previewImage, setPreviewImage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [slip, setSlip] = useState(null);
 
   useEffect(() => {
     const fetchData = async (currentUser) => {
@@ -173,31 +174,44 @@ export default function Cart() {
   };
 
   const handleSubmit = async () => {
-    const body = {
-      items: items.filter((item) => item.checked),
-      email: user.email,
-      name: selectedAddress.name,
-      tel: selectedAddress.tel,
-      address: selectedAddress.address,
-      payment: paymentMethod,
-    };
+    const formData = new FormData();
+    let filteredItems = items.filter((item) => item.checked);
+
+    filteredItems.forEach((item, index) => {
+      formData.append(`items[${index}][productid]`, item.productid);
+      formData.append(`items[${index}][productname]`, item.productname);
+      formData.append(`items[${index}][category]`, item.category);
+      formData.append(`items[${index}][size]`, item.size);
+      formData.append(`items[${index}][price]`, item.price);
+      formData.append(`items[${index}][amount]`, item.amount);
+    });
+
+    formData.append("email", user.email);
+    formData.append("name", selectedAddress.name);
+    formData.append("tel", selectedAddress.tel);
+    formData.append("address", selectedAddress.address);
+    formData.append("payment", paymentMethod);
+
+    if (paymentMethod === "โอนเงิน") {
+      formData.append("slip", slip);
+    }
     try {
       const response = await axios.post(
         "http://localhost:3001/order/upload-image",
-        body
+        formData
       );
 
       if (response.status === 200) {
         // วนลูปในรายการ items เพื่อส่ง items._id เป็นพารามิเตอร์ในการลบ
-        for (const item of body.items) {
+        for (const item of filteredItems) {
           await axios.delete(`http://localhost:3001/cart/${item._id}`);
         }
       }
 
       // หากสั่งซื้อสำเร็จ ก็ลบเฉพาะสินค้าที่สั่งซื้อออกจากตะกร้า
-      const filteredItems = items.filter((item) => !item.checked);
-      setItems(filteredItems);
-      setCartCount(filteredItems.length);
+      const filteredItems1 = items.filter((item) => !item.checked);
+      setItems(filteredItems1);
+      setCartCount(filteredItems1.length);
       setOpenPayment(false);
       Swal.fire({
         icon: "success",
@@ -265,6 +279,7 @@ export default function Cart() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        setSlip(file);
         setUploadedImage(reader.result);
         setSlipFileName(file.name);
       };
