@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+// เพิ่ม import Fragment จาก react
+import React, { useState, useEffect, Fragment } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import {
@@ -118,7 +119,7 @@ const Order = () => {
           </TableHead>
           <TableBody>
             {orders.map((order) => (
-              <React.Fragment key={order._id}>
+              <Fragment key={order._id}>
                 <TableRow
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
@@ -161,9 +162,9 @@ const Order = () => {
                     )}
                   </TableCell>
                 </TableRow>
-                {open[order._id] && (
+                {open[order._id] && order.items.length > 1 && (
                   <TableRow>
-                    <TableCell colSpan={11} >
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
                       <Table size="small" aria-label="purchases">
                         <TableBody>
                           {order.items.slice(1).map((item, index) => (
@@ -174,6 +175,7 @@ const Order = () => {
                                   alt="product"
                                 />
                               </TableCell>
+                              <TableCell>{order.name}</TableCell>
                               <TableCell>{item.productname}</TableCell>
                               <TableCell>{item.amount}</TableCell>
                               <TableCell>{order.totalprice}</TableCell>
@@ -201,7 +203,7 @@ const Order = () => {
                     </TableCell>
                   </TableRow>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </TableBody>
         </Table>
