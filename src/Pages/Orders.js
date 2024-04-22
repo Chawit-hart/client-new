@@ -1,4 +1,3 @@
-// เพิ่ม import Fragment จาก react
 import React, { useState, useEffect, Fragment } from "react";
 import axios from "axios";
 import styled from "styled-components";
@@ -26,6 +25,29 @@ const Container = styled.div`
 const Image = styled.img`
   width: 60px;
   height: auto;
+`;
+
+const CircleBadge = styled.span`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background-color: #ffeb3b;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
+const SubTableCell = styled(TableCell)`
+  width: auto;
+  min-width: 100px; /* ปรับความกว้างตามความเหมาะสม */
+  border-top: 1px solid #ddd; /* เพิ่มเส้นขอบด้านบน */
+  border-bottom: none; /* ลบเส้นขอบด้านล่าง */
 `;
 
 const Order = () => {
@@ -59,10 +81,18 @@ const Order = () => {
   }, []);
 
   const handleToggle = (id) => {
-    setOpen((prevOpen) => ({
-      ...prevOpen,
-      [id]: !prevOpen[id],
-    }));
+    setOpen((prevOpen) => {
+      const updatedOpen = { ...prevOpen };
+      Object.keys(updatedOpen).forEach((orderId) => {
+        if (orderId !== id) {
+          updatedOpen[orderId] = false; // ปิด DropDown ที่ไม่ใช่ DropDown ที่เปิดอยู่
+        }
+      });
+      return {
+        ...updatedOpen,
+        [id]: !prevOpen[id],
+      };
+    });
   };
 
   const formatTimeToBangkok = (dateString) => {
@@ -97,7 +127,7 @@ const Order = () => {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" gutterBottom sx={{ marginTop: '80px'}}>
         Order List
       </Typography>
       <TableContainer component={Paper}>
@@ -107,12 +137,12 @@ const Order = () => {
               <TableCell>Image</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Product Name</TableCell>
+              <TableCell>Size</TableCell>
               <TableCell>Quantity</TableCell>
               <TableCell>Total Price</TableCell>
               <TableCell>Address</TableCell>
               <TableCell>Payment</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Shipping Provider</TableCell>
               <TableCell>tracking Number</TableCell>
               <TableCell>Order Time</TableCell>
             </TableRow>
@@ -131,12 +161,12 @@ const Order = () => {
                   </TableCell>
                   <TableCell>{order.name}</TableCell>
                   <TableCell>{order.items[0].productname}</TableCell>
+                  <TableCell>{order.items[0].size}</TableCell>
                   <TableCell>{order.items[0].amount}</TableCell>
                   <TableCell>{order.totalprice}</TableCell>
                   <TableCell>{order.address}</TableCell>
                   <TableCell>{order.payment}</TableCell>
                   <TableCell>{order.status}</TableCell>
-                  <TableCell>{order.provider}</TableCell>
                   <TableCell>
                     {order.parcel}
                     <a
@@ -158,6 +188,9 @@ const Order = () => {
                         onClick={() => handleToggle(order._id)}
                       >
                         {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        {order.items.length > 1 && !open[order._id] && (
+                          <CircleBadge>+{order.items.length - 1}</CircleBadge>
+                        )}
                       </IconButton>
                     )}
                   </TableCell>
@@ -177,12 +210,12 @@ const Order = () => {
                               </TableCell>
                               <TableCell>{order.name}</TableCell>
                               <TableCell>{item.productname}</TableCell>
+                              <TableCell>{item.size}</TableCell>
                               <TableCell>{item.amount}</TableCell>
                               <TableCell>{order.totalprice}</TableCell>
                               <TableCell>{order.address}</TableCell>
                               <TableCell>{order.payment}</TableCell>
                               <TableCell>{order.status}</TableCell>
-                              <TableCell>{order.provider}</TableCell>
                               <TableCell>
                                 {order.parcel}
                                 <a
