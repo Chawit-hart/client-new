@@ -137,12 +137,12 @@ const Order = () => {
               <TableCell>Image</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Product Name</TableCell>
+              <TableCell>Size</TableCell>
               <TableCell>Quantity</TableCell>
               <TableCell>Total Price</TableCell>
               <TableCell>Address</TableCell>
               <TableCell>Payment</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Shipping Provider</TableCell>
               <TableCell>tracking Number</TableCell>
               <TableCell>Order Time</TableCell>
             </TableRow>
@@ -161,12 +161,12 @@ const Order = () => {
                   </TableCell>
                   <TableCell>{order.name}</TableCell>
                   <TableCell>{order.items[0].productname}</TableCell>
+                  <TableCell>{order.items[0].size}</TableCell>
                   <TableCell>{order.items[0].amount}</TableCell>
                   <TableCell>{order.totalprice}</TableCell>
                   <TableCell>{order.address}</TableCell>
                   <TableCell>{order.payment}</TableCell>
                   <TableCell>{order.status}</TableCell>
-                  <TableCell>{order.provider}</TableCell>
                   <TableCell>
                     {order.parcel}
                     <a
@@ -210,12 +210,12 @@ const Order = () => {
                               </TableCell>
                               <TableCell>{order.name}</TableCell>
                               <TableCell>{item.productname}</TableCell>
+                              <TableCell>{item.size}</TableCell>
                               <TableCell>{item.amount}</TableCell>
                               <TableCell>{order.totalprice}</TableCell>
                               <TableCell>{order.address}</TableCell>
                               <TableCell>{order.payment}</TableCell>
                               <TableCell>{order.status}</TableCell>
-                              <TableCell>{order.provider}</TableCell>
                               <TableCell>
                                 {order.parcel}
                                 <a
