@@ -161,46 +161,50 @@ const Order = () => {
                     )}
                   </TableCell>
                 </TableRow>
-                {open[order._id] && (
-                  <TableRow>
-                    <TableCell colSpan={11} >
-                      <Table size="small" aria-label="purchases">
-                        <TableBody>
-                          {order.items.slice(1).map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell>
-                                <Image
-                                  src={`http://localhost:3001/posts/images/${item.productid}`}
-                                  alt="product"
-                                />
-                              </TableCell>
-                              <TableCell>{item.productname}</TableCell>
-                              <TableCell>{item.amount}</TableCell>
-                              <TableCell>{order.totalprice}</TableCell>
-                              <TableCell>{order.address}</TableCell>
-                              <TableCell>{order.payment}</TableCell>
-                              <TableCell>{order.status}</TableCell>
-                              <TableCell>{order.provider}</TableCell>
-                              <TableCell>
-                                {order.parcel}
-                                <a
-                                  href={getTrackingUrl(order.provider, order.parcel)}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <OpenInNewIcon
-                                    style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                <TableRow>
+                  <TableCell colSpan={11} >
+                    <Table size="small" aria-label="purchases">
+                      {open[order._id] && (
+                        <React.Fragment>
+                          <TableBody>
+                            {order.items.slice(1).map((item, index) => (
+                              <TableRow key={index}>
+                                <TableCell>
+                                  <Image
+                                    src={`http://localhost:3001/posts/images/${item.productid}`}
+                                    alt="product"
                                   />
-                                </a>
-                              </TableCell>
-                              <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableCell>
-                  </TableRow>
-                )}
+                                </TableCell>
+                                <TableCell>{order.name}</TableCell>
+                                <TableCell>{item.productname}</TableCell>
+                                <TableCell>{item.amount}</TableCell>
+                                <TableCell>{order.totalprice}</TableCell>
+                                <TableCell>{order.address}</TableCell>
+                                <TableCell>{order.payment}</TableCell>
+                                <TableCell>{order.status}</TableCell>
+                                <TableCell>{order.provider}</TableCell>
+                                <TableCell>
+                                  {order.parcel}
+                                  <a
+                                    href={getTrackingUrl(order.provider, order.parcel)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <OpenInNewIcon
+                                      style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                                    />
+                                  </a>
+                                </TableCell>
+                                <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </React.Fragment>
+                      )}
+                    </Table>
+                  </TableCell>
+                </TableRow>
+
               </React.Fragment>
             ))}
           </TableBody>
