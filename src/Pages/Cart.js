@@ -350,6 +350,13 @@ export default function Cart() {
                       >
                         ราคา: {item.price.toLocaleString()} บาท
                       </Typography>
+                      <Typography
+                        component="div"
+                        variant="body2"
+                        color="textPrimary"
+                      >
+                        ไซส์: {item.size}
+                      </Typography>
                       <Typography component="div" variant="body2">
                         จำนวน: {item.amount.toLocaleString()}
                       </Typography>
