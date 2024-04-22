@@ -78,7 +78,7 @@ const Order = () => {
   };
 
   const getTrackingUrl = (provider, trackingNumber) => {
-    switch(provider) {
+    switch (provider) {
       case "Thai Post":
         return `https://track.thailandpost.co.th/?trackNumber=${trackingNumber}`;
       case "DHL":
@@ -103,9 +103,7 @@ const Order = () => {
         <Table sx={{ minWidth: 650 }} aria-label="simple order table">
           <TableHead>
             <TableRow>
-              <TableCell>Order ID</TableCell>
               <TableCell>Image</TableCell>
-              <TableCell>Email</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Product Name</TableCell>
               <TableCell>Quantity</TableCell>
@@ -120,49 +118,90 @@ const Order = () => {
           </TableHead>
           <TableBody>
             {orders.map((order) => (
-              <TableRow
-                key={order._id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell>{order._id}</TableCell>
-                <TableCell>
-                  <Image
-                    src={`http://localhost:3001/posts/images/${order.productid}`}
-                    alt="product"
-                  />
-                </TableCell>
-                <TableCell>{order.email}</TableCell>
-                <TableCell>{order.name}</TableCell>
-                <TableCell>{order.productname}</TableCell>
-                <TableCell>{order.amount}</TableCell>
-                <TableCell>{order.totalprice}</TableCell>
-                <TableCell>{order.address}</TableCell>
-                <TableCell>{order.payment}</TableCell>
-                <TableCell>{order.status}</TableCell>
-                <TableCell>{order.provider}</TableCell>
-                <TableCell>
-                  {order.parcel}
-                  <a
-                    href={getTrackingUrl(order.provider, order.parcel)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <OpenInNewIcon
-                      style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+              <React.Fragment key={order._id}>
+                <TableRow
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell>
+                    <Image
+                      src={`http://localhost:3001/posts/images/${order.items[0].productid}`}
+                      alt="product"
                     />
-                  </a>
-                </TableCell>
-                <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
-                <TableCell>
-                    <IconButton
-                      aria-label="expand row"
-                      size="small"
-                      onClick={() => handleToggle(order._id)}
-                    >
-                      {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
                   </TableCell>
-              </TableRow>
+                  <TableCell>{order.name}</TableCell>
+                  <TableCell>{order.items[0].productname}</TableCell>
+                  <TableCell>{order.items[0].amount}</TableCell>
+                  <TableCell>{order.totalprice}</TableCell>
+                  <TableCell>{order.address}</TableCell>
+                  <TableCell>{order.payment}</TableCell>
+                  <TableCell>{order.status}</TableCell>
+                  <TableCell>{order.provider}</TableCell>
+                  <TableCell>
+                    {order.parcel}
+                    <a
+                      href={getTrackingUrl(order.provider, order.parcel)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <OpenInNewIcon
+                        style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                      />
+                    </a>
+                  </TableCell>
+                  <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                  <TableCell>
+                    {order.items.length > 1 && (
+                      <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => handleToggle(order._id)}
+                      >
+                        {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+                {open[order._id] && (
+                  <TableRow>
+                    <TableCell colSpan={11} >
+                      <Table size="small" aria-label="purchases">
+                        <TableBody>
+                          {order.items.slice(1).map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <Image
+                                  src={`http://localhost:3001/posts/images/${item.productid}`}
+                                  alt="product"
+                                />
+                              </TableCell>
+                              <TableCell>{item.productname}</TableCell>
+                              <TableCell>{item.amount}</TableCell>
+                              <TableCell>{order.totalprice}</TableCell>
+                              <TableCell>{order.address}</TableCell>
+                              <TableCell>{order.payment}</TableCell>
+                              <TableCell>{order.status}</TableCell>
+                              <TableCell>{order.provider}</TableCell>
+                              <TableCell>
+                                {order.parcel}
+                                <a
+                                  href={getTrackingUrl(order.provider, order.parcel)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <OpenInNewIcon
+                                    style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                                  />
+                                </a>
+                              </TableCell>
+                              <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
