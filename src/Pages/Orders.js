@@ -1,22 +1,13 @@
 import React, { useState, useEffect, Fragment } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton } from "@mui/material";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Pagination } from 'antd';
 
 const Container = styled.div`
   margin: 20px;
@@ -43,17 +34,12 @@ const CircleBadge = styled.span`
   font-weight: bold;
 `;
 
-const SubTableCell = styled(TableCell)`
-  width: auto;
-  min-width: 100px; /* ปรับความกว้างตามความเหมาะสม */
-  border-top: 1px solid #ddd; /* เพิ่มเส้นขอบด้านบน */
-  border-bottom: none; /* ลบเส้นขอบด้านล่าง */
-`;
-
 const Order = () => {
   const [orders, setOrders] = useState([]);
   const [user, setUser] = useState();
   const [open, setOpen] = useState({});
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   useEffect(() => {
     const fetchOrders = async (email) => {
@@ -125,9 +111,14 @@ const Order = () => {
     }
   };
 
+  const handleChangePage = (pageNumber, pageSize) => {
+    setPage(pageNumber);
+    setPageSize(pageSize);
+  };
+
   return (
     <Container>
-      <Typography variant="h4" gutterBottom sx={{ marginTop: '80px'}}>
+      <Typography variant="h4" gutterBottom sx={{ marginTop: '80px' }}>
         Order List
       </Typography>
       <TableContainer component={Paper}>
@@ -148,7 +139,10 @@ const Order = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.map((order) => (
+            {(pageSize > 0
+              ? orders.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize)
+              : orders
+            ).map((order) => (
               <Fragment key={order._id}>
                 <TableRow
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -241,6 +235,17 @@ const Order = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      <Pagination
+        showSizeChanger
+        pageSizeOptions={[5, 10, 25]}
+        onChange={handleChangePage}
+        onShowSizeChange={handleChangePage}
+        current={page}
+        total={orders.length}
+        pageSize={pageSize}
+        showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
+        style={{ marginTop: '20px' }}
+      />
     </Container>
   );
 };
