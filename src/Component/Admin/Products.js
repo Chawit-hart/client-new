@@ -456,8 +456,6 @@ const Products = () => {
               onChange={(e) => setSelectedSize(e.target.value)}
             >
               <option value="">Select Size</option>
-              <option value="Freesize">Free size</option>
-              <option value="Oversize">Over size</option>
               <option value="XS">XS (Extra-small)</option>
               <option value="S">S (small)</option>
               <option value="M">M (Medium)</option>
