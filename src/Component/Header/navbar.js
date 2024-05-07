@@ -28,7 +28,6 @@ import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
 import { useCart } from "../service/CartContext";
 import debounce from "lodash/debounce";
-import axios from "axios";
 
 const ListItemIcon = styled.div`
   margin-right: 10px;
@@ -190,12 +189,12 @@ export default function Navbar() {
         <span
           key={index}
           style={{
-            backgroundColor: "rgba(63,81,181,0.2)", 
+            backgroundColor: "rgba(63,81,181,0.2)",
             borderRadius: "3px",
-            padding: "0px 2px", 
-            fontWeight: "bold", 
+            padding: "0px 2px",
+            fontWeight: "bold",
             boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
-            color: "#3f51b5", 
+            color: "#3f51b5",
           }}
         >
           {part}
@@ -284,7 +283,6 @@ export default function Navbar() {
               fontWeight: "bold",
               color: "black",
               textAlign: "center",
-              marginLeft: "250px",
               fontSize: "25px",
               cursor: "pointer",
             }}
@@ -293,18 +291,6 @@ export default function Navbar() {
             Adshop
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Button
-              variant="h6"
-              onClick={goToHome}
-              sx={{
-                fontFamily: "Kanit",
-                color: "black",
-                fontSize: "20px",
-                marginLeft: "170px",
-              }}
-            >
-              Home
-            </Button>
             <IconButton
               onClick={goToCart}
               sx={{
