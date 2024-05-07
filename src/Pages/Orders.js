@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton } from "@mui/material";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Pagination } from 'antd';
 
 const Container = styled.div`
   margin: 20px;
@@ -27,10 +18,28 @@ const Image = styled.img`
   height: auto;
 `;
 
+const CircleBadge = styled.span`
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background-color: #ffeb3b;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+`;
+
 const Order = () => {
   const [orders, setOrders] = useState([]);
   const [user, setUser] = useState();
   const [open, setOpen] = useState({});
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   useEffect(() => {
     const fetchOrders = async (email) => {
@@ -58,10 +67,18 @@ const Order = () => {
   }, []);
 
   const handleToggle = (id) => {
-    setOpen((prevOpen) => ({
-      ...prevOpen,
-      [id]: !prevOpen[id],
-    }));
+    setOpen((prevOpen) => {
+      const updatedOpen = { ...prevOpen };
+      Object.keys(updatedOpen).forEach((orderId) => {
+        if (orderId !== id) {
+          updatedOpen[orderId] = false; // ปิด DropDown ที่ไม่ใช่ DropDown ที่เปิดอยู่
+        }
+      });
+      return {
+        ...updatedOpen,
+        [id]: !prevOpen[id],
+      };
+    });
   };
 
   const formatTimeToBangkok = (dateString) => {
@@ -78,7 +95,7 @@ const Order = () => {
   };
 
   const getTrackingUrl = (provider, trackingNumber) => {
-    switch(provider) {
+    switch (provider) {
       case "Thai Post":
         return `https://track.thailandpost.co.th/?trackNumber=${trackingNumber}`;
       case "DHL":
@@ -94,79 +111,141 @@ const Order = () => {
     }
   };
 
+  const handleChangePage = (pageNumber, pageSize) => {
+    setPage(pageNumber);
+    setPageSize(pageSize);
+  };
+
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" gutterBottom sx={{ marginTop: '80px' }}>
         Order List
       </Typography>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple order table">
           <TableHead>
             <TableRow>
-              <TableCell>Order ID</TableCell>
               <TableCell>Image</TableCell>
-              <TableCell>Email</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Product Name</TableCell>
+              <TableCell>Size</TableCell>
               <TableCell>Quantity</TableCell>
               <TableCell>Total Price</TableCell>
               <TableCell>Address</TableCell>
               <TableCell>Payment</TableCell>
               <TableCell>Status</TableCell>
-              <TableCell>Shipping Provider</TableCell>
               <TableCell>tracking Number</TableCell>
               <TableCell>Order Time</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.map((order) => (
-              <TableRow
-                key={order._id}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell>{order._id}</TableCell>
-                <TableCell>
-                  <Image
-                    src={`http://localhost:3001/posts/images/${order.productid}`}
-                    alt="product"
-                  />
-                </TableCell>
-                <TableCell>{order.email}</TableCell>
-                <TableCell>{order.name}</TableCell>
-                <TableCell>{order.productname}</TableCell>
-                <TableCell>{order.amount}</TableCell>
-                <TableCell>{order.totalprice}</TableCell>
-                <TableCell>{order.address}</TableCell>
-                <TableCell>{order.payment}</TableCell>
-                <TableCell>{order.status}</TableCell>
-                <TableCell>{order.provider}</TableCell>
-                <TableCell>
-                  {order.parcel}
-                  <a
-                    href={getTrackingUrl(order.provider, order.parcel)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <OpenInNewIcon
-                      style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+            {(pageSize > 0
+              ? orders.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize)
+              : orders
+            ).map((order) => (
+              <Fragment key={order._id}>
+                <TableRow
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell>
+                    <Image
+                      src={`http://localhost:3001/posts/images/${order.items[0].productid}`}
+                      alt="product"
                     />
-                  </a>
-                </TableCell>
-                <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
-                <TableCell>
-                    <IconButton
-                      aria-label="expand row"
-                      size="small"
-                      onClick={() => handleToggle(order._id)}
-                    >
-                      {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                    </IconButton>
                   </TableCell>
-              </TableRow>
+                  <TableCell>{order.name}</TableCell>
+                  <TableCell>{order.items[0].productname}</TableCell>
+                  <TableCell>{order.items[0].size}</TableCell>
+                  <TableCell>{order.items[0].amount}</TableCell>
+                  <TableCell>{order.totalprice}</TableCell>
+                  <TableCell>{order.address}</TableCell>
+                  <TableCell>{order.payment}</TableCell>
+                  <TableCell>{order.status}</TableCell>
+                  <TableCell>
+                    {order.parcel}
+                    <a
+                      href={getTrackingUrl(order.provider, order.parcel)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <OpenInNewIcon
+                        style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                      />
+                    </a>
+                  </TableCell>
+                  <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                  <TableCell>
+                    {order.items.length > 1 && (
+                      <IconButton
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => handleToggle(order._id)}
+                      >
+                        {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        {order.items.length > 1 && !open[order._id] && (
+                          <CircleBadge>+{order.items.length - 1}</CircleBadge>
+                        )}
+                      </IconButton>
+                    )}
+                  </TableCell>
+                </TableRow>
+                {open[order._id] && order.items.length > 1 && (
+                  <TableRow>
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
+                      <Table size="small" aria-label="purchases">
+                        <TableBody>
+                          {order.items.slice(1).map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <Image
+                                  src={`http://localhost:3001/posts/images/${item.productid}`}
+                                  alt="product"
+                                />
+                              </TableCell>
+                              <TableCell>{order.name}</TableCell>
+                              <TableCell>{item.productname}</TableCell>
+                              <TableCell>{item.size}</TableCell>
+                              <TableCell>{item.amount}</TableCell>
+                              <TableCell>{order.totalprice}</TableCell>
+                              <TableCell>{order.address}</TableCell>
+                              <TableCell>{order.payment}</TableCell>
+                              <TableCell>{order.status}</TableCell>
+                              <TableCell>
+                                {order.parcel}
+                                <a
+                                  href={getTrackingUrl(order.provider, order.parcel)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <OpenInNewIcon
+                                    style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                                  />
+                                </a>
+                              </TableCell>
+                              <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      <Pagination
+        showSizeChanger
+        pageSizeOptions={[5, 10, 25]}
+        onChange={handleChangePage}
+        onShowSizeChange={handleChangePage}
+        current={page}
+        total={orders.length}
+        pageSize={pageSize}
+        showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
+        style={{ marginTop: '20px' }}
+      />
     </Container>
   );
 };
