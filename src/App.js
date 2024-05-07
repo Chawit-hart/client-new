@@ -17,6 +17,7 @@ import Products from "./Component/Admin/Products";
 import OrderList from "./Component/Admin/OrderList";
 import Order from "./Pages/Orders";
 import AdminSection from "./Component/service/AdminSection";
+import Announcement from "./Component/Body/Announcement";
 
 const imageSlides = ["./Images/shirt1.png", "./Images/applewatch.png"];
 
@@ -33,7 +34,7 @@ function App() {
     <Router>
       <AdminAuthProvider>
         <Routes>
-          <Route path="/" element={<Home><Carousel slides={imageSlides} /><Category categories={categories} /></Home>} />
+          <Route path="/" element={<Home><Announcement /><Carousel slides={imageSlides} /><Category categories={categories} /></Home>} />
           <Route path="/profile" element={<Home><Profile /></Home>} />
           <Route path="/cart" element={<Home><Cart /></Home>} />
           <Route path="/category/เสื้อผ้า" element={<Home><ClothingCategoryPage /></Home>} />
