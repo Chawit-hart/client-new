@@ -109,14 +109,10 @@ const ConfirmationPage = () => {
       .get(`http://localhost:3001/posts/${state.productId}`)
       .then((response) => {
         const productData = response.data;
-        setProduct(response.data);
+        setProduct(productData);
         setSizes(productData.amount);
-        updateTotalPrice(response.data.price, 1);
-        // const productSizes = Array.isArray(productData.size)
-        //   ? productData.size
-        //   : [];
-        // setSizes(productSizes);
-        // setSelectedSize(productSizes[0] || "");
+        updateTotalPrice(productData.price, productData.amount > 0 ? 1 : 0);
+        setAmount(productData.amount > 0 ? 1 : 0);
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
@@ -282,14 +278,6 @@ const ConfirmationPage = () => {
                       },
                     }}
                   >
-                    {/* {sizes.map((size) => (
-                      <FormControlLabel
-                        value={size}
-                        control={<Radio />}
-                        label={size}
-                        key={size}
-                      />
-                    ))} */}
                     {Object.keys(sizes).map((size, index, array) => (
                       <Button
                         key={size}
@@ -353,10 +341,11 @@ const ConfirmationPage = () => {
                       fontSize: "0.95rem",
                     }}
                   >
-                    จำนวนคงเหลือ:{" "}
-                    {product.amount[selectedSize] === 0
-                      ? "สินค้าหมด"
-                      : `${sizes[selectedSize]} ชิ้น`}
+                    {selectedSize
+                      ? sizes[selectedSize] !== undefined
+                        ? `จำนวนคงเหลือ: ${sizes[selectedSize]} ชิ้น`
+                        : "สินค้าหมด"
+                      : "กรุณาเลือกไซส์"}
                   </Typography>
                   <TextField
                     label="จำนวน"
@@ -386,7 +375,7 @@ const ConfirmationPage = () => {
             color="secondary"
             onClick={handleAddToCart}
             startIcon={<AddShoppingCartIcon />}
-            disabled={!product || product.amount === "สินค้าหมด"}
+            disabled={!selectedSize || sizes[selectedSize] === 0}
           >
             เพิ่มลงตะกร้า
           </Button>
