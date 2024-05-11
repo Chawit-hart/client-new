@@ -187,7 +187,7 @@ const ConfirmationPage = () => {
   const handleAmountChange = (event) => {
     const value = event.target.value;
     let number = parseInt(value, 10);
-    const max = product.amount;
+    const max = product.amount[selectedSize];
     console.log("🚀 ~ handleAmountChange ~ max:", max);
 
     if (!value) {
