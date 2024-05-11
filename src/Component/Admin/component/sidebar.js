@@ -53,7 +53,22 @@ const UsernameContainer = styled.div`
 
 const LogoutIcon = styled.i`
   cursor: pointer;
+  font-size: 1.3em;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  }
 `;
+
 
 const Sidebar = () => {
   const [ username, setUsername ] = useState("");
