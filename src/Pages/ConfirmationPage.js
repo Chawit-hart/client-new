@@ -26,7 +26,7 @@ const ConfirmationPage = () => {
   const [Amount, setAmount] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   const [productImg, setProductImg] = useState(null);
-  // const [sizes, setSizes] = useState("");
+  const [sizes, setSizes] = useState({});
   const [selectedSize, setSelectedSize] = useState("");
   const [profileData, setProfileData] = useState({
     name: "",
@@ -110,6 +110,7 @@ const ConfirmationPage = () => {
       .then((response) => {
         const productData = response.data;
         setProduct(response.data);
+        setSizes(productData.amount);
         updateTotalPrice(response.data.price, 1);
         // const productSizes = Array.isArray(productData.size)
         //   ? productData.size
@@ -289,7 +290,7 @@ const ConfirmationPage = () => {
                         key={size}
                       />
                     ))} */}
-                    {["XS", "S", "M", "L", "XL"].map((size, index, array) => (
+                    {Object.keys(sizes).map((size, index, array) => (
                       <Button
                         key={size}
                         variant={
@@ -353,9 +354,9 @@ const ConfirmationPage = () => {
                     }}
                   >
                     จำนวนคงเหลือ:{" "}
-                    {product.amount === "สินค้าหมด"
-                      ? product.amount
-                      : `${product.amount} ชิ้น`}
+                    {product.amount[selectedSize] === 0
+                      ? "สินค้าหมด"
+                      : `${sizes[selectedSize]} ชิ้น`}
                   </Typography>
                   <TextField
                     label="จำนวน"
