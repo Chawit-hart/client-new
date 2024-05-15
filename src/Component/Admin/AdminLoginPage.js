@@ -16,9 +16,6 @@ const AdminLoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    console.log("username--->", username);
-    console.log("password---->", password);
-
     try {
       const response = await axios.post("http://localhost:3001/email/", {
         user: username,

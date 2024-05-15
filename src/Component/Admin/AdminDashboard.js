@@ -3,18 +3,19 @@ import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
 import { Button } from "react-bootstrap";
+import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
     totalpriceSuccess: 0,
   });
-  const [username, setUsername] = useState('');
-
+  const [username, setUsername] = useState("");
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -47,11 +48,6 @@ const AdminDashboard = () => {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
     }
   };
-
-  useEffect(() => {
-    fetchDashboardData();
-    fetchUsers();
-  }, []);
 
   const chartData = {
     labels: ["Monthly Sales", "Total Products", "Total"],
@@ -100,6 +96,42 @@ const AdminDashboard = () => {
     fontFamily: "Kanit, sans-serif",
   };
 
+  useEffect(() => {
+    fetchDashboardData();
+    fetchUsers();
+    checkAdminStatus();
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+    renderEditIcon(username);
+  }, [username, isAdmin]);
+
+  const checkAdminStatus = async () => {
+    console.log("user",username);
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/email/check-user/?user=${username}`,
+      );
+      console.log('status',response.data);
+      if (response.data[0].userstatus === "admin") {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error("Error checking admin status:", error);
+    }
+  };
+
+  const renderEditIcon = (userstatus) => {
+    console.log ('admin', isAdmin);
+    if (userstatus === true) {
+      return <FaEdit />;
+    }
+    return null;
+  };
+
   return (
     <div className="container-fluid" style={pageStyle}>
       <div className="row">
@@ -108,7 +140,9 @@ const AdminDashboard = () => {
         </div>
         <div className="col-md-10">
           <div>
-            <h1 className="my-4 text-center">Welcome {username} to Admin Dashboard</h1>
+            <h1 className="my-4 text-center">
+              Welcome {username} to Admin Dashboard
+            </h1>
           </div>
           <div className="row text-center justify-content-center">
             <div className="col-md-3 mb-4">
@@ -149,7 +183,7 @@ const AdminDashboard = () => {
               justifyContent: "space-between",
               alignItems: "center",
               marginBottom: "20px",
-              marginTop: "20px"
+              marginTop: "20px",
             }}
           >
             <h2>รายชื่อผู้ใช้</h2>
@@ -176,6 +210,7 @@ const AdminDashboard = () => {
                   <td>{user._id}</td>
                   <td>{user.user}</td>
                   <td>{user.userstatus}</td>
+                  <td>{renderEditIcon(isAdmin)}</td>
                 </tr>
               ))}
             </tbody>
