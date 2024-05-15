@@ -2,20 +2,21 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
+import UserEditModal from "./UserEditModal";
 import { Button } from "react-bootstrap";
-import { FaEdit } from "react-icons/fa";
 import axios from "axios";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [editShow, setEditShow] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
     totalpriceSuccess: 0,
   });
   const [username, setUsername] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -35,6 +36,12 @@ const AdminDashboard = () => {
         "http://localhost:3001/email/check-user"
       );
       setUsers(response.data);
+      const storedUsername = localStorage.getItem("username");
+      if (storedUsername) {
+        const currentUserData = response.data.find(user => user.user === storedUsername);
+        setCurrentUser(currentUserData);
+        setUsername(storedUsername);
+      }
     } catch (error) {
       console.error("มีข้อผิดพลาดในการดึงข้อมูลผู้ใช้:", error);
     }
@@ -99,37 +106,14 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
     fetchUsers();
-    checkAdminStatus();
-    const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
-    renderEditIcon(username);
-  }, [username, isAdmin]);
+  }, []);
 
-  const checkAdminStatus = async () => {
-    console.log("user",username);
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/email/check-user/?user=${username}`,
-      );
-      console.log('status',response.data);
-      if (response.data[0].userstatus === "admin") {
-        setIsAdmin(true);
-      } else {
-        setIsAdmin(false);
-      }
-    } catch (error) {
-      console.error("Error checking admin status:", error);
-    }
+  const handleEditShow = () => {
+    setEditShow(true);
   };
 
-  const renderEditIcon = (userstatus) => {
-    console.log ('admin', isAdmin);
-    if (userstatus === true) {
-      return <FaEdit />;
-    }
-    return null;
+  const handleEditClose = () => {
+    setEditShow(false);
   };
 
   return (
@@ -190,6 +174,9 @@ const AdminDashboard = () => {
             <Button variant="primary" onClick={handleShow}>
               Add User
             </Button>
+            <Button variant="secondary" onClick={handleEditShow}>
+              Change Password
+            </Button>
           </div>
           <AddUserModal
             show={show}
@@ -210,12 +197,19 @@ const AdminDashboard = () => {
                   <td>{user._id}</td>
                   <td>{user.user}</td>
                   <td>{user.userstatus}</td>
-                  <td>{renderEditIcon(isAdmin)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        {currentUser && (
+          <UserEditModal
+            show={editShow}
+            handleClose={handleEditClose}
+            user={currentUser}
+            refreshUsers={fetchUsers}
+          />
+        )}
       </div>
     </div>
   );
