@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import axios from "axios";
+import UserEditModal from '../UserEditModal';
 
 const SidebarContainer = styled.div`
   width: 250px;
@@ -54,6 +55,7 @@ const UsernameContainer = styled.div`
 const IconContainer = styled.div`
   display: flex;
   align-items: center;
+  position: relative;
 `;
 
 const Icon = styled.i`
@@ -74,8 +76,32 @@ const Icon = styled.i`
   }
 `;
 
-const Sidebar = () => {
+const DropdownMenu = styled.div`
+  position: absolute;
+  bottom: 60px; /* ปรับค่า bottom ให้ dropdown อยู่ด้านบนของไอคอน */
+  right: 0;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  z-index: 101;
+  width: 170px;
+  padding: 10px;
+`;
+
+const DropdownItem = styled.div`
+  padding: 10px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #f0f0f0;
+    border-radius: 10px;
+  }
+`;
+
+const Sidebar = ({ currentUser, refreshUsers }) => {
   const [ username, setUsername ] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [editShow, setEditShow] = useState(false);
 
   const navigate = useNavigate();
 
@@ -101,8 +127,16 @@ const Sidebar = () => {
     navigate('/admin-login');
   };
 
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
   const handleSettings = () => {
-    navigate('/settings');
+    setEditShow(true);
+  };
+
+  const handleEditClose = () => {
+    setEditShow(false);
   };
 
   useEffect(() => {
@@ -147,10 +181,23 @@ const Sidebar = () => {
       <UsernameContainer>
         <span>{username}</span>
         <IconContainer>
-          <Icon className="bi bi-gear" onClick={handleSettings}></Icon>
+          <Icon className="bi bi-gear" onClick={toggleDropdown}></Icon>
+          {showDropdown && (
+            <DropdownMenu>
+              <DropdownItem onClick={handleSettings}>Change Password</DropdownItem>
+            </DropdownMenu>
+          )}
           <Icon className="bi bi-box-arrow-right" onClick={handleLogout}></Icon>
         </IconContainer>
       </UsernameContainer>
+      {currentUser && (
+        <UserEditModal
+          show={editShow}
+          handleClose={handleEditClose}
+          user={currentUser}
+          refreshUsers={refreshUsers}
+        />
+      )}
     </SidebarContainer>
   );
 };

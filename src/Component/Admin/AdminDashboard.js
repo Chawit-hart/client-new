@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
-import UserEditModal from "./UserEditModal";
 import { Button } from "react-bootstrap";
 import axios from "axios";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
-  const [editShow, setEditShow] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
@@ -108,19 +106,11 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
-  const handleEditShow = () => {
-    setEditShow(true);
-  };
-
-  const handleEditClose = () => {
-    setEditShow(false);
-  };
-
   return (
     <div className="container-fluid" style={pageStyle}>
       <div className="row">
         <div className="col-md-2">
-          <Sidebar />
+          <Sidebar currentUser={currentUser} refreshUsers={fetchUsers} />
         </div>
         <div className="col-md-10">
           <div>
@@ -174,9 +164,6 @@ const AdminDashboard = () => {
             <Button variant="primary" onClick={handleShow}>
               Add User
             </Button>
-            <Button variant="secondary" onClick={handleEditShow}>
-              Change Password
-            </Button>
           </div>
           <AddUserModal
             show={show}
@@ -202,14 +189,6 @@ const AdminDashboard = () => {
             </tbody>
           </table>
         </div>
-        {currentUser && (
-          <UserEditModal
-            show={editShow}
-            handleClose={handleEditClose}
-            user={currentUser}
-            refreshUsers={fetchUsers}
-          />
-        )}
       </div>
     </div>
   );
