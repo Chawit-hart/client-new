@@ -78,7 +78,7 @@ const Icon = styled.i`
 
 const DropdownMenu = styled.div`
   position: absolute;
-  bottom: 60px; /* ปรับค่า bottom ให้ dropdown อยู่ด้านบนของไอคอน */
+  bottom: 60px;
   right: 0;
   background-color: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -133,6 +133,7 @@ const Sidebar = ({ currentUser, refreshUsers }) => {
 
   const handleSettings = () => {
     setEditShow(true);
+    setShowDropdown(false); // ปิด Dropdown เมื่อเปิด modal edit
   };
 
   const handleEditClose = () => {

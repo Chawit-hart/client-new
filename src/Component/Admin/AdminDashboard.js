@@ -4,6 +4,7 @@ import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
 import { Button } from "react-bootstrap";
 import axios from "axios";
+import { FaTrash } from "react-icons/fa";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -48,9 +49,19 @@ const AdminDashboard = () => {
   const addUser = async (userData) => {
     try {
       await axios.post("http://localhost:3001/email/user", userData);
+      console.log('data',userData);
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    try {
+      await axios.delete(`http://localhost:3001/email/delete-user/${userId}`);
+      fetchUsers();
+    } catch (error) {
+      console.error("มีข้อผิดพลาดในการลบผู้ใช้:", error);
     }
   };
 
@@ -169,6 +180,7 @@ const AdminDashboard = () => {
             show={show}
             handleClose={handleClose}
             addUser={addUser}
+            refreshUsers={fetchUsers}
           />
           <table className="table table-hover">
             <thead className="thead-dark">
@@ -176,6 +188,9 @@ const AdminDashboard = () => {
                 <th scope="col">UID</th>
                 <th scope="col">User</th>
                 <th scope="col">Status</th>
+                {currentUser && currentUser.userstatus === "admin" && (
+                  <th scope="col">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -184,6 +199,17 @@ const AdminDashboard = () => {
                   <td>{user._id}</td>
                   <td>{user.user}</td>
                   <td>{user.userstatus}</td>
+                  {currentUser && currentUser.userstatus === "admin" && (
+                    <td>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => deleteUser(user._id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
