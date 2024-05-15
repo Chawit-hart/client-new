@@ -51,7 +51,12 @@ const UsernameContainer = styled.div`
   padding: 0 20px;
 `;
 
-const LogoutIcon = styled.i`
+const IconContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Icon = styled.i`
   cursor: pointer;
   font-size: 1.3em;
   padding: 10px;
@@ -69,32 +74,35 @@ const LogoutIcon = styled.i`
   }
 `;
 
-
 const Sidebar = () => {
   const [ username, setUsername ] = useState("");
 
   const navigate = useNavigate();
 
   const handleToDashboard = () => {
-    navigate('/Dashboard')
-  }
+    navigate('/Dashboard');
+  };
 
   const handleToCustomer = () => {
     navigate('/Customers');
   };
 
   const handleToProduct = () => {
-    navigate('/Products')
-  }
+    navigate('/Products');
+  };
 
   const handleToOrderList = () => {
-    navigate('/OrderList')
-  }
+    navigate('/OrderList');
+  };
 
   const handleLogout = () => {
     console.log('Logging out...');
     localStorage.removeItem("username");
     navigate('/admin-login');
+  };
+
+  const handleSettings = () => {
+    navigate('/settings');
   };
 
   useEffect(() => {
@@ -138,7 +146,10 @@ const Sidebar = () => {
       </ListGroup>
       <UsernameContainer>
         <span>{username}</span>
-        <LogoutIcon className="bi bi-box-arrow-right" onClick={handleLogout}></LogoutIcon>
+        <IconContainer>
+          <Icon className="bi bi-gear" onClick={handleSettings}></Icon>
+          <Icon className="bi bi-box-arrow-right" onClick={handleLogout}></Icon>
+        </IconContainer>
       </UsernameContainer>
     </SidebarContainer>
   );
