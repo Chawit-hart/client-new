@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 function UserEditModal({ show, handleClose, user, refreshUsers }) {
   const [username, setUsername] = useState('');
-  const [userStatus, setUserStatus] = useState('');
+  const [userStatus, setUserStatus] = useState();
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -12,33 +13,67 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
   useEffect(() => {
     if (user) {
       setUsername(user.user || '');
-      setUserStatus(user.userstatus || '');
     }
   }, [user]);
 
   const handleSaveChanges = async () => {
     if (!user || !user._id) {
-      alert('User data is not loaded correctly.');
+      Swal.fire({
+        icon: 'error',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        text: 'User data is not loaded correctly.',
+      });
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
-      alert("New passwords do not match!");
+      Swal.fire({
+        icon: 'error',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        text: 'New passwords do not match!',
+      });
       return;
     }
 
     try {
       await axios.put(`http://localhost:3001/email/update-user/${user._id}`, {
         _id: user._id,
-        user: username,
         pass: newPassword,
-        userstatus: userStatus,
+        userStatus
       });
       refreshUsers();
       handleClose();
+      Swal.fire({
+        icon: 'success',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        text: 'Password has been changed successfully.',
+      });
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Failed to update user');
+      Swal.fire({
+        icon: 'error',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        text: 'Failed to update user.',
+      });
     }
   };
 
@@ -49,17 +84,18 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
       </Modal.Header>
       <Modal.Body>
         <Form>
-          <Form.Group>
-            <Form.Label>Username</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Enter username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-            />
+          <Form.Group as={Row} className="align-items-center">
+            <Form.Label column sm="2">Username:</Form.Label>
+            <Col sm="9">
+              <Form.Control
+                plaintext
+                readOnly
+                defaultValue={username}
+              />
+            </Col>
           </Form.Group>
           <Form.Group>
-            <Form.Label>Old Password</Form.Label>
+            <Form.Label style={{ marginTop: '10px' }}>Old Password</Form.Label>
             <Form.Control
               type="password"
               placeholder="Enter old password"
@@ -68,7 +104,7 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Label>New Password</Form.Label>
+            <Form.Label style={{ marginTop: '10px' }}>New Password</Form.Label>
             <Form.Control
               type="password"
               placeholder="Enter new password"
@@ -77,24 +113,13 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Label>Confirm New Password</Form.Label>
+            <Form.Label style={{ marginTop: '10px' }}>Confirm New Password</Form.Label>
             <Form.Control
               type="password"
               placeholder="Confirm new password"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
             />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>User Status</Form.Label>
-            <Form.Control
-              as="select"
-              value={userStatus}
-              onChange={e => setUserStatus(e.target.value)}
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </Form.Control>
           </Form.Group>
         </Form>
       </Modal.Body>

@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
-import UserEditModal from "./UserEditModal";
 import { Button } from "react-bootstrap";
 import axios from "axios";
+import { FaTrash } from "react-icons/fa";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
-  const [editShow, setEditShow] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
@@ -50,9 +49,19 @@ const AdminDashboard = () => {
   const addUser = async (userData) => {
     try {
       await axios.post("http://localhost:3001/email/user", userData);
+      console.log('data',userData);
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    try {
+      await axios.delete(`http://localhost:3001/email/delete-user/${userId}`);
+      fetchUsers();
+    } catch (error) {
+      console.error("มีข้อผิดพลาดในการลบผู้ใช้:", error);
     }
   };
 
@@ -108,19 +117,11 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
-  const handleEditShow = () => {
-    setEditShow(true);
-  };
-
-  const handleEditClose = () => {
-    setEditShow(false);
-  };
-
   return (
     <div className="container-fluid" style={pageStyle}>
       <div className="row">
         <div className="col-md-2">
-          <Sidebar />
+          <Sidebar currentUser={currentUser} refreshUsers={fetchUsers} />
         </div>
         <div className="col-md-10">
           <div>
@@ -174,14 +175,12 @@ const AdminDashboard = () => {
             <Button variant="primary" onClick={handleShow}>
               Add User
             </Button>
-            <Button variant="secondary" onClick={handleEditShow}>
-              Change Password
-            </Button>
           </div>
           <AddUserModal
             show={show}
             handleClose={handleClose}
             addUser={addUser}
+            refreshUsers={fetchUsers}
           />
           <table className="table table-hover">
             <thead className="thead-dark">
@@ -189,6 +188,9 @@ const AdminDashboard = () => {
                 <th scope="col">UID</th>
                 <th scope="col">User</th>
                 <th scope="col">Status</th>
+                {currentUser && currentUser.userstatus === "admin" && (
+                  <th scope="col">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -197,19 +199,22 @@ const AdminDashboard = () => {
                   <td>{user._id}</td>
                   <td>{user.user}</td>
                   <td>{user.userstatus}</td>
+                  {currentUser && currentUser.userstatus === "admin" && (
+                    <td>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => deleteUser(user._id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        {currentUser && (
-          <UserEditModal
-            show={editShow}
-            handleClose={handleEditClose}
-            user={currentUser}
-            refreshUsers={fetchUsers}
-          />
-        )}
       </div>
     </div>
   );
