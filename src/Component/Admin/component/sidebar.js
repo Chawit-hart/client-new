@@ -124,6 +124,8 @@ const Sidebar = ({ currentUser, refreshUsers }) => {
   const handleLogout = () => {
     console.log('Logging out...');
     localStorage.removeItem("username");
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentAdmin");
     navigate('/admin-login');
   };
 
