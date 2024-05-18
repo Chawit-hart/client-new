@@ -4,14 +4,13 @@ import { useAdminAuth } from './AdminAuthContext';
 import AdminLayout from '../../AdminLayout';
 
 const AdminSection = ({ children }) => {
-  const { currentAdmin } = useAdminAuth();
-  console.log("🚀 ~ file: AdminSection.js:8 ~ AdminSection ~ currentAdmin:", currentAdmin);
+  const  currentAdmin  = localStorage.getItem("currentAdmin");
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    // if (!currentAdmin) {
-    //   navigate('/admin-login');
-    // }
+    if (!currentAdmin) {
+      navigate('/admin-login');
+    }
   }, [currentAdmin, navigate]);
 
   return currentAdmin ? (

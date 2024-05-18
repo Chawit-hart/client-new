@@ -8,28 +8,12 @@ const AdminAuthContext = createContext();
 export const useAdminAuth = () => useContext(AdminAuthContext);
 
 export const AdminAuthProvider = ({ children }) => {
-  const [currentAdmin, setCurrentAdmin] = useState(
-    JSON.parse(localStorage.getItem("currentAdmin"))
-  );
-  const navigate = useNavigate();
+    const [currentAdmin, setCurrentAdmin] = useState(JSON.parse(localStorage.getItem("currentAdmin")));
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const newCurrentAdmin = JSON.parse(localStorage.getItem("currentAdmin"));
-      setCurrentAdmin(newCurrentAdmin);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-
-    // Cleanup function
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, []);
-
-  return (
-    <AdminAuthContext.Provider value={{ currentAdmin }}>
-      {children}
-    </AdminAuthContext.Provider>
-  );
+    return (
+      <AdminAuthContext.Provider value={{ currentAdmin }}>
+        {children}
+      </AdminAuthContext.Provider>
+    );
 };
