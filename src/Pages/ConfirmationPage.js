@@ -319,9 +319,9 @@ const ConfirmationPage = () => {
                     }}
                   >
                     {selectedSize
-                      ? sizes[selectedSize] !== undefined
+                      ? sizes[selectedSize] !== 0
                         ? `จำนวนคงเหลือ: ${sizes[selectedSize]} ชิ้น`
-                        : "สินค้าหมด"
+                        : "จำนวนคงเหลือ: สินค้าหมด ชิ้น"
                       : "กรุณาเลือกไซส์"}
                   </Typography>
                   <TextField
