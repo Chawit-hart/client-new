@@ -48,6 +48,17 @@ const AdminLoginPage = () => {
       }
     } catch (error) {
       console.error("Error:", error);
+      const errorMessage =
+        error.response?.data?.message || "An error occurred. Please try again.";
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: errorMessage,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        toast: true,
+      });
     }
   };
 
