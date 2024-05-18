@@ -32,12 +32,17 @@ const StyledTextField = styled(TextField)`
 const Customer = () => {
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/Usersinfo");
-        setCustomers(response.data);
+        const response = await axios.get("http://localhost:3001/Usersinfo", {
+          headers: {
+            Authorization: token,
+          },
+        });
+        setCustomers(response.data.listOfUsers);
       } catch (error) {
         console.error("มีปัญหาในการดึงข้อมูล:", error);
       }
