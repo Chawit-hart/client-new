@@ -4,7 +4,7 @@ import { useAdminAuth } from './AdminAuthContext';
 import AdminLayout from '../../AdminLayout';
 
 const AdminSection = ({ children }) => {
-  const { currentAdmin } = useAdminAuth();
+  const  currentAdmin  = localStorage.getItem("currentAdmin");
   const navigate = useNavigate();
 
   React.useEffect(() => {
