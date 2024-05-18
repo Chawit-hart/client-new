@@ -232,6 +232,7 @@ const AdminDashboard = () => {
                         variant="danger"
                         size="sm"
                         onClick={() => deleteUser(user._id)}
+                        style={{ marginRight: "10px" }}
                       >
                         <FaTrash />
                       </Button>
