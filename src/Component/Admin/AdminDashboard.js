@@ -153,6 +153,18 @@ const AdminDashboard = () => {
     if (userToEdit) {
       updateUser(userToEdit._id, { roles: role });
       handleEditClose();
+      Swal.fire({
+        icon: "success",
+        toast: true,
+        text: "User updated successfully!",
+        position: "top-end",
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
     }
   };
 
