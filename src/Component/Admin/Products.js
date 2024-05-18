@@ -209,7 +209,7 @@ const Products = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [productName, setProductName] = useState("");
   const [productDetail, setProductDetail] = useState("");
-  const [quantity, setQuantity] = useState({ XS: 0, S: 0, M: 0, L: 0, XL: 0 });
+  const [quantity, setQuantity] = useState({ XS: "", S: "", M: "", L: "", XL: "" });
   const [price, setPrice] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
@@ -229,7 +229,7 @@ const Products = () => {
   };
 
   const handleQuantityChange = (size) => (e) => {
-    setQuantity({ ...quantity, [size]: Number(e.target.value) });
+    setQuantity({ ...quantity, [size]: e.target.value });
   };
 
   const handleSubmit = async (event) => {
@@ -265,7 +265,7 @@ const Products = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:3001/posts/upload-image",
         formData,
         {
@@ -301,7 +301,7 @@ const Products = () => {
 
   const resetForm = () => {
     setProductName("");
-    setQuantity({ XS: 0, S: 0, M: 0, L: 0, XL: 0 });
+    setQuantity({ XS: "", S: "", M: "", L: "", XL: "" });
     setPrice("");
     setProductDetail("");
     setSelectedCategory("");
