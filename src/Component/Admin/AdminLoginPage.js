@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Form, Button } from "react-bootstrap";
-import { useAdminAuth } from "../service/AdminAuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -10,6 +9,7 @@ const AdminLoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -20,7 +20,7 @@ const AdminLoginPage = () => {
         pass: password,
       });
 
-      console.log(response);
+      console.log(response.data.token);
 
       if (response.data.isAdmin) {
         localStorage.setItem("username", username);
