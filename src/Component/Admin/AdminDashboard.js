@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
-import { Button } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
@@ -16,13 +17,33 @@ const AdminDashboard = () => {
   });
   const [username, setUsername] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [userToDelete, setUserToDelete] = useState(null);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleDeleteClose = () => setShowDeleteModal(false);
+  const handleDeleteShow = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("token", token);
+      fetchUsers();
+    }
+  }, [token]);
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axiosInstance.get(
         "http://localhost:3001/email/check-user",
         {
@@ -33,8 +54,8 @@ const AdminDashboard = () => {
         }
       );
 
-      // Handle nested response
-      const usersData = response.data.users || response.data;
+      const { users: usersData, newToken } = response.data;
+      setToken(newToken); // Update token state
 
       if (Array.isArray(usersData)) {
         setUsers(usersData);
@@ -59,13 +80,18 @@ const AdminDashboard = () => {
 
   const addUser = async (userData) => {
     try {
-      const token = localStorage.getItem("token");
-      await axiosInstance.post("http://localhost:3001/email/user", userData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-      });
+      const response = await axiosInstance.post(
+        "http://localhost:3001/email/user",
+        userData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
+      const { newToken } = response.data;
+      setToken(newToken); // Update token state
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
@@ -74,8 +100,7 @@ const AdminDashboard = () => {
 
   const deleteUser = async (userId) => {
     try {
-      const token = localStorage.getItem("token");
-      await axiosInstance.delete(
+      const response = await axiosInstance.delete(
         `http://localhost:3001/email/delete-user/${userId}`,
         {
           headers: {
@@ -84,9 +109,18 @@ const AdminDashboard = () => {
           },
         }
       );
+      const { newToken } = response.data;
+      setToken(newToken); // Update token state
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการลบผู้ใช้:", error);
+    }
+  };
+
+  const confirmDeleteUser = async () => {
+    if (userToDelete) {
+      await deleteUser(userToDelete._id);
+      handleDeleteClose();
     }
   };
 
@@ -200,9 +234,11 @@ const AdminDashboard = () => {
             }}
           >
             <h2>รายชื่อผู้ใช้</h2>
-            <Button variant="primary" onClick={handleShow}>
-              Add User
-            </Button>
+            {currentUser && currentUser.roles === "admin" && (
+              <Button variant="primary" onClick={handleShow}>
+                Add User
+              </Button>
+            )}
           </div>
           <AddUserModal
             show={show}
@@ -230,19 +266,19 @@ const AdminDashboard = () => {
                   {currentUser && currentUser.roles === "admin" && (
                     <td>
                       <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => deleteUser(user._id)}
-                        style={{ marginRight: "10px" }}
-                      >
-                        <FaTrash />
-                      </Button>
-                      <Button
                         variant="warning"
                         size="sm"
                         onClick={() => editUser(user)}
+                        style={{ marginRight: "10px" }}
                       >
                         <FaEdit />
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteShow(user)}
+                      >
+                        <FaTrash />
                       </Button>
                     </td>
                   )}
@@ -252,6 +288,22 @@ const AdminDashboard = () => {
           </table>
         </div>
       </div>
+      <Modal show={showDeleteModal} onHide={handleDeleteClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete user {userToDelete?.user}?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleDeleteClose}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteUser}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
