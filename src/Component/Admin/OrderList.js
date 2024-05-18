@@ -119,6 +119,7 @@ const OrderList = () => {
   };
 
   const formatTimeToBangkok = (dateString) => {
+    if (!dateString) return ""; // Check if dateString is undefined
     const date = new Date(dateString);
     const options = {
       day: "2-digit",
@@ -183,7 +184,7 @@ const OrderList = () => {
     setAnchorEl(null);
   };
 
-  const handleUpdateStatus = async (status) => {
+  const handleUpdateStatus = async (status, trackingNumber) => {
     if (currentOrder && currentOrder._id) {
       try {
         const response = await axios.put(
@@ -276,19 +277,19 @@ const OrderList = () => {
         setLocalOrders(localOrders.filter((o) => o._id !== order._id));
       } catch (error) {
         console.error("Error deleting order:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Failed to delete order",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
       }
-      Swal.fire({
-        icon: "error",
-        title: "Failed to delete order",
-        position: "top-end",
-        toast: true,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        timer: 1500,
-        didOpen: (toast) => {
-          toast.style.marginTop = "70px";
-        },
-      });
     }
   };
 
@@ -299,7 +300,7 @@ const OrderList = () => {
   const filteredOrders = localOrders.filter((order) => {
     const searchFields = ["email", "productid", "productname", "name"];
     return searchFields.some((field) =>
-      order[field].toString().toLowerCase().includes(searchTerm.toLowerCase())
+      order[field]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
 
@@ -417,7 +418,6 @@ const OrderList = () => {
                 <TableCell>Phone</TableCell>
                 <TableCell>Payment</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell>shipping Provider</TableCell>
                 <TableCell>Tracking Number</TableCell>
                 <TableCell>Time</TableCell>
                 <TableCell>Action</TableCell>
@@ -446,16 +446,15 @@ const OrderList = () => {
                       {order.email}
                     </TableCell>
                     <TableCell>{order.name}</TableCell>
-                    <TableCell>{order.productid}</TableCell>
-                    <TableCell>{order.productname}</TableCell>
-                    <TableCell>{order.category}</TableCell>
-                    <TableCell>{order.amount}</TableCell>
+                    <TableCell>{order.items[0].productid}</TableCell>
+                    <TableCell>{order.items[0].productname}</TableCell>
+                    <TableCell>{order.items[0].category}</TableCell>
+                    <TableCell>{order.items[0].amount}</TableCell>
                     <TableCell>{order.totalprice} บาท</TableCell>
                     <TableCell>{order.address}</TableCell>
                     <TableCell>{order.tel}</TableCell>
                     <TableCell>{order.payment}</TableCell>
                     <TableCell>{order.status}</TableCell>
-                    <TableCell>{order.provider}</TableCell>
                     <TableCell>{order.parcel}</TableCell>
                     <TableCell>
                       {formatTimeToBangkok(order.ordertime)}
@@ -575,26 +574,29 @@ const OrderList = () => {
                     DHL
                   </MenuItem>
                   <MenuItem value="Kerry Express">
-                  <img
+                    <img
                       src="/Images/kerry.png"
                       alt="Kerry Express"
                       style={{ marginRight: 8, height: "24px" }}
                     />
-                    Kerry Express</MenuItem>
+                    Kerry Express
+                  </MenuItem>
                   <MenuItem value="Flash Express">
-                  <img
+                    <img
                       src="/Images/flash.png"
                       alt="Flash Express"
                       style={{ marginRight: 8, height: "24px" }}
                     />
-                    Flash Express</MenuItem>
+                    Flash Express
+                  </MenuItem>
                   <MenuItem value="J&T Express">
-                  <img
+                    <img
                       src="/Images/J&T.png"
                       alt="J&T Express"
                       style={{ marginRight: 8, height: "24px" }}
                     />
-                    J&T Express</MenuItem>
+                    J&T Express
+                  </MenuItem>
                 </Select>
               </FormControl>
               <TextField
