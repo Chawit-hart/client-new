@@ -6,6 +6,7 @@ import { Button, Modal, FormControl, Form } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -50,8 +51,24 @@ const AdminDashboard = () => {
     if (token) {
       localStorage.setItem("token", token);
       fetchUsers();
+      fetchDashboard();
     }
   }, [token]);
+
+  const fetchDashboard = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/order/dashboard", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        }
+      });
+      const data = response.data;
+      setData(data);
+    } catch (error) {
+      console.log("Error fetching dashboard data:", error);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -239,10 +256,6 @@ const AdminDashboard = () => {
   const pageStyle = {
     fontFamily: "Kanit, sans-serif",
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const filteredUsers = searchQuery === "" ? users : users.filter(
     (user) => user._id.includes(searchQuery) || user.user.includes(searchQuery)

@@ -75,6 +75,8 @@ const Modal = styled.div`
   border-radius: 10px;
   z-index: 2;
   width: 50%;
+  max-height: 80%;
+  overflow-y: auto;
   font-family: "Kanit", sans-serif;
 `;
 
@@ -202,13 +204,18 @@ const AccHeader = styled.div`
   font-size: 2em;
 `;
 
+const SizesContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+`;
+
 const Products = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [productName, setProductName] = useState("");
   const [productDetail, setProductDetail] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [quantity, setQuantity] = useState({ XS: 0, S: 0, M: 0, L: 0, XL: 0 });
   const [price, setPrice] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
   const [products, setProducts] = useState([]);
@@ -219,18 +226,24 @@ const Products = () => {
     resetForm();
   };
 
-  const handleImageChange = (e) => setImageUpload(e.target.files[0]);
+  const handleImageChange = (e) => {
+    setImageUpload(e.target.files[0]);
+  };
+
+  const handleQuantityChange = (size) => (e) => {
+    setQuantity({ ...quantity, [size]: Number(e.target.value) });
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (
       !productName ||
-      !quantity ||
       !price ||
       !productDetail ||
       !selectedCategory ||
-      !imageUpload
+      !imageUpload ||
+      Object.values(quantity).every((val) => val === "")
     ) {
       Swal.fire({
         icon: "error",
@@ -245,16 +258,21 @@ const Products = () => {
     formData.append("category", selectedCategory);
     formData.append("detail", productDetail);
     formData.append("price", price);
-    formData.append("amount", JSON.stringify(quantity)); // Convert quantity to string
     formData.append("image", imageUpload);
+    formData.append("amount[S]", quantity.S);
+    formData.append("amount[M]", quantity.M);
+    formData.append("amount[L]", quantity.L);
+    formData.append("amount[XL]", quantity.XL);
+    formData.append("amount[XS]", quantity.XS);
 
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:3001/posts/upload-image",
         formData,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
+            Authorization: token,
           },
         }
       );
@@ -281,11 +299,10 @@ const Products = () => {
 
   const resetForm = () => {
     setProductName("");
-    setQuantity("");
+    setQuantity({ XS: 0, S: 0, M: 0, L: 0, XL: 0 });
     setPrice("");
     setProductDetail("");
     setSelectedCategory("");
-    setSelectedSize("");
     setImageUpload(null);
   };
 
@@ -315,7 +332,13 @@ const Products = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3001/posts/${id}`);
+          const token = localStorage.getItem("token");
+          await axios.delete(`http://localhost:3001/posts/${id}`,{
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            }
+          });
           Swal.fire({
             icon: "success",
             title: "The product has been successfully deleted!",
@@ -372,16 +395,16 @@ const Products = () => {
               />
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
-                <div>
-                  <h4>Available Sizes</h4>
-                  {product.amount &&
-                    typeof product.amount === "object" &&
-                    Object.keys(product.amount).map((key) => (
-                      <div key={key}>
-                        {key}: {product.amount[key]}
-                      </div>
-                    ))}
-                </div>
+              <div>
+                <h4>Available Sizes</h4>
+                {product.amount &&
+                  typeof product.amount === "object" &&
+                  Object.keys(product.amount).map((key) => (
+                    <div key={key}>
+                      {key}: {product.amount[key]}
+                    </div>
+                  ))}
+              </div>
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -438,14 +461,6 @@ const Products = () => {
             />
           </StyledLabel>
           <StyledLabel>
-            Quantity: <span style={{ color: "red" }}>*</span>
-            <StyledInput
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </StyledLabel>
-          <StyledLabel>
             Category: <span style={{ color: "red" }}>*</span>
             <StyledSelect
               value={selectedCategory}
@@ -465,18 +480,18 @@ const Products = () => {
             />
           </StyledLabel>
           <StyledLabel>
-            Size:
-            <StyledSelect
-              value={selectedSize}
-              onChange={(e) => setSelectedSize(e.target.value)}
-            >
-              <option value="">Select Size</option>
-              <option value="XS">XS (Extra-small)</option>
-              <option value="S">S (small)</option>
-              <option value="M">M (Medium)</option>
-              <option value="L">L (Large)</option>
-              <option value="XL">XL (Extra-Large)</option>
-            </StyledSelect>
+            Sizes:
+            <SizesContainer>
+              {["XS", "S", "M", "L", "XL"].map((size) => (
+                <StyledInput
+                  key={size}
+                  type="number"
+                  placeholder={`${size} Quantity`}
+                  value={quantity[size]}
+                  onChange={handleQuantityChange(size)}
+                />
+              ))}
+            </SizesContainer>
           </StyledLabel>
           <StyledLabel>
             <FileInputLabel htmlFor="product-image">
