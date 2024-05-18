@@ -9,7 +9,6 @@ export const useAdminAuth = () => useContext(AdminAuthContext);
 
 export const AdminAuthProvider = ({ children }) => {
     const [currentAdmin, setCurrentAdmin] = useState(JSON.parse(localStorage.getItem("currentAdmin")));
-    const navigate = useNavigate();
 
     return (
       <AdminAuthContext.Provider value={{ currentAdmin }}>

@@ -3,8 +3,8 @@ import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
 import { Button } from "react-bootstrap";
-import axios from "axios";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
+import axiosInstance from "../service/axiosConfig";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -20,25 +20,10 @@ const AdminDashboard = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const token = localStorage.getItem("token");
-
-  // const fetchDashboardData = async () => {
-  //   try {
-  //     const response = await axios.get("http://localhost:3001/order/dashboard",{
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         "Authorization": token,
-  //       }
-  //     });
-  //     setData(response.data);
-  //   } catch (error) {
-  //     console.error("There was an error fetching the dashboard:", error);
-  //   }
-  // };
-
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(
+      const token = localStorage.getItem("token");
+      const response = await axiosInstance.get(
         "http://localhost:3001/email/check-user",
         {
           headers: {
@@ -47,17 +32,21 @@ const AdminDashboard = () => {
           },
         }
       );
-      setUsers(response.data.users);
-      const tokenResponse = response.data.newToken;
-      console.log(
-        "🚀 ~ file: AdminDashboard.js:52 ~ fetchUsers ~ tokenResponse:",
-        tokenResponse
-      );
-      await localStorage.setItem("token", token);
+
+      // Handle nested response
+      const usersData = response.data.users || response.data;
+
+      if (Array.isArray(usersData)) {
+        setUsers(usersData);
+      } else {
+        console.error("Unexpected data format:", response.data);
+        setUsers([]);
+      }
+
       const storedUsername = localStorage.getItem("username");
 
       if (storedUsername) {
-        const currentUserData = response.data.users.find(
+        const currentUserData = usersData.find(
           (user) => user.user === storedUsername
         );
         setCurrentUser(currentUserData);
@@ -70,8 +59,13 @@ const AdminDashboard = () => {
 
   const addUser = async (userData) => {
     try {
-      await axios.post("http://localhost:3001/email/user", userData);
-      console.log("data", userData);
+      const token = localStorage.getItem("token");
+      await axiosInstance.post("http://localhost:3001/email/user", userData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+      });
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
@@ -80,7 +74,16 @@ const AdminDashboard = () => {
 
   const deleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:3001/email/delete-user/${userId}`);
+      const token = localStorage.getItem("token");
+      await axiosInstance.delete(
+        `http://localhost:3001/email/delete-user/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการลบผู้ใช้:", error);
@@ -132,6 +135,10 @@ const AdminDashboard = () => {
 
   const pageStyle = {
     fontFamily: "Kanit, sans-serif",
+  };
+
+  const editUser = (user) => {
+    console.log("Editing user:", user);
   };
 
   useEffect(() => {
@@ -209,7 +216,7 @@ const AdminDashboard = () => {
                 <th scope="col">UID</th>
                 <th scope="col">User</th>
                 <th scope="col">Status</th>
-                {currentUser && currentUser.userstatus === "admin" && (
+                {currentUser && currentUser.roles === "admin" && (
                   <th scope="col">Actions</th>
                 )}
               </tr>
@@ -220,14 +227,22 @@ const AdminDashboard = () => {
                   <td>{user._id}</td>
                   <td>{user.user}</td>
                   <td>{user.roles}</td>
-                  {currentUser && currentUser.userstatus === "admin" && (
+                  {currentUser && currentUser.roles === "admin" && (
                     <td>
                       <Button
                         variant="danger"
                         size="sm"
                         onClick={() => deleteUser(user._id)}
+                        style={{ marginRight: "10px" }}
                       >
                         <FaTrash />
+                      </Button>
+                      <Button
+                        variant="warning"
+                        size="sm"
+                        onClick={() => editUser(user)}
+                      >
+                        <FaEdit />
                       </Button>
                     </td>
                   )}
