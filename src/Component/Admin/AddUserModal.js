@@ -42,8 +42,14 @@ const AddUserModal = ({ show, handleClose, refreshUsers }) => {
       console.log('Submitting user data:', userData); // เพิ่ม log เพื่อตรวจสอบข้อมูล
 
       try {
-        const response = await axios.post('http://localhost:3001/email/user', userData);
-        console.log('API response:', response.data); // ตรวจสอบการตอบสนองจาก API
+        const token = localStorage.getItem("token");
+        const response = await axios.post('http://localhost:3001/email/user', userData, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token
+          }
+        });
+        console.log('API response:', response.data);
         refreshUsers();
         handleClose();
         Swal.fire({

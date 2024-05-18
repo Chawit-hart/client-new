@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
-import { Button } from "react-bootstrap";
+import { Button, Modal, FormControl, Form } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
@@ -16,13 +18,42 @@ const AdminDashboard = () => {
   });
   const [username, setUsername] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToEdit, setUserToEdit] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [role, setRole] = useState("");
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleDeleteClose = () => setShowDeleteModal(false);
+  const handleDeleteShow = (user) => {
+    setUserToDelete(user);
+    setShowDeleteModal(true);
+  };
+  const handleEditClose = () => setShowEditModal(false);
+  const handleEditShow = (user) => {
+    setUserToEdit(user);
+    setRole(user.roles); // Set the role state to the current role of the user
+    setShowEditModal(true);
+  };
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("token", token);
+      fetchUsers();
+    }
+  }, [token]);
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem("token");
       const response = await axiosInstance.get(
         "http://localhost:3001/email/check-user",
         {
@@ -33,8 +64,8 @@ const AdminDashboard = () => {
         }
       );
 
-      // Handle nested response
-      const usersData = response.data.users || response.data;
+      const { users: usersData, newToken } = response.data;
+      setToken(newToken); // Update token state
 
       if (Array.isArray(usersData)) {
         setUsers(usersData);
@@ -59,13 +90,18 @@ const AdminDashboard = () => {
 
   const addUser = async (userData) => {
     try {
-      const token = localStorage.getItem("token");
-      await axiosInstance.post("http://localhost:3001/email/user", userData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
-        },
-      });
+      const response = await axiosInstance.post(
+        "http://localhost:3001/email/user",
+        userData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
+      const { newToken } = response.data;
+      setToken(newToken); // Update token state
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
@@ -74,8 +110,7 @@ const AdminDashboard = () => {
 
   const deleteUser = async (userId) => {
     try {
-      const token = localStorage.getItem("token");
-      await axiosInstance.delete(
+      const response = await axiosInstance.delete(
         `http://localhost:3001/email/delete-user/${userId}`,
         {
           headers: {
@@ -84,9 +119,46 @@ const AdminDashboard = () => {
           },
         }
       );
+      const { newToken } = response.data;
+      setToken(newToken); // Update token state
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการลบผู้ใช้:", error);
+    }
+  };
+
+  const updateUser = async (userId, updatedData) => {
+    try {
+      const response = await axiosInstance.put(
+        `http://localhost:3001/email/update-user/${userId}`,
+        updatedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
+      const { newToken } = response.data;
+      setToken(newToken); // Update token state
+      fetchUsers();
+    } catch (error) {
+      console.error("มีข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้:", error);
+    }
+  };
+
+  const handleEditSubmit = (event) => {
+    event.preventDefault();
+    if (userToEdit) {
+      updateUser(userToEdit._id, { roles: role });
+      handleEditClose();
+    }
+  };
+
+  const confirmDeleteUser = async () => {
+    if (userToDelete) {
+      await deleteUser(userToDelete._id);
+      handleDeleteClose();
     }
   };
 
@@ -137,13 +209,13 @@ const AdminDashboard = () => {
     fontFamily: "Kanit, sans-serif",
   };
 
-  const editUser = (user) => {
-    console.log("Editing user:", user);
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const filteredUsers = users.filter(
+    (user) => user._id.includes(searchQuery) || user.user.includes(searchQuery)
+  );
 
   return (
     <div className="container-fluid" style={pageStyle}>
@@ -200,58 +272,114 @@ const AdminDashboard = () => {
             }}
           >
             <h2>รายชื่อผู้ใช้</h2>
-            <Button variant="primary" onClick={handleShow}>
-              Add User
-            </Button>
+            {currentUser && currentUser.roles === "admin" && (
+              <Button variant="primary" onClick={handleShow}>
+                Add User
+              </Button>
+            )}
           </div>
+          <FormControl
+            type="text"
+            placeholder="Search by UID or Username"
+            className="mb-4"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ borderRadius: "20px" }}
+          />
           <AddUserModal
             show={show}
             handleClose={handleClose}
             addUser={addUser}
             refreshUsers={fetchUsers}
           />
-          <table className="table table-hover">
-            <thead className="thead-dark">
-              <tr>
-                <th scope="col">UID</th>
-                <th scope="col">User</th>
-                <th scope="col">Status</th>
-                {currentUser && currentUser.roles === "admin" && (
-                  <th scope="col">Actions</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user, index) => (
-                <tr key={index}>
-                  <td>{user._id}</td>
-                  <td>{user.user}</td>
-                  <td>{user.roles}</td>
+          {filteredUsers.length > 0 ? (
+            <table className="table table-hover">
+              <thead className="thead-dark">
+                <tr>
+                  <th scope="col">UID</th>
+                  <th scope="col">User</th>
+                  <th scope="col">Role</th>
                   {currentUser && currentUser.roles === "admin" && (
-                    <td>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => deleteUser(user._id)}
-                        style={{ marginRight: "10px" }}
-                      >
-                        <FaTrash />
-                      </Button>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        onClick={() => editUser(user)}
-                      >
-                        <FaEdit />
-                      </Button>
-                    </td>
+                    <th scope="col">Actions</th>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user, index) => (
+                  <tr key={index}>
+                    <td>{user._id}</td>
+                    <td>{user.user}</td>
+                    <td>{user.roles}</td>
+                    {currentUser && currentUser.roles === "admin" && (
+                      <td>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => handleEditShow(user)}
+                          style={{ marginRight: "10px" }}
+                        >
+                          <FaEdit />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteShow(user)}
+                        >
+                          <FaTrash />
+                        </Button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>ไม่พบสิ่งที่ค้นหา</p>
+          )}
         </div>
       </div>
+      <Modal show={showDeleteModal} onHide={handleDeleteClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete user {userToDelete?.user}?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleDeleteClose}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={confirmDeleteUser}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showEditModal} onHide={handleEditClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit User Role</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEditSubmit}>
+            <Form.Group controlId="formRole">
+              <Form.Label>Role</Form.Label>
+              <Form.Control
+                as="select"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </Form.Control>
+            </Form.Group>
+            <Button
+              variant="primary"
+              type="submit"
+              style={{ marginTop: "15px" }}
+            >
+              Save Changes
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
