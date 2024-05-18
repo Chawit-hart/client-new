@@ -25,6 +25,7 @@ const AdminLoginPage = () => {
       if (response.data.isAdmin) {
         localStorage.setItem("username", username);
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("currentAdmin", response.data.isAdmin);
         Swal.fire({
           position: "top-end",
           icon: "success",
@@ -34,7 +35,7 @@ const AdminLoginPage = () => {
           timer: 1500,
           toast: true,
         });
-        navigate("/dashboard");
+        navigate("/Dashboard");
       } else {
         Swal.fire({
           position: "top-end",
