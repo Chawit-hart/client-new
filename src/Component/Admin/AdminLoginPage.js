@@ -11,20 +11,20 @@ const AdminLoginPage = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const { login } = useAdminAuth();
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:3001/email/", {
+      const response = await axios.post("http://localhost:3001/email/login", {
         user: username,
         pass: password,
       });
 
+      console.log(response);
+
       if (response.data.isAdmin) {
-        await login(username, password);
         localStorage.setItem("username", username);
+        localStorage.setItem("token", response.data.token);
         Swal.fire({
           position: "top-end",
           icon: "success",

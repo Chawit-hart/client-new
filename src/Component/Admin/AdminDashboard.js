@@ -20,19 +20,31 @@ const AdminDashboard = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await axios.get("http://localhost:3001/order/dashboard");
-      setData(response.data);
-    } catch (error) {
-      console.error("There was an error fetching the dashboard:", error);
-    }
-  };
+  const token = localStorage.getItem("token");
+
+  // const fetchDashboardData = async () => {
+  //   try {
+  //     const response = await axios.get("http://localhost:3001/order/dashboard",{
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Authorization": token,
+  //       }
+  //     });
+  //     setData(response.data);
+  //   } catch (error) {
+  //     console.error("There was an error fetching the dashboard:", error);
+  //   }
+  // };
 
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/email/check-user"
+        "http://localhost:3001/email/check-user",{
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token
+          }
+        }
       );
       setUsers(response.data);
       const storedUsername = localStorage.getItem("username");
@@ -113,7 +125,6 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
     fetchUsers();
   }, []);
 
@@ -198,7 +209,7 @@ const AdminDashboard = () => {
                 <tr key={index}>
                   <td>{user._id}</td>
                   <td>{user.user}</td>
-                  <td>{user.userstatus}</td>
+                  <td>{user.roles}</td>
                   {currentUser && currentUser.userstatus === "admin" && (
                     <td>
                       <Button

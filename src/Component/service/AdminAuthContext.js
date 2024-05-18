@@ -31,29 +31,6 @@ export const AdminAuthProvider = ({ children }) => {
         return () => clearInterval(intervalId);
       }, []);
 
-    const login = async (username, password) => {
-      try {
-        const response = await axios.post("http://localhost:3001/email", {
-          user: username,
-          pass: password,
-        });
-        if (response.data && response.data.isAdmin) {
-          const adminData = { username, ...response.data };
-          const currentTime = new Date().getTime();
-          const sessionExpiration = currentTime + (30 * 60 * 1000); //ตั้ง Session ไว้ที่ 30 นาที
-          localStorage.setItem("currentAdmin", JSON.stringify(adminData));
-          localStorage.setItem("sessionExpiration", sessionExpiration.toString());
-          setCurrentAdmin(adminData);
-          navigate("/Dashboard");
-        } else {
-          Swal.fire("Access Denied", "You are not an admin.", "error");
-        }
-      } catch (error) {
-        console.error("Error logging in:", error.response.data);
-        Swal.fire("Login Failed", error.response.data.message, "error");
-      }
-    };
-
     const logout = (isSessionExpired = false) => {
         setCurrentAdmin(null);
         localStorage.removeItem("currentAdmin");
@@ -71,7 +48,7 @@ export const AdminAuthProvider = ({ children }) => {
       };
 
     return (
-      <AdminAuthContext.Provider value={{ currentAdmin, login, logout }}>
+      <AdminAuthContext.Provider value={{ currentAdmin, logout }}>
         {children}
       </AdminAuthContext.Provider>
     );
