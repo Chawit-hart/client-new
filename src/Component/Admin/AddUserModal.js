@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddUserModal = ({ show, handleClose, refreshUsers }) => {
   const [user, setUser] = useState("");
@@ -14,6 +15,8 @@ const AddUserModal = ({ show, handleClose, refreshUsers }) => {
     repassword: false,
     userstatus: false,
   });
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -73,13 +76,15 @@ const AddUserModal = ({ show, handleClose, refreshUsers }) => {
         setRepassword("");
         setUserStatus("");
       } catch (error) {
-        console.error("Error adding user:", error); // เพิ่ม log เพื่อตรวจสอบข้อผิดพลาด
         Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: `Failed to add user! ${
-            error.response ? error.response.data : error.message
-          }`,
+          title: "Session Expired",
+          text: "Your session has expired. Please log in again.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/admin-login");
+          }
         });
       }
     } else {
