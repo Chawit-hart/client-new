@@ -5,6 +5,7 @@ import AddUserModal from "./AddUserModal";
 import { Button, Modal, FormControl, Form } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
+import Swal from "sweetalert2";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -152,6 +153,18 @@ const AdminDashboard = () => {
     if (userToEdit) {
       updateUser(userToEdit._id, { roles: role });
       handleEditClose();
+      Swal.fire({
+        icon: "success",
+        toast: true,
+        text: "User updated successfully!",
+        position: "top-end",
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
     }
   };
 
@@ -159,6 +172,18 @@ const AdminDashboard = () => {
     if (userToDelete) {
       await deleteUser(userToDelete._id);
       handleDeleteClose();
+      Swal.fire({
+        icon: "success",
+        toast: true,
+        text: "User deleted successfully!",
+        position: "top-end",
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
     }
   };
 
@@ -213,7 +238,7 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter(
+  const filteredUsers = searchQuery === "" ? users : users.filter(
     (user) => user._id.includes(searchQuery) || user.user.includes(searchQuery)
   );
 

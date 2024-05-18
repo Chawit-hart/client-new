@@ -213,8 +213,6 @@ const Products = () => {
   const [imageUpload, setImageUpload] = useState(null);
   const [products, setProducts] = useState([]);
 
-  const [isFormValid, setIsFormValid] = useState(true); // ห้ามลบ isFormValid เพราะว่าถ้าลบ มันจะเข้าใจว่า ตัวนี้จะไม่ใช่ฟังก์ชัน
-
   const openModal = () => setModalOpen(true);
   const closeModal = () => {
     setModalOpen(false);
@@ -225,8 +223,7 @@ const Products = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
-    // ตรวจสอบความครบถ้วนของข้อมูล
+
     if (
       !productName ||
       !quantity ||
@@ -243,31 +240,32 @@ const Products = () => {
       return;
     }
 
-  
-    // สร้าง FormData และเพิ่มข้อมูลสินค้าและไฟล์รูปภาพ
     const formData = new FormData();
     formData.append("name", productName);
     formData.append("category", selectedCategory);
     formData.append("detail", productDetail);
     formData.append("price", price);
-    formData.append("amount", quantity);
+    formData.append("amount", JSON.stringify(quantity)); // Convert quantity to string
     formData.append("image", imageUpload);
-    if (selectedSize) formData.append("size", selectedSize);
-  
+
     try {
-      const response = await axios.post("http://localhost:3001/posts/upload-image", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
+      const response = await axios.post(
+        "http://localhost:3001/posts/upload-image",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       Swal.fire({
         icon: "success",
         title: "Product added successfully",
         showConfirmButton: false,
         timer: 1500,
       });
-  
+
       closeModal();
       resetForm();
       fetchProducts();
@@ -280,7 +278,6 @@ const Products = () => {
       });
     }
   };
-  
 
   const resetForm = () => {
     setProductName("");
@@ -309,12 +306,12 @@ const Products = () => {
     Swal.fire({
       title: `Do you want to delete the product '${name}'?`,
       text: "You will not be able to recover this action!",
-      icon: 'warning',
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Confirm',
-      cancelButtonText: 'Cancel'
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Confirm",
+      cancelButtonText: "Cancel",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -376,6 +373,11 @@ const Products = () => {
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
               <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
+              <div>
+                {product.amount && typeof product.amount === 'object' && Object.keys(product.amount).map((key) => (
+                  <div key={key}>{key}: {product.amount[key]}</div>
+                ))}
+              </div>
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -394,6 +396,11 @@ const Products = () => {
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
               <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
+              <div>
+                {product.amount && typeof product.amount === 'object' && Object.keys(product.amount).map((key) => (
+                  <div key={key}>{key}: {product.amount[key]}</div>
+                ))}
+              </div>
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -425,7 +432,7 @@ const Products = () => {
           <StyledLabel>
             Quantity: <span style={{ color: "red" }}>*</span>
             <StyledInput
-              type="text"
+              type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
             />
@@ -444,7 +451,7 @@ const Products = () => {
           <StyledLabel>
             Price: <span style={{ color: "red" }}>*</span>
             <StyledInput
-              type="text"
+              type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -471,7 +478,6 @@ const Products = () => {
               <StyledInput
                 type="file"
                 id="product-image"
-                value={setImageUpload}
                 onChange={handleImageChange}
                 accept="image/jpeg, image/png"
               />
