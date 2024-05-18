@@ -206,32 +206,33 @@ export default function Cart() {
         for (const item of filteredItems) {
           await axios.delete(`http://localhost:3001/cart/${item._id}`);
         }
-      }
 
-      // หากสั่งซื้อสำเร็จ ก็ลบเฉพาะสินค้าที่สั่งซื้อออกจากตะกร้า
-      const filteredItems1 = items.filter((item) => !item.checked);
-      setItems(filteredItems1);
-      setCartCount(filteredItems1.length);
-      setOpenPayment(false);
-      Swal.fire({
-        icon: "success",
-        title: "การสั่งซื้อสำเร็จ",
-        text: "ขอบคุณที่ทำการสั่งซื้อสินค้า",
-        position: "top-end",
-        toast: true,
-        showConfirmButton: false,
-        timerProgressBar: true,
-        timer: 3000,
-        didOpen: (toast) => {
-          toast.style.marginTop = "70px";
-        },
-      });
-    } catch {
-      // แสดงข้อความจาก Swal2 เมื่อเกิดข้อผิดพลาดในการ Submit
+        // หากสั่งซื้อสำเร็จ ก็ลบเฉพาะสินค้าที่สั่งซื้อออกจากตะกร้า
+        const filteredItems1 = items.filter((item) => !item.checked);
+        setItems(filteredItems1);
+        setCartCount(filteredItems1.length);
+        setOpenPayment(false);
+        Swal.fire({
+          icon: "success",
+          title: "การสั่งซื้อสำเร็จ",
+          text: "ขอบคุณที่ทำการสั่งซื้อสินค้า",
+          position: "top-end",
+          toast: true,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 3000,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
+      }
+    } catch (error) {
+      console.log("🚀 ~ file: Cart.js:230 ~ handleSubmit ~ error:", error);
+      const errorMessage = error.response ? error.response.data.message : "มีปัญหาในการสั่งซื้อสินค้า กรุณาลองใหม่ภายหลัง";
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: "มีปัญหาในการสั่งซื้อสินค้า กรุณาลองใหม่ภายหลัง",
+        text: errorMessage,
         position: "top-end",
         toast: true,
         showConfirmButton: false,
