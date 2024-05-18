@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 function UserEditModal({ show, handleClose, user, refreshUsers }) {
   const [username, setUsername] = useState("");
@@ -9,6 +10,8 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -58,9 +61,9 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
         {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": token,
+            Authorization: token,
           },
-        },
+        }
       );
       refreshUsers();
       handleClose();
@@ -77,15 +80,15 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      console.error("Error updating user:", error);
       Swal.fire({
-        icon: "error",
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        text: "Failed to update user.",
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
       });
     }
   };

@@ -33,6 +33,7 @@ import Swal from "sweetalert2";
 import axios from "axios";
 import { InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate } from "react-router-dom";
 
 const OrderContainer = styled.div`
   display: flex;
@@ -90,6 +91,8 @@ const OrderList = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [shippingProvider, setShippingProvider] = useState("");
 
+  const navigate = useNavigate();
+
   const fetchOrders = async () => {
     try {
       const response = await axios.get("http://localhost:3001/order");
@@ -114,7 +117,16 @@ const OrderList = () => {
       const url = URL.createObjectURL(response.data);
       setSlipUrl(url);
     } catch (error) {
-      console.error("There was an error fetching the slip:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -195,7 +207,6 @@ const OrderList = () => {
             provider: shippingProvider,
           }
         );
-        console.log(response.data.message);
         setStatusDialogOpen(false);
         fetchOrders();
         Swal.fire({
@@ -211,18 +222,15 @@ const OrderList = () => {
           },
         });
       } catch (error) {
-        console.error("There was an error updating the order status:", error);
         Swal.fire({
-          icon: "error",
-          title: "Failed to update order status.",
-          position: "top-end",
-          toast: true,
-          showConfirmButton: false,
-          timerProgressBar: true,
-          timer: 1500,
-          didOpen: (toast) => {
-            toast.style.marginTop = "70px";
-          },
+          title: "Session Expired",
+          text: "Your session has expired. Please log in again.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/admin-login");
+          }
         });
       }
     }
@@ -276,18 +284,15 @@ const OrderList = () => {
         });
         setLocalOrders(localOrders.filter((o) => o._id !== order._id));
       } catch (error) {
-        console.error("Error deleting order:", error);
         Swal.fire({
-          icon: "error",
-          title: "Failed to delete order",
-          position: "top-end",
-          toast: true,
-          showConfirmButton: false,
-          timerProgressBar: true,
-          timer: 1500,
-          didOpen: (toast) => {
-            toast.style.marginTop = "70px";
-          },
+          title: "Session Expired",
+          text: "Your session has expired. Please log in again.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/admin-login");
+          }
         });
       }
     }
@@ -341,18 +346,15 @@ const OrderList = () => {
           },
         });
       } catch (error) {
-        console.error("Error deleting orders:", error);
         Swal.fire({
-          icon: "error",
-          title: "There was a problem deleting your orders.",
-          position: "top-end",
-          toast: true,
-          showConfirmButton: false,
-          timerProgressBar: true,
-          timer: 1500,
-          didOpen: (toast) => {
-            toast.style.marginTop = "70px";
-          },
+          title: "Session Expired",
+          text: "Your session has expired. Please log in again.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/admin-login");
+          }
         });
       }
     }

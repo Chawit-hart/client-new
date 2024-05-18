@@ -7,6 +7,7 @@ import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
@@ -25,6 +26,8 @@ const AdminDashboard = () => {
   const [userToEdit, setUserToEdit] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [role, setRole] = useState("");
+
+  const navigate = useNavigate();
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -57,16 +60,28 @@ const AdminDashboard = () => {
 
   const fetchDashboard = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/order/dashboard", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token,
+      const response = await axios.get(
+        "http://localhost:3001/order/dashboard",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
         }
-      });
+      );
       const data = response.data;
       setData(data);
     } catch (error) {
-      console.log("Error fetching dashboard data:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -102,7 +117,16 @@ const AdminDashboard = () => {
         setUsername(storedUsername);
       }
     } catch (error) {
-      console.error("มีข้อผิดพลาดในการดึงข้อมูลผู้ใช้:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -122,7 +146,16 @@ const AdminDashboard = () => {
       setToken(newToken); // Update token state
       fetchUsers();
     } catch (error) {
-      console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -141,7 +174,16 @@ const AdminDashboard = () => {
       setToken(newToken); // Update token state
       fetchUsers();
     } catch (error) {
-      console.error("มีข้อผิดพลาดในการลบผู้ใช้:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -166,7 +208,16 @@ const AdminDashboard = () => {
         )
       );
     } catch (error) {
-      console.error("มีข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -257,9 +308,13 @@ const AdminDashboard = () => {
     fontFamily: "Kanit, sans-serif",
   };
 
-  const filteredUsers = searchQuery === "" ? users : users.filter(
-    (user) => user._id.includes(searchQuery) || user.user.includes(searchQuery)
-  );
+  const filteredUsers =
+    searchQuery === ""
+      ? users
+      : users.filter(
+          (user) =>
+            user._id.includes(searchQuery) || user.user.includes(searchQuery)
+        );
 
   return (
     <div className="container-fluid" style={pageStyle}>

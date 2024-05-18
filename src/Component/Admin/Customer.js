@@ -3,6 +3,8 @@ import styled from "styled-components";
 import axios from "axios";
 import { TextField, InputAdornment } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const CustomerContainer = styled.div`
   display: flex;
@@ -34,6 +36,8 @@ const Customer = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const token = localStorage.getItem("token");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -44,7 +48,16 @@ const Customer = () => {
         });
         setCustomers(response.data.listOfUsers);
       } catch (error) {
-        console.error("มีปัญหาในการดึงข้อมูล:", error);
+        Swal.fire({
+          title: "Session Expired",
+          text: "Your session has expired. Please log in again.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/admin-login");
+          }
+        });
       }
     };
 

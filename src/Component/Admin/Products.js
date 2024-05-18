@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { BiPlusCircle, BiTrash } from "react-icons/bi";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ProductsContainer = styled.div`
   display: flex;
@@ -37,12 +38,6 @@ const ProductName = styled.h3`
 const ProductPrice = styled.p`
   font-size: 1em;
   color: #666;
-`;
-
-const ProductQuantity = styled.p`
-  font-size: 0.9em;
-  color: #333;
-  margin-top: 10px;
 `;
 
 const StyledBiPlusCircle = styled(BiPlusCircle)`
@@ -221,6 +216,8 @@ const Products = () => {
   const imageInputRef = useRef(null);
   const [products, setProducts] = useState([]);
 
+  const navigate = useNavigate();
+
   const openModal = () => setModalOpen(true);
   const closeModal = () => {
     setModalOpen(false);
@@ -289,11 +286,15 @@ const Products = () => {
       resetForm();
       fetchProducts();
     } catch (error) {
-      console.error("Error submitting the product:", error);
       Swal.fire({
-        icon: "error",
-        title: "An error occurred while saving the product",
-        showConfirmButton: true,
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
       });
     }
   };
@@ -315,7 +316,16 @@ const Products = () => {
       const response = await axios.get("http://localhost:3001/posts");
       setProducts(response.data);
     } catch (error) {
-      console.error("Error fetching products data:", error);
+      Swal.fire({
+        title: "Session Expired",
+        text: "Your session has expired. Please log in again.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/admin-login");
+        }
+      });
     }
   };
 
@@ -357,18 +367,15 @@ const Products = () => {
           });
           fetchProducts();
         } catch (error) {
-          console.error("Error deleting product:", error);
           Swal.fire({
-            icon: "error",
-            title: "An error occurred while deleting the product.",
-            position: "top-end",
-            toast: true,
-            showConfirmButton: false,
-            timerProgressBar: true,
-            timer: 1500,
-            didOpen: (toast) => {
-              toast.style.marginTop = "70px";
-            },
+            title: "Session Expired",
+            text: "Your session has expired. Please log in again.",
+            icon: "warning",
+            confirmButtonText: "OK",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/admin-login");
+            }
           });
         }
       }
@@ -399,16 +406,18 @@ const Products = () => {
               />
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
-              {product.amount && typeof product.amount === "object" && Object.keys(product.amount).length > 0 && (
-                <div>
-                  <h4>Available Sizes</h4>
-                  {Object.keys(product.amount).map((key) => (
-                    <div key={key}>
-                      {key}: {product.amount[key]}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {product.amount &&
+                typeof product.amount === "object" &&
+                Object.keys(product.amount).length > 0 && (
+                  <div>
+                    <h4>Available Sizes</h4>
+                    {Object.keys(product.amount).map((key) => (
+                      <div key={key}>
+                        {key}: {product.amount[key]}
+                      </div>
+                    ))}
+                  </div>
+                )}
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -426,16 +435,18 @@ const Products = () => {
               />
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
-              {product.amount && typeof product.amount === "object" && Object.keys(product.amount).length > 0 && (
-                <div>
-                  <h4>Available Sizes</h4>
-                  {Object.keys(product.amount).map((key) => (
-                    <div key={key}>
-                      {key}: {product.amount[key]}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {product.amount &&
+                typeof product.amount === "object" &&
+                Object.keys(product.amount).length > 0 && (
+                  <div>
+                    <h4>Available Sizes</h4>
+                    {Object.keys(product.amount).map((key) => (
+                      <div key={key}>
+                        {key}: {product.amount[key]}
+                      </div>
+                    ))}
+                  </div>
+                )}
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
