@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
-import { Button, Modal, FormControl } from "react-bootstrap";
+import { Button, Modal, FormControl, Form } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
 
@@ -10,6 +10,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [data, setData] = useState({
     ProductCountSuccess: 0,
     ProductCount: 0,
@@ -19,7 +20,9 @@ const AdminDashboard = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [userToDelete, setUserToDelete] = useState(null);
+  const [userToEdit, setUserToEdit] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [role, setRole] = useState("");
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -27,6 +30,12 @@ const AdminDashboard = () => {
   const handleDeleteShow = (user) => {
     setUserToDelete(user);
     setShowDeleteModal(true);
+  };
+  const handleEditClose = () => setShowEditModal(false);
+  const handleEditShow = (user) => {
+    setUserToEdit(user);
+    setRole(user.roles); // Set the role state to the current role of the user
+    setShowEditModal(true);
   };
 
   useEffect(() => {
@@ -118,6 +127,34 @@ const AdminDashboard = () => {
     }
   };
 
+  const updateUser = async (userId, updatedData) => {
+    try {
+      const response = await axiosInstance.put(
+        `http://localhost:3001/email/update-user/${userId}`,
+        updatedData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+        }
+      );
+      const { newToken } = response.data;
+      setToken(newToken); // Update token state
+      fetchUsers();
+    } catch (error) {
+      console.error("มีข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้:", error);
+    }
+  };
+
+  const handleEditSubmit = (event) => {
+    event.preventDefault();
+    if (userToEdit) {
+      updateUser(userToEdit._id, { roles: role });
+      handleEditClose();
+    }
+  };
+
   const confirmDeleteUser = async () => {
     if (userToDelete) {
       await deleteUser(userToDelete._id);
@@ -172,16 +209,12 @@ const AdminDashboard = () => {
     fontFamily: "Kanit, sans-serif",
   };
 
-  const editUser = (user) => {
-    console.log("Editing user:", user);
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = users.filter((user) =>
-    user._id.includes(searchQuery) || user.user.includes(searchQuery)
+  const filteredUsers = users.filter(
+    (user) => user._id.includes(searchQuery) || user.user.includes(searchQuery)
   );
 
   return (
@@ -264,7 +297,7 @@ const AdminDashboard = () => {
                 <tr>
                   <th scope="col">UID</th>
                   <th scope="col">User</th>
-                  <th scope="col">Status</th>
+                  <th scope="col">Role</th>
                   {currentUser && currentUser.roles === "admin" && (
                     <th scope="col">Actions</th>
                   )}
@@ -281,7 +314,7 @@ const AdminDashboard = () => {
                         <Button
                           variant="warning"
                           size="sm"
-                          onClick={() => editUser(user)}
+                          onClick={() => handleEditShow(user)}
                           style={{ marginRight: "10px" }}
                         >
                           <FaEdit />
@@ -319,6 +352,33 @@ const AdminDashboard = () => {
             Delete
           </Button>
         </Modal.Footer>
+      </Modal>
+      <Modal show={showEditModal} onHide={handleEditClose} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit User Role</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleEditSubmit}>
+            <Form.Group controlId="formRole">
+              <Form.Label>Role</Form.Label>
+              <Form.Control
+                as="select"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </Form.Control>
+            </Form.Group>
+            <Button
+              variant="primary"
+              type="submit"
+              style={{ marginTop: "15px" }}
+            >
+              Save Changes
+            </Button>
+          </Form>
+        </Modal.Body>
       </Modal>
     </div>
   );
