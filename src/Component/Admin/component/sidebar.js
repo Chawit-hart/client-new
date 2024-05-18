@@ -15,6 +15,52 @@ const SidebarContainer = styled.div`
   font-family: 'Kanit', sans-serif;
   background-color: white;
   z-index: 100;
+  transform: ${({ isOpen }) => (isOpen ? 'translateX(0)' : 'translateX(-100%)')};
+  transition: transform 0.3s ease-in-out;
+`;
+
+const HamburgerButton = styled.div`
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+
+  span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: black;
+    margin: 3px 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  span:nth-child(1) {
+    transform: ${({ isOpen }) => (isOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none')};
+  }
+
+  span:nth-child(2) {
+    opacity: ${({ isOpen }) => (isOpen ? '0' : '1')};
+  }
+
+  span:nth-child(3) {
+    transform: ${({ isOpen }) => (isOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none')};
+  }
 `;
 
 const Title = styled.div`
@@ -99,26 +145,32 @@ const DropdownItem = styled.div`
 `;
 
 const Sidebar = ({ currentUser, refreshUsers }) => {
-  const [ username, setUsername ] = useState("");
+  const [username, setUsername] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [editShow, setEditShow] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const navigate = useNavigate();
 
+  const smoothNavigate = (path) => {
+    setSidebarOpen(false);
+    setTimeout(() => navigate(path), 300); // รอให้ sidebar ปิดก่อนถึงจะ navigate
+  };
+
   const handleToDashboard = () => {
-    navigate('/Dashboard');
+    smoothNavigate('/Dashboard');
   };
 
   const handleToCustomer = () => {
-    navigate('/Customers');
+    smoothNavigate('/Customers');
   };
 
   const handleToProduct = () => {
-    navigate('/Products');
+    smoothNavigate('/Products');
   };
 
   const handleToOrderList = () => {
-    navigate('/OrderList');
+    smoothNavigate('/OrderList');
   };
 
   const handleLogout = () => {
@@ -144,7 +196,7 @@ const Sidebar = ({ currentUser, refreshUsers }) => {
 
   useEffect(() => {
     const savedUsername = localStorage.getItem("username");
-  
+
     if (savedUsername) {
       setUsername(savedUsername);
     } else {
@@ -159,49 +211,56 @@ const Sidebar = ({ currentUser, refreshUsers }) => {
           console.error("Error fetching user data:", error);
         }
       };
-  
+
       fetchUserData();
     }
   }, []);
 
   return (
-    <SidebarContainer>
-      <Title>AdminPanel</Title>
-      <ListGroup>
-        <ListItem onClick={handleToDashboard}>
-          <i className="bi bi-speedometer2 me-2"></i>Dashboard
-        </ListItem>
-        <ListItem onClick={handleToCustomer}>
-          <i className="bi bi-people me-2"></i>Customers
-        </ListItem>
-        <ListItem onClick={handleToOrderList}>
-        <i className="bi bi-clipboard me-2"></i>Order list
-        </ListItem>
-        <ListItem onClick={handleToProduct}>
-          <i className="bi bi-bag me-2"></i>Products
-        </ListItem>
-      </ListGroup>
-      <UsernameContainer>
-        <span>{username}</span>
-        <IconContainer>
-          <Icon className="bi bi-gear" onClick={toggleDropdown}></Icon>
-          {showDropdown && (
-            <DropdownMenu>
-              <DropdownItem onClick={handleSettings}>Change Password</DropdownItem>
-            </DropdownMenu>
-          )}
-          <Icon className="bi bi-box-arrow-right" onClick={handleLogout}></Icon>
-        </IconContainer>
-      </UsernameContainer>
-      {currentUser && (
-        <UserEditModal
-          show={editShow}
-          handleClose={handleEditClose}
-          user={currentUser}
-          refreshUsers={refreshUsers}
-        />
-      )}
-    </SidebarContainer>
+    <>
+      <HamburgerButton onClick={() => setSidebarOpen(!isSidebarOpen)} isOpen={isSidebarOpen}>
+        <span></span>
+        <span></span>
+        <span></span>
+      </HamburgerButton>
+      <SidebarContainer isOpen={isSidebarOpen}>
+        <Title style={{ marginTop: '50px' }}>AdminPanel</Title>
+        <ListGroup>
+          <ListItem onClick={handleToDashboard}>
+            <i className="bi bi-speedometer2 me-2"></i>Dashboard
+          </ListItem>
+          <ListItem onClick={handleToCustomer}>
+            <i className="bi bi-people me-2"></i>Customers
+          </ListItem>
+          <ListItem onClick={handleToOrderList}>
+            <i className="bi bi-clipboard me-2"></i>Order list
+          </ListItem>
+          <ListItem onClick={handleToProduct}>
+            <i className="bi bi-bag me-2"></i>Products
+          </ListItem>
+        </ListGroup>
+        <UsernameContainer>
+          <span>{username}</span>
+          <IconContainer>
+            <Icon className="bi bi-gear" onClick={toggleDropdown}></Icon>
+            {showDropdown && (
+              <DropdownMenu>
+                <DropdownItem onClick={handleSettings}>Change Password</DropdownItem>
+              </DropdownMenu>
+            )}
+            <Icon className="bi bi-box-arrow-right" onClick={handleLogout}></Icon>
+          </IconContainer>
+        </UsernameContainer>
+        {currentUser && (
+          <UserEditModal
+            show={editShow}
+            handleClose={handleEditClose}
+            user={currentUser}
+            refreshUsers={refreshUsers}
+          />
+        )}
+      </SidebarContainer>
+    </>
   );
 };
 

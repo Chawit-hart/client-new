@@ -51,6 +51,7 @@ function UserEditModal({ show, handleClose, user, refreshUsers }) {
         `http://localhost:3001/email/update-user/${user._id}`,
         {
           _id: user._id,
+          old: oldPassword,
           pass: newPassword,
           userStatus,
         },
