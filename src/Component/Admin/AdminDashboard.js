@@ -39,17 +39,27 @@ const AdminDashboard = () => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3001/email/check-user",{
+        "http://localhost:3001/email/check-user",
+        {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": token
-          }
+            Authorization: token,
+          },
         }
       );
-      setUsers(response.data);
+      setUsers(response.data.users);
+      const tokenResponse = response.data.newToken;
+      console.log(
+        "🚀 ~ file: AdminDashboard.js:52 ~ fetchUsers ~ tokenResponse:",
+        tokenResponse
+      );
+      await localStorage.setItem("token", token);
       const storedUsername = localStorage.getItem("username");
+
       if (storedUsername) {
-        const currentUserData = response.data.find(user => user.user === storedUsername);
+        const currentUserData = response.data.users.find(
+          (user) => user.user === storedUsername
+        );
         setCurrentUser(currentUserData);
         setUsername(storedUsername);
       }
@@ -61,7 +71,7 @@ const AdminDashboard = () => {
   const addUser = async (userData) => {
     try {
       await axios.post("http://localhost:3001/email/user", userData);
-      console.log('data',userData);
+      console.log("data", userData);
       fetchUsers();
     } catch (error) {
       console.error("มีข้อผิดพลาดในการเพิ่มผู้ใช้:", error);
