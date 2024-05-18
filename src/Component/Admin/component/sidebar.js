@@ -152,20 +152,25 @@ const Sidebar = ({ currentUser, refreshUsers }) => {
 
   const navigate = useNavigate();
 
+  const smoothNavigate = (path) => {
+    setSidebarOpen(false);
+    setTimeout(() => navigate(path), 300); // รอให้ sidebar ปิดก่อนถึงจะ navigate
+  };
+
   const handleToDashboard = () => {
-    navigate('/Dashboard');
+    smoothNavigate('/Dashboard');
   };
 
   const handleToCustomer = () => {
-    navigate('/Customers');
+    smoothNavigate('/Customers');
   };
 
   const handleToProduct = () => {
-    navigate('/Products');
+    smoothNavigate('/Products');
   };
 
   const handleToOrderList = () => {
-    navigate('/OrderList');
+    smoothNavigate('/OrderList');
   };
 
   const handleLogout = () => {
