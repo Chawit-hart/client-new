@@ -142,7 +142,12 @@ const AdminDashboard = () => {
       );
       const { newToken } = response.data;
       setToken(newToken); // Update token state
-      fetchUsers();
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === userId ? { ...user, ...updatedData } : user
+        )
+      );
     } catch (error) {
       console.error("มีข้อผิดพลาดในการอัปเดตข้อมูลผู้ใช้:", error);
     }
@@ -151,19 +156,20 @@ const AdminDashboard = () => {
   const handleEditSubmit = (event) => {
     event.preventDefault();
     if (userToEdit) {
-      updateUser(userToEdit._id, { roles: role });
-      handleEditClose();
-      Swal.fire({
-        icon: "success",
-        toast: true,
-        text: "User updated successfully!",
-        position: "top-end",
-        showConfirmButton: false,
-        timerProgressBar: true,
-        timer: 1500,
-        didOpen: (toast) => {
-          toast.style.marginTop = "70px";
-        },
+      updateUser(userToEdit._id, { roles: role }).then(() => {
+        handleEditClose();
+        Swal.fire({
+          icon: "success",
+          toast: true,
+          text: "User updated successfully!",
+          position: "top-end",
+          showConfirmButton: false,
+          timerProgressBar: true,
+          timer: 1500,
+          didOpen: (toast) => {
+            toast.style.marginTop = "70px";
+          },
+        });
       });
     }
   };
