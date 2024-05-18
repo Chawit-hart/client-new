@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
 import MyChart from "./component/Chart";
 import AddUserModal from "./AddUserModal";
-import { Button, Modal } from "react-bootstrap";
+import { Button, Modal, FormControl } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axiosInstance from "../service/axiosConfig";
 
@@ -19,6 +19,7 @@ const AdminDashboard = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [userToDelete, setUserToDelete] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -179,6 +180,10 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
+  const filteredUsers = users.filter((user) =>
+    user._id.includes(searchQuery) || user.user.includes(searchQuery)
+  );
+
   return (
     <div className="container-fluid" style={pageStyle}>
       <div className="row">
@@ -240,52 +245,63 @@ const AdminDashboard = () => {
               </Button>
             )}
           </div>
+          <FormControl
+            type="text"
+            placeholder="Search by UID or Username"
+            className="mb-4"
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ borderRadius: "20px" }}
+          />
           <AddUserModal
             show={show}
             handleClose={handleClose}
             addUser={addUser}
             refreshUsers={fetchUsers}
           />
-          <table className="table table-hover">
-            <thead className="thead-dark">
-              <tr>
-                <th scope="col">UID</th>
-                <th scope="col">User</th>
-                <th scope="col">Status</th>
-                {currentUser && currentUser.roles === "admin" && (
-                  <th scope="col">Actions</th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user, index) => (
-                <tr key={index}>
-                  <td>{user._id}</td>
-                  <td>{user.user}</td>
-                  <td>{user.roles}</td>
+          {filteredUsers.length > 0 ? (
+            <table className="table table-hover">
+              <thead className="thead-dark">
+                <tr>
+                  <th scope="col">UID</th>
+                  <th scope="col">User</th>
+                  <th scope="col">Status</th>
                   {currentUser && currentUser.roles === "admin" && (
-                    <td>
-                      <Button
-                        variant="warning"
-                        size="sm"
-                        onClick={() => editUser(user)}
-                        style={{ marginRight: "10px" }}
-                      >
-                        <FaEdit />
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleDeleteShow(user)}
-                      >
-                        <FaTrash />
-                      </Button>
-                    </td>
+                    <th scope="col">Actions</th>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredUsers.map((user, index) => (
+                  <tr key={index}>
+                    <td>{user._id}</td>
+                    <td>{user.user}</td>
+                    <td>{user.roles}</td>
+                    {currentUser && currentUser.roles === "admin" && (
+                      <td>
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => editUser(user)}
+                          style={{ marginRight: "10px" }}
+                        >
+                          <FaEdit />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteShow(user)}
+                        >
+                          <FaTrash />
+                        </Button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>ไม่พบสิ่งที่ค้นหา</p>
+          )}
         </div>
       </div>
       <Modal show={showDeleteModal} onHide={handleDeleteClose} centered>
