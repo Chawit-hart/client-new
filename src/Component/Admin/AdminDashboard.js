@@ -33,10 +33,19 @@ const AdminDashboard = () => {
         }
       );
 
-      setUsers(response.data);
+      // Handle nested response
+      const usersData = response.data.users || response.data;
+
+      if (Array.isArray(usersData)) {
+        setUsers(usersData);
+      } else {
+        console.error("Unexpected data format:", response.data);
+        setUsers([]);
+      }
+
       const storedUsername = localStorage.getItem("username");
       if (storedUsername) {
-        const currentUserData = response.data.find(
+        const currentUserData = usersData.find(
           (user) => user.user === storedUsername
         );
         setCurrentUser(currentUserData);
