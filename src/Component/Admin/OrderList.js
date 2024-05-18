@@ -303,7 +303,7 @@ const OrderList = () => {
   };
 
   const filteredOrders = localOrders.filter((order) => {
-    const searchFields = ["email", "productid", "productname", "name"];
+    const searchFields = ["email", "productid", "productname", "name", "_id"];
     return searchFields.some((field) =>
       order[field]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -411,7 +411,7 @@ const OrderList = () => {
                 </TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Product ID</TableCell>
+                <TableCell>No.</TableCell>
                 <TableCell>Product Name</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Quantity</TableCell>
@@ -448,7 +448,7 @@ const OrderList = () => {
                       {order.email}
                     </TableCell>
                     <TableCell>{order.name}</TableCell>
-                    <TableCell>{order.items[0].productid}</TableCell>
+                    <TableCell>{order._id}</TableCell>
                     <TableCell>{order.items[0].productname}</TableCell>
                     <TableCell>{order.items[0].category}</TableCell>
                     <TableCell>{order.items[0].amount}</TableCell>

@@ -5,10 +5,7 @@ import {
   Typography,
   Paper,
   Button,
-  Divider,
   TextField,
-  Radio,
-  FormControlLabel,
   FormLabel,
   ButtonGroup,
 } from "@mui/material";
@@ -23,7 +20,7 @@ import { useCart } from "../Component/service/CartContext";
 const ConfirmationPage = () => {
   const { state } = useLocation();
   const [product, setProduct] = useState(null);
-  const [Amount, setAmount] = useState(1);
+  const [Amount, setAmount] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [productImg, setProductImg] = useState(null);
   const [sizes, setSizes] = useState({});
@@ -41,7 +38,7 @@ const ConfirmationPage = () => {
 
   useEffect(() => {
     if (product) {
-      updateTotalPrice(product.price, Amount);
+      updateTotalPrice(product.price, Amount || 1);
     }
   }, [product, Amount]);
 
@@ -49,10 +46,8 @@ const ConfirmationPage = () => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Endpoint สำหรับดึงข้อมูลโปรไฟล์โดยใช้ email
         const fetchProfileEndpoint = `http://localhost:3001/usersinfo/address?email=${currentUser.email}`;
 
-        // เรียก API เพื่อดึงข้อมูลโปรไฟล์
         axios
           .get(fetchProfileEndpoint)
           .then((response) => {
@@ -93,14 +88,9 @@ const ConfirmationPage = () => {
     };
 
     return fetchImageAndSendToAPI;
-  }, []);
+  }, [state.productId]);
 
   const handleSizeSelect = (size) => {
-    console.log("selectedSize--->", selectedSize);
-    console.log(
-      "🚀 ~ file: ConfirmationPage.js:100 ~ handleSizeSelect ~ size:",
-      size
-    );
     setSelectedSize(size);
   };
 
@@ -112,7 +102,7 @@ const ConfirmationPage = () => {
         setProduct(productData);
         setSizes(productData.amount);
         updateTotalPrice(productData.price, productData.amount > 0 ? 1 : 0);
-        setAmount(productData.amount > 0 ? 1 : 0);
+        setAmount(productData.amount > 0 ? 1 : "");
       })
       .catch((error) => console.error("Error:", error));
   }, [state.productId]);
@@ -139,10 +129,6 @@ const ConfirmationPage = () => {
         price: product.price,
         amount: Amount,
       };
-      console.log(
-        "🚀 ~ file: ConfirmationPage.js:142 ~ handleAddToCart ~ cartItem:",
-        cartItem
-      );
 
       await axios.post("http://localhost:3001/cart/upload-image", cartItem);
 
@@ -184,7 +170,6 @@ const ConfirmationPage = () => {
     const value = event.target.value;
     let number = parseInt(value, 10);
     const max = product.amount[selectedSize];
-    console.log("🚀 ~ handleAmountChange ~ max:", max);
 
     if (!value) {
       setAmount("");
@@ -300,29 +285,21 @@ const ConfirmationPage = () => {
                             borderTopRightRadius: 8,
                             borderBottomRightRadius: 8,
                           }),
-                          // เส้นขอบเป็นสีดำเมื่อไม่ได้เลือก
                           border: "1px solid rgba(0, 0, 0, 0.23)",
-                          // สีของข้อความเป็นสีดำเมื่อไม่ได้เลือก
                           color: "black",
-                          // พื้นหลังสีขาวเมื่อไม่ได้เลือก
                           bgcolor: "white",
-                          // เมื่อเลือกหรือวางเมาส์เหนือ (hover) ของปุ่มที่เลือกแล้ว
                           ...(selectedSize === size && {
                             bgcolor: "black",
                             color: "white",
                             "&:hover": {
                               bgcolor: "black",
                               color: "white",
-                              // เส้นขอบเป็นสีดำเมื่อ hover
                               border: "1px solid black",
                             },
                           }),
-                          // เมื่อวางเมาส์เหนือ (hover) และปุ่มไม่ได้ถูกเลือก
                           "&:hover": {
                             bgcolor: (theme) => theme.palette.action.hover,
-                            // สีของข้อความเป็นสีดำเมื่อ hover
                             color: "black",
-                            // เส้นขอบเป็นสีดำเมื่อ hover
                             border: "1px solid black",
                           },
                         }}
