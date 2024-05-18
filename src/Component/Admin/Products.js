@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { BiPlusCircle, BiTrash } from "react-icons/bi";
 import Swal from "sweetalert2";
@@ -218,6 +218,7 @@ const Products = () => {
   const [price, setPrice] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
+  const imageInputRef = useRef(null);
   const [products, setProducts] = useState([]);
 
   const openModal = () => setModalOpen(true);
@@ -304,6 +305,9 @@ const Products = () => {
     setProductDetail("");
     setSelectedCategory("");
     setImageUpload(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
   };
 
   const fetchProducts = async () => {
@@ -333,11 +337,11 @@ const Products = () => {
       if (result.isConfirmed) {
         try {
           const token = localStorage.getItem("token");
-          await axios.delete(`http://localhost:3001/posts/${id}`,{
+          await axios.delete(`http://localhost:3001/posts/${id}`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: token,
-            }
+            },
           });
           Swal.fire({
             icon: "success",
@@ -395,16 +399,16 @@ const Products = () => {
               />
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
-              <div>
-                <h4>Available Sizes</h4>
-                {product.amount &&
-                  typeof product.amount === "object" &&
-                  Object.keys(product.amount).map((key) => (
+              {product.amount && typeof product.amount === "object" && Object.keys(product.amount).length > 0 && (
+                <div>
+                  <h4>Available Sizes</h4>
+                  {Object.keys(product.amount).map((key) => (
                     <div key={key}>
                       {key}: {product.amount[key]}
                     </div>
                   ))}
-              </div>
+                </div>
+              )}
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -422,16 +426,16 @@ const Products = () => {
               />
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
-              <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
-              <div>
-                {product.amount &&
-                  typeof product.amount === "object" &&
-                  Object.keys(product.amount).map((key) => (
+              {product.amount && typeof product.amount === "object" && Object.keys(product.amount).length > 0 && (
+                <div>
+                  <h4>Available Sizes</h4>
+                  {Object.keys(product.amount).map((key) => (
                     <div key={key}>
                       {key}: {product.amount[key]}
                     </div>
                   ))}
-              </div>
+                </div>
+              )}
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -483,13 +487,15 @@ const Products = () => {
             Sizes:
             <SizesContainer>
               {["XS", "S", "M", "L", "XL"].map((size) => (
-                <StyledInput
-                  key={size}
-                  type="number"
-                  placeholder={`${size} Quantity`}
-                  value={quantity[size]}
-                  onChange={handleQuantityChange(size)}
-                />
+                <div key={size}>
+                  <StyledLabel>{size}</StyledLabel>
+                  <StyledInput
+                    type="number"
+                    placeholder={`${size} Quantity`}
+                    value={quantity[size]}
+                    onChange={handleQuantityChange(size)}
+                  />
+                </div>
               ))}
             </SizesContainer>
           </StyledLabel>
@@ -501,6 +507,7 @@ const Products = () => {
               <StyledInput
                 type="file"
                 id="product-image"
+                ref={imageInputRef}
                 onChange={handleImageChange}
                 accept="image/jpeg, image/png"
               />
