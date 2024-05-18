@@ -372,12 +372,16 @@ const Products = () => {
               />
               <ProductName>{product.name}</ProductName>
               <ProductPrice>{product.price} บาท</ProductPrice>
-              <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
-              <div>
-                {product.amount && typeof product.amount === 'object' && Object.keys(product.amount).map((key) => (
-                  <div key={key}>{key}: {product.amount[key]}</div>
-                ))}
-              </div>
+                <div>
+                  <h4>Available Sizes</h4>
+                  {product.amount &&
+                    typeof product.amount === "object" &&
+                    Object.keys(product.amount).map((key) => (
+                      <div key={key}>
+                        {key}: {product.amount[key]}
+                      </div>
+                    ))}
+                </div>
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
@@ -397,9 +401,13 @@ const Products = () => {
               <ProductPrice>{product.price} บาท</ProductPrice>
               <ProductQuantity>Quantity: {product.amount}</ProductQuantity>
               <div>
-                {product.amount && typeof product.amount === 'object' && Object.keys(product.amount).map((key) => (
-                  <div key={key}>{key}: {product.amount[key]}</div>
-                ))}
+                {product.amount &&
+                  typeof product.amount === "object" &&
+                  Object.keys(product.amount).map((key) => (
+                    <div key={key}>
+                      {key}: {product.amount[key]}
+                    </div>
+                  ))}
               </div>
               <BiTrash
                 style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
