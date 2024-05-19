@@ -17,6 +17,7 @@ import {
   FormControlLabel,
   Radio,
   IconButton,
+  TextField,
 } from "@mui/material";
 import "bootstrap/dist/css/bootstrap.min.css";
 import CloseIcon from "@mui/icons-material/Close";
@@ -26,6 +27,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
 import { useCart } from "../Component/service/CartContext";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 const style = {
   position: "absolute",
@@ -47,6 +49,7 @@ export default function Cart() {
   const [items, setItems] = useState([]);
   const [addresses, setAddresses] = useState([]);
   const [openAddress, setOpenAddress] = useState(false);
+  const [openAddAddress, setOpenAddAddress] = useState(false);
   const [openPayment, setOpenPayment] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [slipImage, setSlipImage] = useState("");
@@ -54,6 +57,11 @@ export default function Cart() {
   const [previewImage, setPreviewImage] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [slip, setSlip] = useState(null);
+  const [newAddress, setNewAddress] = useState({
+    name: "",
+    address: "",
+    tel: "",
+  });
 
   useEffect(() => {
     const fetchData = async (currentUser) => {
@@ -131,6 +139,22 @@ export default function Cart() {
 
   const handleCloseAddress = () => {
     setOpenAddress(false);
+    setOpenAddAddress(false);
+    setOpenPayment(false);
+  };
+
+  const handleCloseAddAddress = () => {
+    setOpenAddAddress(false);
+    setNewAddress({ name: "", address: "", tel: "" });
+  };
+
+  const handleOpenAddAddress = () => {
+    setOpenAddAddress(true);
+  };
+
+  const handleGobackToAddressFromAdd = () => {
+    setOpenAddAddress(false);
+    setOpenAddress(true);
   };
 
   const handleClosePayment = () => {
@@ -228,7 +252,9 @@ export default function Cart() {
       }
     } catch (error) {
       console.log("🚀 ~ file: Cart.js:230 ~ handleSubmit ~ error:", error);
-      const errorMessage = error.response ? error.response.data.message : "มีปัญหาในการสั่งซื้อสินค้า กรุณาลองใหม่ภายหลัง";
+      const errorMessage = error.response
+        ? error.response.data.message
+        : "มีปัญหาในการสั่งซื้อสินค้า กรุณาลองใหม่ภายหลัง";
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
@@ -242,7 +268,6 @@ export default function Cart() {
           toast.style.marginTop = "70px";
         },
       });
-      // // // console.log("🚀 ~ error");
     }
   };
 
@@ -288,12 +313,64 @@ export default function Cart() {
     }
   };
 
+  const handleAddNewAddress = async () => {
+    if (!newAddress.name || !newAddress.address || !newAddress.tel) {
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 2000,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/usersinfo/",
+        { ...newAddress, email: user.email }
+      );
+      setAddresses((prevAddresses) => [...prevAddresses, response.data]);
+      handleCloseAddAddress();
+      Swal.fire({
+        icon: "success",
+        title: "เพิ่มที่อยู่สำเร็จ",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 1500,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    } catch (error) {
+      console.error("Error adding new address:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาดในการเพิ่มที่อยู่",
+        text: error.response?.data?.message || "กรุณาลองใหม่ภายหลัง",
+        position: "top-end",
+        toast: true,
+        showConfirmButton: false,
+        timerProgressBar: true,
+        timer: 3000,
+        didOpen: (toast) => {
+          toast.style.marginTop = "70px";
+        },
+      });
+    }
+  };
+
   const totalPrice = getTotalPrice();
 
   useEffect(() => {
-    // ตรวจสอบว่า openPayment เปลี่ยนแล้วหรือไม่
     if (!openPayment) {
-      // ลบชื่อไฟล์สลิปออก
       setSlipFileName("");
     }
   }, [openPayment]);
@@ -450,8 +527,96 @@ export default function Cart() {
                       />
                     </ListItem>
                   ))}
+                  <ListItem
+                    button
+                    sx={{ flexDirection: "row", alignItems: "center" }}
+                    onClick={handleOpenAddAddress}
+                  >
+                    <AddCircleOutlineIcon />
+                    <ListItemText
+                      primary="เพิ่มที่อยู่"
+                      sx={{ whiteSpace: "normal", textAlign: "left", ml: 2 }}
+                    />
+                  </ListItem>
                 </List>
               </>
+            </Box>
+          </Modal>
+          <Modal
+            open={openAddAddress}
+            onClose={handleCloseAddAddress}
+            aria-labelledby="modal-add-address-title"
+            aria-describedby="modal-add-address-description"
+          >
+            <Box sx={style}>
+              <IconButton
+                aria-label="close"
+                onClick={handleGobackToAddressFromAdd}
+                sx={{
+                  position: "absolute",
+                  left: 8,
+                  top: 8,
+                  color: (theme) => theme.palette.grey[500],
+                }}
+              >
+                <ArrowBackIcon />
+              </IconButton>
+              <IconButton
+                aria-label="close"
+                onClick={handleCloseAddress}
+                sx={{
+                  position: "absolute",
+                  right: 8,
+                  top: 8,
+                  color: (theme) => theme.palette.grey[500],
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Typography
+                id="modal-add-address-title"
+                variant="h6"
+                component="h2"
+                sx={{ marginTop: "20px" }}
+              >
+                เพิ่มที่อยู่ใหม่
+              </Typography>
+              <TextField
+                fullWidth
+                label="ชื่อ"
+                value={newAddress.name}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, name: e.target.value })
+                }
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                label="ที่อยู่"
+                value={newAddress.address}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, address: e.target.value })
+                }
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                label="เบอร์โทร"
+                value={newAddress.tel}
+                onChange={(e) =>
+                  setNewAddress({ ...newAddress, tel: e.target.value })
+                }
+                margin="normal"
+              />
+              <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAddNewAddress}
+                >
+                  บันทึก
+                </Button>
+              </Box>
             </Box>
           </Modal>
           <Modal
