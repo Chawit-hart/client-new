@@ -435,7 +435,7 @@ const Products = () => {
                 typeof product.amount === "object" &&
                 Object.keys(product.amount).length > 0 && (
                   <div>
-                    <h4>Available Sizes</h4>
+                    <h5>Available Sizes</h5>
                     <SizesGrid>
                       {Object.keys(product.amount).map((key) => (
                         <SizeInfo key={key}>
@@ -467,7 +467,7 @@ const Products = () => {
                 typeof product.amount === "object" &&
                 Object.keys(product.amount).length > 0 && (
                   <div>
-                    <h4>Available Sizes</h4>
+                    <h5>Available Sizes</h5>
                     <SizesGrid>
                       {Object.keys(product.amount).map((key) => (
                         <SizeInfo key={key}>
