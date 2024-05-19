@@ -331,10 +331,10 @@ export default function Cart() {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:3001/usersinfo/",
-        { ...newAddress, email: user.email }
-      );
+      const response = await axios.post("http://localhost:3001/usersinfo/", {
+        ...newAddress,
+        email: user.email,
+      });
       setAddresses((prevAddresses) => [...prevAddresses, response.data]);
       handleCloseAddAddress();
       Swal.fire({
@@ -499,7 +499,11 @@ export default function Cart() {
                       key={address.id}
                       button
                       onClick={() => handleSelectAddress(address)}
-                      sx={{ flexDirection: "column", textAlign: "left" }}
+                      sx={{
+                        flexDirection: "column",
+                        textAlign: "left",
+                        alignItems: "flex-start",
+                      }}
                     >
                       <ListItemText
                         primary={address.name}
