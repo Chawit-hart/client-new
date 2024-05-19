@@ -311,7 +311,7 @@ const AdminDashboard = () => {
               Yearly Sales
             </Button>
           </div>
-          <div style={{ height: "400px", marginTop: "20px" }}>
+          <div style={{ height: "800px", marginTop: "20px" }}>
             {selectedChart === "monthly" && <MonthlySalesChart />}
             {selectedChart === "previousMonth" && <PreviousMonthSalesChart />}
             {selectedChart === "yearly" && <YearlySalesChart />}
