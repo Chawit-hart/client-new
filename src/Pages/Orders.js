@@ -135,17 +135,23 @@ const Order = () => {
         <Table sx={{ minWidth: 650 }} aria-label="simple order table">
           <TableHead>
             <TableRow>
-              <TableCell>No.</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Product Name</TableCell>
-              <TableCell>Size</TableCell>
-              <TableCell>Quantity</TableCell>
-              <TableCell>Total Price</TableCell>
-              <TableCell>Address</TableCell>
-              <TableCell>Payment</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>tracking Number</TableCell>
-              <TableCell>Order Time</TableCell>
+              {[
+                "No.",
+                "Name",
+                "Product Name",
+                "Size",
+                "Quantity",
+                "Total Price",
+                "Address",
+                "Payment",
+                "Status",
+                "Tracking Number",
+                "Order Time",
+              ].map((header, index) => (
+                <TableCell key={index} style={{ width: `${100 / 11}%` }}>
+                  {header}
+                </TableCell>
+              ))}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -208,27 +214,43 @@ const Order = () => {
                 {open[order._id] && order.items.length > 1 && (
                   <TableRow>
                     <TableCell
-                      style={{ paddingBottom: 0, paddingTop: 0 }}
                       colSpan={12}
+                      style={{
+                        paddingBottom: 0,
+                        paddingTop: 0,
+                        paddingLeft: "128px",
+                        paddingRight: "72px",
+                      }}
                     >
                       <Table aria-label="purchases">
                         <TableBody>
                           {order.items.slice(1).map((item, index) => (
                             <TableRow key={index}>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell>{order.name}</TableCell>
-                              <TableCell>{item.productname}</TableCell>
-                              <TableCell>{item.size}</TableCell>
-                              <TableCell>{item.amount}</TableCell>
-                              <TableCell>{order.totalprice}</TableCell>
-                              <TableCell>{order.address}</TableCell>
-                              <TableCell>{order.payment}</TableCell>
-                              <TableCell>{order.status}</TableCell>
-                              <TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {order.name}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {item.productname}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {item.size}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {item.amount}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {order.totalprice}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {order.address}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {order.payment}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
+                                {order.status}
+                              </TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
                                 {order.parcel}
                                 <a
                                   href={getTrackingUrl(
@@ -247,7 +269,7 @@ const Order = () => {
                                   />
                                 </a>
                               </TableCell>
-                              <TableCell>
+                              <TableCell style={{ width: `${100 / 11}%` }}>
                                 {formatTimeToBangkok(order.ordertime)}
                               </TableCell>
                             </TableRow>
