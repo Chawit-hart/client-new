@@ -1,13 +1,23 @@
 import React, { useState, useEffect, Fragment } from "react";
 import axios from "axios";
 import styled from "styled-components";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import { auth } from "../Config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { Pagination } from 'antd';
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { Pagination } from "antd";
 
 const Container = styled.div`
   margin: 20px;
@@ -118,14 +128,14 @@ const Order = () => {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom sx={{ marginTop: '80px' }}>
+      <Typography variant="h4" gutterBottom sx={{ marginTop: "80px" }}>
         Order List
       </Typography>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple order table">
           <TableHead>
             <TableRow>
-              <TableCell>Image</TableCell>
+              <TableCell>No.</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Product Name</TableCell>
               <TableCell>Size</TableCell>
@@ -140,19 +150,17 @@ const Order = () => {
           </TableHead>
           <TableBody>
             {(pageSize > 0
-              ? orders.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize)
+              ? orders.slice(
+                  (page - 1) * pageSize,
+                  (page - 1) * pageSize + pageSize
+                )
               : orders
             ).map((order) => (
               <Fragment key={order._id}>
                 <TableRow
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
-                  <TableCell>
-                    <Image
-                      src={`http://localhost:3001/posts/images/${order.items[0].productid}`}
-                      alt="product"
-                    />
-                  </TableCell>
+                  <TableCell>{order._id}</TableCell>
                   <TableCell>{order.name}</TableCell>
                   <TableCell>{order.items[0].productname}</TableCell>
                   <TableCell>{order.items[0].size}</TableCell>
@@ -169,7 +177,11 @@ const Order = () => {
                       rel="noopener noreferrer"
                     >
                       <OpenInNewIcon
-                        style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                        style={{
+                          verticalAlign: "middle",
+                          height: "15px",
+                          color: "#A9A9A9",
+                        }}
                       />
                     </a>
                   </TableCell>
@@ -181,7 +193,11 @@ const Order = () => {
                         size="small"
                         onClick={() => handleToggle(order._id)}
                       >
-                        {open[order._id] ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                        {open[order._id] ? (
+                          <KeyboardArrowUpIcon />
+                        ) : (
+                          <KeyboardArrowDownIcon />
+                        )}
                         {order.items.length > 1 && !open[order._id] && (
                           <CircleBadge>+{order.items.length - 1}</CircleBadge>
                         )}
@@ -191,17 +207,19 @@ const Order = () => {
                 </TableRow>
                 {open[order._id] && order.items.length > 1 && (
                   <TableRow>
-                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={12}>
-                      <Table size="small" aria-label="purchases">
+                    <TableCell
+                      style={{ paddingBottom: 0, paddingTop: 0 }}
+                      colSpan={12}
+                    >
+                      <Table aria-label="purchases">
                         <TableBody>
                           {order.items.slice(1).map((item, index) => (
                             <TableRow key={index}>
-                              <TableCell>
-                                <Image
-                                  src={`http://localhost:3001/posts/images/${item.productid}`}
-                                  alt="product"
-                                />
-                              </TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
                               <TableCell>{order.name}</TableCell>
                               <TableCell>{item.productname}</TableCell>
                               <TableCell>{item.size}</TableCell>
@@ -213,16 +231,25 @@ const Order = () => {
                               <TableCell>
                                 {order.parcel}
                                 <a
-                                  href={getTrackingUrl(order.provider, order.parcel)}
+                                  href={getTrackingUrl(
+                                    order.provider,
+                                    order.parcel
+                                  )}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
                                   <OpenInNewIcon
-                                    style={{ verticalAlign: "middle", height: "15px", color: "#A9A9A9" }}
+                                    style={{
+                                      verticalAlign: "middle",
+                                      height: "15px",
+                                      color: "#A9A9A9",
+                                    }}
                                   />
                                 </a>
                               </TableCell>
-                              <TableCell>{formatTimeToBangkok(order.ordertime)}</TableCell>
+                              <TableCell>
+                                {formatTimeToBangkok(order.ordertime)}
+                              </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -243,8 +270,10 @@ const Order = () => {
         current={page}
         total={orders.length}
         pageSize={pageSize}
-        showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} items`}
-        style={{ marginTop: '20px' }}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
+        style={{ marginTop: "20px" }}
       />
     </Container>
   );
