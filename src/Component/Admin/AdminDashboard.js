@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "./component/sidebar";
-import MyChart from "./component/Chart";
+import MonthlySalesChart from "./component/MonthlySalesChart";
+import YearlySalesChart from "./component/YearlySalesChart";
+import PreviousMonthSalesChart from "./component/PreviousMonthSalesChart";
 import AddUserModal from "./AddUserModal";
 import { Button, Modal, FormControl, Form } from "react-bootstrap";
 import { FaTrash, FaEdit } from "react-icons/fa";
@@ -26,6 +28,7 @@ const AdminDashboard = () => {
   const [userToEdit, setUserToEdit] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [role, setRole] = useState("");
+  const [selectedChart, setSelectedChart] = useState("monthly");
 
   const navigate = useNavigate();
 
@@ -261,49 +264,6 @@ const AdminDashboard = () => {
     }
   };
 
-  const chartData = {
-    labels: ["Monthly Sales", "Total Products", "Total"],
-    datasets: [
-      {
-        data: [
-          data.ProductCountSuccess,
-          data.ProductCount,
-          data.totalpriceSuccess,
-        ],
-        backgroundColor: ["#007bff", "#28a745", "#ffc107"],
-        borderColor: ["#007bff", "#28a745", "#ffc107"],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    scales: {
-      y: {
-        ticks: {
-          type: "logarithmic",
-          callback: function (value, index, values) {
-            return Number(value.toString());
-          },
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-        position: "top",
-      },
-    },
-    responsive: true,
-    maintainAspectRatio: false,
-  };
-
-  const cardStyle = (backgroundColor) => ({
-    backgroundColor: backgroundColor,
-    color: "#fff",
-    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-  });
-
   const pageStyle = {
     fontFamily: "Kanit, sans-serif",
   };
@@ -328,38 +288,33 @@ const AdminDashboard = () => {
               Welcome {username} to Admin Dashboard
             </h1>
           </div>
-          <div className="row text-center justify-content-center">
-            <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle("#007bff")}>
-                <div className="card-body">
-                  <h5 className="card-title">Monthly Sales</h5>
-                  <p className="card-text">{data.ProductCountSuccess} items</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle("#28a745")}>
-                <div className="card-body">
-                  <h5 className="card-title">Total Products</h5>
-                  <p className="card-text">{data.ProductCount} items</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-3 mb-4">
-              <div className="card h-100" style={cardStyle("#ffc107")}>
-                <div className="card-body">
-                  <h5 className="card-title">Total Revenue</h5>
-                  <p className="card-text">{data.totalpriceSuccess} บาท</p>
-                </div>
-              </div>
-            </div>
+          <div className="text-center my-4">
+            <Button
+              variant="info"
+              onClick={() => setSelectedChart("previousMonth")}
+              style={{ marginRight: "10px" }}
+            >
+              Previous Month Sales
+            </Button>
+            <Button
+              variant="success"
+              onClick={() => setSelectedChart("monthly")}
+              style={{ marginRight: "10px" }}
+            >
+              Monthly Sales
+            </Button>
+
+            <Button
+              variant="primary"
+              onClick={() => setSelectedChart("yearly")}
+            >
+              Yearly Sales
+            </Button>
           </div>
-          <div style={{ height: "400px", marginTop: "100px" }}>
-            <MyChart
-              data={chartData}
-              options={chartOptions}
-              chartId="myChart"
-            />
+          <div style={{ height: "400px", marginTop: "20px" }}>
+            {selectedChart === "monthly" && <MonthlySalesChart />}
+            {selectedChart === "previousMonth" && <PreviousMonthSalesChart />}
+            {selectedChart === "yearly" && <YearlySalesChart />}
           </div>
           <div
             style={{
