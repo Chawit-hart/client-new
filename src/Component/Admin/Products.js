@@ -205,11 +205,40 @@ const SizesContainer = styled.div`
   gap: 10px;
 `;
 
+const SizesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+`;
+
+const SizeInfo = styled.div`
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 5px;
+`;
+
+const SizeLabel = styled.span`
+  font-weight: bold;
+`;
+
+const SizeValue = styled.span`
+  color: #666;
+`;
+
 const Products = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [productName, setProductName] = useState("");
   const [productDetail, setProductDetail] = useState("");
-  const [quantity, setQuantity] = useState({ XS: "", S: "", M: "", L: "", XL: "" });
+  const [quantity, setQuantity] = useState({
+    XS: "",
+    S: "",
+    M: "",
+    L: "",
+    XL: "",
+  });
   const [price, setPrice] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [imageUpload, setImageUpload] = useState(null);
@@ -265,15 +294,11 @@ const Products = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:3001/posts/upload-image",
-        formData,
-        {
-          headers: {
-            Authorization: token,
-          },
-        }
-      );
+      await axios.post("http://localhost:3001/posts/upload-image", formData, {
+        headers: {
+          Authorization: token,
+        },
+      });
 
       Swal.fire({
         icon: "success",
@@ -411,15 +436,18 @@ const Products = () => {
                 Object.keys(product.amount).length > 0 && (
                   <div>
                     <h4>Available Sizes</h4>
-                    {Object.keys(product.amount).map((key) => (
-                      <div key={key}>
-                        {key}: {product.amount[key]}
-                      </div>
-                    ))}
+                    <SizesGrid>
+                      {Object.keys(product.amount).map((key) => (
+                        <SizeInfo key={key}>
+                          <SizeLabel>{key}:</SizeLabel>
+                          <SizeValue>{product.amount[key]}</SizeValue>
+                        </SizeInfo>
+                      ))}
+                    </SizesGrid>
                   </div>
                 )}
               <BiTrash
-                style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
+                style={{ cursor: "pointer", color: "red", fontSize: "20px", marginTop: "30px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
               />
             </ProductCard>
@@ -440,15 +468,18 @@ const Products = () => {
                 Object.keys(product.amount).length > 0 && (
                   <div>
                     <h4>Available Sizes</h4>
-                    {Object.keys(product.amount).map((key) => (
-                      <div key={key}>
-                        {key}: {product.amount[key]}
-                      </div>
-                    ))}
+                    <SizesGrid>
+                      {Object.keys(product.amount).map((key) => (
+                        <SizeInfo key={key}>
+                          <SizeLabel>{key}:</SizeLabel>
+                          <SizeValue>{product.amount[key]}</SizeValue>
+                        </SizeInfo>
+                      ))}
+                    </SizesGrid>
                   </div>
                 )}
               <BiTrash
-                style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
+                style={{ cursor: "pointer", color: "red", fontSize: "20px", marginTop: "30px" }}
                 onClick={() => deleteProduct(product._id, product.name)}
               />
             </ProductCard>
