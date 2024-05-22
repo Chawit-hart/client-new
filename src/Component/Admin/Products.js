@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import { BiPlusCircle, BiTrash } from "react-icons/bi";
+import { BiPlusCircle, BiTrash, BiEdit } from "react-icons/bi";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -45,6 +45,13 @@ const StyledBiPlusCircle = styled(BiPlusCircle)`
   color: white;
 `;
 
+const StyledBiEdit = styled(BiEdit)`
+  cursor: pointer;
+  color: #007bff;
+  font-size: 20px;
+  margin-right: 10px;
+`;
+
 const Button = styled.button`
   background-color: #007bff;
   color: white;
@@ -71,8 +78,31 @@ const Modal = styled.div`
   z-index: 2;
   width: 50%;
   max-height: 80%;
-  overflow-y: auto;
   font-family: "Kanit", sans-serif;
+`;
+
+const ModalContent = styled.div`
+  max-height: calc(80vh - 100px);
+  overflow-y: auto;
+  padding: 20px;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
 `;
 
 const Overlay = styled.div`
@@ -230,6 +260,8 @@ const SizeValue = styled.span`
 
 const Products = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [productId, setProductId] = useState(null);
   const [productName, setProductName] = useState("");
   const [productDetail, setProductDetail] = useState("");
   const [quantity, setQuantity] = useState({
@@ -246,6 +278,14 @@ const Products = () => {
   const [products, setProducts] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (modalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [modalOpen]);
 
   const openModal = () => setModalOpen(true);
   const closeModal = () => {
@@ -294,18 +334,32 @@ const Products = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post("http://localhost:3001/posts/upload-image", formData, {
-        headers: {
-          Authorization: token,
-        },
-      });
 
-      Swal.fire({
-        icon: "success",
-        title: "Product added successfully",
-        showConfirmButton: false,
-        timer: 1500,
-      });
+      if (editMode) {
+        await axios.put(`http://localhost:3001/posts/${productId}`, formData, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Product updated successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      } else {
+        await axios.post("http://localhost:3001/posts/upload-image", formData, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        Swal.fire({
+          icon: "success",
+          title: "Product added successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      }
 
       closeModal();
       resetForm();
@@ -331,6 +385,8 @@ const Products = () => {
     setProductDetail("");
     setSelectedCategory("");
     setImageUpload(null);
+    setEditMode(false);
+    setProductId(null);
     if (imageInputRef.current) {
       imageInputRef.current.value = "";
     }
@@ -407,9 +463,21 @@ const Products = () => {
     });
   };
 
+  const editProduct = (product) => {
+    setProductName(product.name);
+    setProductDetail(product.detail);
+    setQuantity(product.amount);
+    setPrice(product.price);
+    setSelectedCategory(product.category);
+    setProductId(product._id);
+    setEditMode(true);
+    openModal();
+  };
+
   const clothingData = products.filter(
     (product) => product.category === "Clothing"
   );
+
   const accessoryData = products.filter(
     (product) => product.category === "Accessories"
   );
@@ -446,10 +514,13 @@ const Products = () => {
                     </SizesGrid>
                   </div>
                 )}
-              <BiTrash
-                style={{ cursor: "pointer", color: "red", fontSize: "20px", marginTop: "30px" }}
-                onClick={() => deleteProduct(product._id, product.name)}
-              />
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                <StyledBiEdit onClick={() => editProduct(product)} />
+                <BiTrash
+                  style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
+                  onClick={() => deleteProduct(product._id, product.name)}
+                />
+              </div>
             </ProductCard>
           ))}
         </ClothesContainer>
@@ -478,91 +549,96 @@ const Products = () => {
                     </SizesGrid>
                   </div>
                 )}
-              <BiTrash
-                style={{ cursor: "pointer", color: "red", fontSize: "20px", marginTop: "30px" }}
-                onClick={() => deleteProduct(product._id, product.name)}
-              />
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
+                <StyledBiEdit onClick={() => editProduct(product)} />
+                <BiTrash
+                  style={{ cursor: "pointer", color: "red", fontSize: "20px" }}
+                  onClick={() => deleteProduct(product._id, product.name)}
+                />
+              </div>
             </ProductCard>
           ))}
         </AccContainer>
       </ProductsContainer>
       <Overlay isOpen={modalOpen} onClick={closeModal} />
       <Modal isOpen={modalOpen}>
-        <h2>Add New Product</h2>
-        <StyledForm onSubmit={handleSubmit}>
-          <StyledLabel>
-            Product Name: <span style={{ color: "red" }}>*</span>
-            <StyledInput
-              type="text"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-            />
-          </StyledLabel>
-          <StyledLabel>
-            Detail: <span style={{ color: "red" }}>*</span>
-            <StyledInput
-              type="text"
-              value={productDetail}
-              onChange={(e) => setProductDetail(e.target.value)}
-            />
-          </StyledLabel>
-          <StyledLabel>
-            Category: <span style={{ color: "red" }}>*</span>
-            <StyledSelect
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">Select Category</option>
-              <option value="Clothing">Clothing</option>
-              <option value="Accessories">Accessories</option>
-            </StyledSelect>
-          </StyledLabel>
-          <StyledLabel>
-            Price: <span style={{ color: "red" }}>*</span>
-            <StyledInput
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </StyledLabel>
-          <StyledLabel>
-            Sizes:
-            <SizesContainer>
-              {["XS", "S", "M", "L", "XL"].map((size) => (
-                <div key={size}>
-                  <StyledLabel>{size}</StyledLabel>
-                  <StyledInput
-                    type="number"
-                    placeholder={`${size} Quantity`}
-                    value={quantity[size]}
-                    onChange={handleQuantityChange(size)}
-                  />
-                </div>
-              ))}
-            </SizesContainer>
-          </StyledLabel>
-          <StyledLabel>
-            <FileInputLabel htmlFor="product-image">
-              Product Image: <span style={{ color: "red" }}>*</span>{" "}
-            </FileInputLabel>
-            <FileInputContainer>
+        <ModalContent>
+          <h2>{editMode ? "Edit Product" : "Add New Product"}</h2>
+          <StyledForm onSubmit={handleSubmit}>
+            <StyledLabel>
+              Product Name: <span style={{ color: "red" }}>*</span>
               <StyledInput
-                type="file"
-                id="product-image"
-                ref={imageInputRef}
-                onChange={handleImageChange}
-                accept="image/jpeg, image/png"
+                type="text"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
               />
-              {imageUpload && <p>{imageUpload.name}</p>}
-            </FileInputContainer>
-          </StyledLabel>
-          <ButtonsContainer>
-            <CancelButton type="button" onClick={closeModal}>
-              Cancel
-            </CancelButton>
-            <SubmitButton type="submit">Submit</SubmitButton>
-          </ButtonsContainer>
-        </StyledForm>
+            </StyledLabel>
+            <StyledLabel>
+              Detail: <span style={{ color: "red" }}>*</span>
+              <StyledInput
+                type="text"
+                value={productDetail}
+                onChange={(e) => setProductDetail(e.target.value)}
+              />
+            </StyledLabel>
+            <StyledLabel>
+              Category: <span style={{ color: "red" }}>*</span>
+              <StyledSelect
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+              >
+                <option value="">Select Category</option>
+                <option value="Clothing">Clothing</option>
+                <option value="Accessories">Accessories</option>
+              </StyledSelect>
+            </StyledLabel>
+            <StyledLabel>
+              Price: <span style={{ color: "red" }}>*</span>
+              <StyledInput
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+            </StyledLabel>
+            <StyledLabel>
+              Sizes:
+              <SizesContainer>
+                {["XS", "S", "M", "L", "XL"].map((size) => (
+                  <div key={size}>
+                    <StyledLabel>{size}</StyledLabel>
+                    <StyledInput
+                      type="number"
+                      placeholder={`${size} Quantity`}
+                      value={quantity[size]}
+                      onChange={handleQuantityChange(size)}
+                    />
+                  </div>
+                ))}
+              </SizesContainer>
+            </StyledLabel>
+            <StyledLabel>
+              <FileInputLabel htmlFor="product-image">
+                Product Image: <span style={{ color: "red" }}>*</span>{" "}
+              </FileInputLabel>
+              <FileInputContainer>
+                <StyledInput
+                  type="file"
+                  id="product-image"
+                  ref={imageInputRef}
+                  onChange={handleImageChange}
+                  accept="image/jpeg, image/png"
+                />
+                {imageUpload && <p>{imageUpload.name}</p>}
+              </FileInputContainer>
+            </StyledLabel>
+            <ButtonsContainer>
+              <CancelButton type="button" onClick={closeModal}>
+                Cancel
+              </CancelButton>
+              <SubmitButton type="submit">{editMode ? "Update" : "Submit"}</SubmitButton>
+            </ButtonsContainer>
+          </StyledForm>
+        </ModalContent>
       </Modal>
     </>
   );
