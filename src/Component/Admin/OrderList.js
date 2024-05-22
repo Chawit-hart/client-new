@@ -89,7 +89,7 @@ const OrderList = () => {
   const [orderStatus, setOrderStatus] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [shippingProvider, setShippingProvider] = useState("");
+  const [shippingProvider, setShippingProvider] = useState("Flash Express");
 
   const navigate = useNavigate();
 
@@ -242,7 +242,7 @@ const OrderList = () => {
     setStatusDialogOpen(true);
     setOrderStatus("");
     setTrackingNumber("");
-    setShippingProvider("");
+    setShippingProvider("Flash Express");
   };
 
   const handleCloseStatusDialog = () => {
@@ -559,30 +559,6 @@ const OrderList = () => {
                   label="Shipping Provider"
                   onChange={(e) => setShippingProvider(e.target.value)}
                 >
-                  <MenuItem value="Thai Post">
-                    <img
-                      src="/Images/thaipost.png"
-                      alt="Thai Post"
-                      style={{ marginRight: 8, height: "24px" }}
-                    />
-                    ไปรษณีย์ไทย
-                  </MenuItem>
-                  <MenuItem value="DHL">
-                    <img
-                      src="/Images/dhl.jpg"
-                      alt="DHL"
-                      style={{ marginRight: 8, height: "24px" }}
-                    />
-                    DHL
-                  </MenuItem>
-                  <MenuItem value="Kerry Express">
-                    <img
-                      src="/Images/kerry.png"
-                      alt="Kerry Express"
-                      style={{ marginRight: 8, height: "24px" }}
-                    />
-                    Kerry Express
-                  </MenuItem>
                   <MenuItem value="Flash Express">
                     <img
                       src="/Images/flash.png"
@@ -590,14 +566,6 @@ const OrderList = () => {
                       style={{ marginRight: 8, height: "24px" }}
                     />
                     Flash Express
-                  </MenuItem>
-                  <MenuItem value="J&T Express">
-                    <img
-                      src="/Images/J&T.png"
-                      alt="J&T Express"
-                      style={{ marginRight: 8, height: "24px" }}
-                    />
-                    J&T Express
                   </MenuItem>
                 </Select>
               </FormControl>
